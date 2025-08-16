@@ -7,8 +7,8 @@ import JewelFilter from "@/components/filters/JewelFilter";
 import NeonFilter from "@/components/filters/NeonFilter";
 import OverlayFilter from "@/components/filters/OverlayFilter";
 import PachinkoFilter from "@/components/filters/PachinkoFilter";
-import RainbowFilter from "@/components/filters/RainbowFilter";
 import SepiaFilter from "@/components/filters/SepiaFilter";
+import DarkFilter from "@/components/filters/DarkFilter";
 
 import type {
   FilterComponent,
@@ -101,14 +101,15 @@ export class FilterFactory {
     });
 
     this.registerFilter({
-      type: "rainbow",
-      name: "レインボー",
-      description: "虹色の彩度と明るさを強調するフィルター",
-      component: RainbowFilter,
+      type: "dark",
+      name: "ダーク",
+      description: "暗めフィルター",
+      component: DarkFilter,
       defaultEnabled: false,
-      color: "#FF69B4",
+      color: "#222222", // ダークな色
       category: "artistic",
     });
+
 
     this.registerFilter({
       type: "neon",
@@ -136,7 +137,7 @@ export class FilterFactory {
       description: "華やかでキラキラ感を強調したカラフルフィルター",
       component: PachinkoFilter,
       defaultEnabled: false,
-      color: "#FF1493",
+      color: "#FFB84D",
       category: "artistic",
     });
 

@@ -1,34 +1,36 @@
-import { ColorMatrix, Group, Image } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
+import { Image, Group, ColorMatrix } from "@shopify/react-native-skia";
 import type { FilterComponentProps } from "@/types/filters";
 
 /**
- * RainbowFilter
- * 虹色グラデーション＋発光感で超カラフル
+ * RainbowNeonGradientFilter - 横方向にネオン発色の虹色グラデーション
  */
-const RainbowFilter: React.FC<FilterComponentProps> = React.memo(
+const RainbowNeonGradientFilter: React.FC<FilterComponentProps> = React.memo(
   ({ image, width, height, isBaseLayer = true, options = {} }) => {
-    const { opacity = 0.8, intensity = 1.0 } = options;
+    const { opacity = 1.0, intensity = 1.0 } = options;
 
-    const rainbowMatrix = useMemo(() => {
-      const i = intensity;
-      return [
-        1.5*i, 0.0, 0.2*i, 0, 0.0,
-        0.0, 1.5*i, 0.2*i, 0, 0.0,
-        0.2*i, 0.2*i, 1.5*i, 0, 0.0,
-        0, 0, 0, 1, 0,
-      ];
-    }, [intensity]);
+    const baseIntensity = 1.2 * intensity; // 色の強さ
 
-    const glowMatrix = useMemo(() => {
-      const i = intensity;
-      return [
-        1.3*i, 0.1*i, 0.1*i, 0, 0,
-        0.1*i, 1.3*i, 0.1*i, 0, 0,
-        0.1*i, 0.1*i, 1.3*i, 0, 0,
-        0,0,0,1,0,
-      ];
-    }, [intensity]);
+    const leftMatrix = useMemo(() => [
+      1.6 * baseIntensity, 0, 0, 0, 0, // 赤強め
+      0, 0.6 * baseIntensity, 0, 0, 0,
+      0, 0, 0.8 * baseIntensity, 0, 0,
+      0, 0, 0, 1, 0,
+    ], [baseIntensity]);
+
+    const centerMatrix = useMemo(() => [
+      0.8 * baseIntensity, 0, 0, 0, 0,
+      0, 1.5 * baseIntensity, 0, 0, 0, // 緑強め
+      0, 0, 0.8 * baseIntensity, 0, 0,
+      0, 0, 0, 1, 0,
+    ], [baseIntensity]);
+
+    const rightMatrix = useMemo(() => [
+      0.8 * baseIntensity, 0, 0, 0, 0,
+      0, 0.8 * baseIntensity, 0, 0, 0,
+      0, 0, 1.6 * baseIntensity, 0, 0, // 青強め
+      0, 0, 0, 1, 0,
+    ], [baseIntensity]);
 
     return (
       <Group>
@@ -36,26 +38,25 @@ const RainbowFilter: React.FC<FilterComponentProps> = React.memo(
           <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />
         )}
 
-        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity}>
-          <ColorMatrix matrix={rainbowMatrix} />
+        {/* 左側赤 */}
+        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity * 0.4}>
+          <ColorMatrix matrix={leftMatrix} />
         </Image>
 
-        <Image
-          image={image}
-          x={0}
-          y={0}
-          width={width}
-          height={height}
-          fit="cover"
-          opacity={opacity*0.6}
-          blendMode="screen"
-        >
-          <ColorMatrix matrix={glowMatrix} />
+        {/* 中央緑 */}
+        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity * 0.4}>
+          <ColorMatrix matrix={centerMatrix} />
+        </Image>
+
+        {/* 右側青 */}
+        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity * 0.4}>
+          <ColorMatrix matrix={rightMatrix} />
         </Image>
       </Group>
     );
   }
 );
 
-RainbowFilter.displayName = "RainbowFilter";
-export default RainbowFilter;
+RainbowNeonGradientFilter.displayName = "RainbowNeonGradientFilter";
+
+export default RainbowNeonGradientFilter;
