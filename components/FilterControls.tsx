@@ -246,7 +246,7 @@ const FilterControls: React.FC<FilterControlsProps> = React.memo(
         )}
 
         {/* オーバーレイ画像の選択 */}
-        {settings.states["overlay"] && onSelectOverlayImage && (
+        {settings.states.overlay && onSelectOverlayImage && (
           <>
             <Text style={styles.sectionTitle}>オーバーレイ画像</Text>
             <View style={styles.overlayImageSection}>
@@ -296,14 +296,14 @@ const FilterControls: React.FC<FilterControlsProps> = React.memo(
               ? "フィルターが適用されていません"
               : (() => {
                   return (
-                    activeFilters
+                    `${activeFilters
                       .map((filterType) => {
                         const config =
                           filterFactory.getFilterConfig(filterType);
                         return config ? `• ${config.description}` : "";
                       })
                       .filter(Boolean)
-                      .join("\n") + "\n"
+                      .join("\n")}\n`
                   );
                 })()}
           </Text>
