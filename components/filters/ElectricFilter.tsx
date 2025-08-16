@@ -9,18 +9,33 @@ const ElectricFilter: React.FC<FilterComponentProps> = React.memo(
     const electricMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.6*i, 0, 0, 0, 0,
-        0, 1.2*i, 0, 0, 0,
-        0, 0, 1.8*i, 0, 0,
+        1.9 * i, 0, 0.1 * i, 0, 0,
+        0.1 * i, 1.9 * i, 0, 0, 0,
+        0, 0.1 * i, 1.9 * i, 0, 0,
+        0, 0, 0, 1, 0,
+      ];
+    }, [intensity]);
+
+    const flashMatrix = useMemo(() => {
+      const i = intensity;
+      return [
+        2.5 * i, 0, 0, 0, -0.1,
+        0, 2.5 * i, 0, 0, -0.1,
+        0, 0, 2.5 * i, 0, -0.1,
         0, 0, 0, 1, 0,
       ];
     }, [intensity]);
 
     return (
       <Group>
-        {isBaseLayer && <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />}
-        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity}>
+        {isBaseLayer && (
+          <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />
+        )}
+        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity} blendMode="screen">
           <ColorMatrix matrix={electricMatrix} />
+        </Image>
+        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity * 0.8} blendMode="overlay">
+          <ColorMatrix matrix={flashMatrix} />
         </Image>
       </Group>
     );
