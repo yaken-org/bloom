@@ -90,7 +90,9 @@ export default function NeonCamera() {
 
     // パーティクルを一定時間後に削除
     setTimeout(() => {
-      setParticles((prev) => prev.filter((p) => !newParticles.some(np => np.id === p.id)));
+      setParticles((prev) =>
+        prev.filter((p) => !newParticles.some((np) => np.id === p.id)),
+      );
     }, 1500);
   }, []);
 
@@ -412,84 +414,84 @@ export default function NeonCamera() {
 
       {/* カメラオーバーレイ */}
       <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
-          {/* 上 */}
-          <View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              height: squareTop,
-              backgroundColor: "rgba(0, 0, 0, 0.7)",
-            }}
-          />
-          {/* 下 */}
-          <View
-            style={{
-              position: "absolute",
-              top: squareTop + squareSize,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "rgba(0, 0, 0, 0.7)",
-            }}
-          />
-          {/* 左 */}
-          <View
-            style={{
-              position: "absolute",
-              top: squareTop,
-              left: 0,
-              width: squareLeft,
-              height: squareSize,
-              backgroundColor: "rgba(0, 0, 0, 0.7)",
-            }}
-          />
-          {/* 右 */}
-          <View
-            style={{
-              position: "absolute",
-              top: squareTop,
-              left: squareLeft + squareSize,
-              width: squareLeft,
-              height: squareSize,
-              backgroundColor: "rgba(0, 0, 0, 0.7)",
-            }}
-          />
+        {/* 上 */}
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: squareTop,
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+          }}
+        />
+        {/* 下 */}
+        <View
+          style={{
+            position: "absolute",
+            top: squareTop + squareSize,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+          }}
+        />
+        {/* 左 */}
+        <View
+          style={{
+            position: "absolute",
+            top: squareTop,
+            left: 0,
+            width: squareLeft,
+            height: squareSize,
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+          }}
+        />
+        {/* 右 */}
+        <View
+          style={{
+            position: "absolute",
+            top: squareTop,
+            left: squareLeft + squareSize,
+            width: squareLeft,
+            height: squareSize,
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+          }}
+        />
 
-          {/* ネオンフレーム */}
-          <View
-            style={[
-              styles.neonFrame,
-              {
-                top: squareTop,
-                left: squareLeft,
-                width: squareSize,
-                height: squareSize,
-              },
-            ]}
-          >
-            <Svg width={squareSize} height={squareSize} style={styles.svgFrame}>
-              <Circle
-                cx={squareSize / 2}
-                cy={squareSize / 2}
-                r={squareSize / 2 - 10}
-                stroke="#ff00ff"
-                strokeWidth={3}
-                fill="transparent"
-                strokeDasharray="10 5"
-              />
-              <Circle
-                cx={squareSize / 2}
-                cy={squareSize / 2}
-                r={squareSize / 2 - 20}
-                stroke="#00ffff"
-                strokeWidth={2}
-                fill="transparent"
-                strokeDasharray="5 10"
-              />
-            </Svg>
-          </View>
+        {/* ネオンフレーム */}
+        <View
+          style={[
+            styles.neonFrame,
+            {
+              top: squareTop,
+              left: squareLeft,
+              width: squareSize,
+              height: squareSize,
+            },
+          ]}
+        >
+          <Svg width={squareSize} height={squareSize} style={styles.svgFrame}>
+            <Circle
+              cx={squareSize / 2}
+              cy={squareSize / 2}
+              r={squareSize / 2 - 10}
+              stroke="#ff00ff"
+              strokeWidth={3}
+              fill="transparent"
+              strokeDasharray="10 5"
+            />
+            <Circle
+              cx={squareSize / 2}
+              cy={squareSize / 2}
+              r={squareSize / 2 - 20}
+              stroke="#00ffff"
+              strokeWidth={2}
+              fill="transparent"
+              strokeDasharray="5 10"
+            />
+          </Svg>
+        </View>
       </View>
 
       {/* 浮遊する絵文字 */}
