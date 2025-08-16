@@ -19,10 +19,26 @@ const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
     const contrastMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.5 * i + (1 - i), 0, 0, 0, -0.1 * i,
-        0, 1.5 * i + (1 - i), 0, 0, -0.1 * i,
-        0, 0, 1.5 * i + (1 - i), 0, -0.1 * i,
-        0, 0, 0, 1, 0,
+        1.5 * i + (1 - i),
+        0,
+        0,
+        0,
+        -0.1 * i,
+        0,
+        1.5 * i + (1 - i),
+        0,
+        0,
+        -0.1 * i,
+        0,
+        0,
+        1.5 * i + (1 - i),
+        0,
+        -0.1 * i,
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 

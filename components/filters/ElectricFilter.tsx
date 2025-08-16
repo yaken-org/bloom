@@ -13,27 +13,87 @@ const ElectricFilter: React.FC<FilterComponentProps> = React.memo(
     const electricMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.4*i, 0, 0, 0, 0,
-        0, 1.4*i, 0, 0, 0,
-        0, 0, 1.6*i, 0, 0,
-        0, 0, 0, 1, 0,
+        1.4 * i,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1.4 * i,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1.6 * i,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 
     return (
       <Group>
-        {isBaseLayer && <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />}
+        {isBaseLayer && (
+          <Image
+            image={image}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fit="cover"
+          />
+        )}
 
-        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity*0.6}>
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          opacity={opacity * 0.6}
+        >
           <ColorMatrix matrix={electricMatrix} />
         </Image>
 
-        <Image image={whiteGradientImage} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity*0.2} blendMode="screen" />
-        <Image image={electricGlowImage} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity*0.35} blendMode="screen" />
-        <Image image={glitterImage} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity*0.25} blendMode="screen" />
+        <Image
+          image={whiteGradientImage}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          opacity={opacity * 0.2}
+          blendMode="screen"
+        />
+        <Image
+          image={electricGlowImage}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          opacity={opacity * 0.35}
+          blendMode="screen"
+        />
+        <Image
+          image={glitterImage}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          opacity={opacity * 0.25}
+          blendMode="screen"
+        />
       </Group>
     );
-  }
+  },
 );
 
 ElectricFilter.displayName = "ElectricFilter";
