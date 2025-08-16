@@ -34,7 +34,7 @@ const FilterView = React.memo(
         filters,
         overlayImageUrl,
         width = 300,
-        height = 225,
+        height = 300,
         filterOptions,
       },
       ref,
