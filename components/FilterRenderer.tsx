@@ -1,6 +1,6 @@
 import React from 'react';
 import { Group, Image } from '@shopify/react-native-skia';
-import type { FilterComponentProps, FilterType, OverlayFilterProps } from '@/types/filters';
+import type { FilterComponentProps, FilterType } from '@/types/filters';
 import { filterFactory } from '@/lib/filters/FilterFactory';
 
 interface FilterRendererProps extends FilterComponentProps {
