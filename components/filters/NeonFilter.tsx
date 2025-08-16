@@ -3,33 +3,33 @@ import React, { useMemo } from "react";
 import type { FilterComponentProps } from "@/types/filters";
 
 /**
- * NeonFilter - 紫・青・ピンク系ネオン輝き（超濃色＆超ギラギラ）
+ * NeonFilter - 極端に派手な紫・青・ピンクネオン
  */
 const NeonFilter: React.FC<FilterComponentProps> = React.memo(
   ({ image, width, height, isBaseLayer = true, options = {} }) => {
     const { opacity = 1.0, intensity = 1.0 } = options;
 
-    // ネオンカラー強調（色濃度2〜3倍）
+    // 超高彩度 + 色強化
     const neonMatrix = useMemo(() => {
       const i = intensity;
       return [
-        2.0*i, 0.0, 0.4*i, 0, 0.1*i,   // 赤
-        0.1*i, 2.0*i, 0.5*i, 0, 0.0,   // 緑
-        0.0, 0.3*i, 2.5*i, 0, 0.1*i,   // 青
+        1.5, 0, 1.5, 0, 0,   // 赤＋紫系強化
+        0, 1.5, 2.0, 0, 0,   // 緑＋青系
+        0, 0, 3.0, 0, 0,     // 青・ピンク強化
         0, 0, 0, 1, 0,
       ];
     }, [intensity]);
 
-    // グロー・輝き強化マトリックス（光源感を2倍）
-    const glowMatrix = useMemo(() => {
-      const i = intensity;
+    // 彩度50倍マトリックス
+    const saturationMatrix = useMemo(() => {
+      const s = 50; // 彩度
       return [
-        3.0*i, 0.2*i, 0.3*i, 0, 0,
-        0.2*i, 3.0*i, 0.3*i, 0, 0,
-        0.3*i, 0.2*i, 3.0*i, 0, 0,
+        0.213*s + 1-1, 0.715*s, 0.072*s, 0, 0,
+        0.213*s, 0.715*s + 1-1, 0.072*s, 0, 0,
+        0.213*s, 0.715*s, 0.072*s + 1-1, 0, 0,
         0, 0, 0, 1, 0,
       ];
-    }, [intensity]);
+    }, []);
 
     return (
       <Group>
@@ -37,16 +37,18 @@ const NeonFilter: React.FC<FilterComponentProps> = React.memo(
           <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />
         )}
 
+        {/* 色強化 */}
         <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity}>
           <ColorMatrix matrix={neonMatrix} />
         </Image>
 
+        {/* 彩度強化 */}
         <Image
           image={image}
           x={0} y={0} width={width} height={height} fit="cover"
-          opacity={opacity*0.9} blendMode="screen"
+          opacity={opacity} blendMode="screen"
         >
-          <ColorMatrix matrix={glowMatrix} />
+          <ColorMatrix matrix={saturationMatrix} />
         </Image>
       </Group>
     );
