@@ -1,0 +1,14 @@
+{
+  "folders": [
+    {
+      "path": ".."
+    }
+  ],
+  "settings": {
+    "biome.enabled": true,
+    "biome.configurationPath": "biome.json"
+  },
+  "extensions": {
+    "recommendations": ["biomejs.biome", "usernamehw.errorlens"]
+  }
+}
