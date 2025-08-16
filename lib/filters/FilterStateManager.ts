@@ -73,7 +73,7 @@ export class FilterStateManager {
   public toggleFilter(filterType: FilterType): void {
     this.refreshAvailableFilters();
     
-    if (this.settings.states.hasOwnProperty(filterType)) {
+    if (filterType in this.settings.states) {
       this.settings.states[filterType] = !this.settings.states[filterType];
     }
   }
