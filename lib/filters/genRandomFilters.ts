@@ -14,6 +14,6 @@ export default function getRandomFilters(): string[] {
     }
 
     // ランダムに2つ選択
-    const shuffled = [...availableFilters].sort(() => 0.5 - Math.random());
+    const shuffled = fisherYatesShuffle(availableFilters);
     return shuffled.slice(0, 2);
 };
