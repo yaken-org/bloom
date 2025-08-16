@@ -16,15 +16,6 @@ import { useFilters } from "@/hooks/useFilters";
 import getRandomFilters from "@/lib/filters/genRandomFilters";
 import type { FilterType } from "@/types/filters";
 
-/**
- * TestPage - フィルターシステムの実装
- *
- * 主な機能:
- * 1. 画像選択
- * 2. フィルターの適用
- * 3. フィルター順序の変更
- * 4. 画像保存
- */
 const ViewPage: React.FC = () => {
   const [overlayImageUrl] = useState<string | null>(null);
 
@@ -110,8 +101,6 @@ const ViewPage: React.FC = () => {
         contentInsetAdjustmentBehavior="automatic"
       >
         <StatusBar style="auto" />
-
-        {/* <Text style={styles.title}>フィルターシステム</Text> */}
 
         {imageUri ? (
           <>
