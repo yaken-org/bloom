@@ -32,8 +32,9 @@ const ViewPage: React.FC = () => {
 
   // ランダムフィルターを即座に適用
   (() => {
-    const randomFilters = getRandomFilters();
+    const [randomFilters, options] = getRandomFilters();
     Object.keys(settings.states).forEach((filterType) => {
+      settings.options[filterType] = { ...options };
       const shouldEnable = randomFilters.includes(filterType);
       if (settings.states[filterType as FilterType] !== shouldEnable) {
         toggleFilter(filterType as FilterType);
