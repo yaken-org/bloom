@@ -28,7 +28,7 @@ export default function getRandomFilters(): [string[], FilterOptions] {
   const selectedFilters = shuffled.slice(0, 2);
   
   // オーバーレイフィルターを追加
-  selectedFilters.splice(1, 0, "overlay");
+  selectedFilters.splice(0, 0, "overlay");
 
   const overlayImageUrl = chooseOverlayImageUrl();
   // オーバーレイフィルターのオプションを設定
