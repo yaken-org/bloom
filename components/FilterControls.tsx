@@ -1,16 +1,23 @@
 import React from 'react';
 import { View, StyleSheet, Text, Switch, TouchableOpacity } from 'react-native';
 import type { FilterType, FilterState } from '@/types/filters';
+import { filterFactory } from '@/lib/filters/FilterFactory';
 
 interface FilterControlsProps {
   filterStates: FilterState;
   filterOrder: FilterType[];
-  overlayImageUrl: string | null;
-  onToggleFilter: (filterType: keyof FilterState) => void;
-  onReorderFilter: (filterOrder: FilterType[]) => void;
-  onSelectOverlayImage: () => void;
+  overlayImageUrl?: string | null;
+  onToggleFilter: (filterType: FilterType) => void;
+  onReorderFilter: (newOrder: FilterType[]) => void;
+  onSelectOverlayImage?: () => void;
+  onSetFilterOptions?: (filterType: FilterType, options: Record<string, any>) => void;
+  getFilterOptions?: (filterType: FilterType) => Record<string, any>;
 }
 
+/**
+ * 拡張可能なフィルターコントロールコンポーネント
+ * FilterFactoryから動的にフィルター情報を取得して表示
+ */
 const FilterControls: React.FC<FilterControlsProps> = ({
   filterStates,
   filterOrder,
@@ -18,7 +25,10 @@ const FilterControls: React.FC<FilterControlsProps> = ({
   onToggleFilter,
   onReorderFilter,
   onSelectOverlayImage,
+  onSetFilterOptions,
+  getFilterOptions,
 }) => {
+  const allConfigs = filterFactory.getAllFilterConfigs();
   const hasAnyFilterEnabled = Object.values(filterStates).some(state => state);
 
   const moveFilterUp = (index: number) => {
@@ -40,21 +50,55 @@ const FilterControls: React.FC<FilterControlsProps> = ({
   const handleToggleAll = (value: boolean) => {
     if (!value) {
       // 全て無効化
-      onToggleFilter('imageMagick');
-      onToggleFilter('glittery');
-      onToggleFilter('overlay');
+      allConfigs.forEach(config => {
+        if (filterStates[config.type]) {
+          onToggleFilter(config.type);
+        }
+      });
     } else {
-      // ImageMagickフィルターを有効化
-      if (!filterStates.imageMagick) {
-        onToggleFilter('imageMagick');
+      // 最初のフィルターを有効化（後方互換性のため）
+      const firstFilter = allConfigs.find(config => config.type === 'imageMagick') || allConfigs[0];
+      if (firstFilter && !filterStates[firstFilter.type]) {
+        onToggleFilter(firstFilter.type);
       }
     }
   };
 
-  const filterNames = {
-    overlay: 'オーバーレイ',
-    imageMagick: 'ImageMagick風',
-    glittery: 'ギラギラ'
+  const getActiveFilters = () => {
+    return filterOrder.filter(filterType => filterStates[filterType]);
+  };
+
+  // シンプルなスライダーコンポーネント
+  const SimpleSlider: React.FC<{
+    value: number;
+    onValueChange: (value: number) => void;
+    minimumValue?: number;
+    maximumValue?: number;
+    step?: number;
+  }> = ({ value, onValueChange, minimumValue = 0, maximumValue = 1, step = 0.1 }) => {
+    const handlePress = (event: any) => {
+      const { locationX } = event.nativeEvent;
+      const sliderWidth = 200;
+      const ratio = Math.max(0, Math.min(1, locationX / sliderWidth));
+      const newValue = minimumValue + ratio * (maximumValue - minimumValue);
+      const steppedValue = Math.round(newValue / step) * step;
+      onValueChange(Math.max(minimumValue, Math.min(maximumValue, steppedValue)));
+    };
+
+    const thumbPosition = ((value - minimumValue) / (maximumValue - minimumValue)) * 200;
+
+    return (
+      <View style={styles.sliderContainer}>
+        <TouchableOpacity
+          style={styles.sliderTrack}
+          onPress={handlePress}
+          activeOpacity={0.8}
+        >
+          <View style={[styles.sliderFill, { width: thumbPosition }]} />
+          <View style={[styles.sliderThumb, { left: thumbPosition - 8 }]} />
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   return (
@@ -72,35 +116,17 @@ const FilterControls: React.FC<FilterControlsProps> = ({
       <Text style={styles.sectionTitle}>個別フィルター設定</Text>
 
       <View style={styles.filterToggleContainer}>
-        <View style={styles.filterToggleRow}>
-          <Text style={styles.filterToggleLabel}>ImageMagick風</Text>
-          <Switch
-            value={filterStates.imageMagick}
-            onValueChange={() => onToggleFilter('imageMagick')}
-            trackColor={{ false: '#ccc', true: '#007AFF' }}
-            thumbColor={filterStates.imageMagick ? '#fff' : '#f4f3f4'}
-          />
-        </View>
-        
-        <View style={styles.filterToggleRow}>
-          <Text style={styles.filterToggleLabel}>ギラギラ</Text>
-          <Switch
-            value={filterStates.glittery}
-            onValueChange={() => onToggleFilter('glittery')}
-            trackColor={{ false: '#ccc', true: '#34C759' }}
-            thumbColor={filterStates.glittery ? '#fff' : '#f4f3f4'}
-          />
-        </View>
-
-        <View style={styles.filterToggleRow}>
-          <Text style={styles.filterToggleLabel}>オーバーレイ</Text>
-          <Switch
-            value={filterStates.overlay}
-            onValueChange={() => onToggleFilter('overlay')}
-            trackColor={{ false: '#ccc', true: '#FF9500' }}
-            thumbColor={filterStates.overlay ? '#fff' : '#f4f3f4'}
-          />
-        </View>
+        {allConfigs.map(config => (
+          <View key={config.type} style={styles.filterToggleRow}>
+            <Text style={styles.filterToggleLabel}>{config.name}</Text>
+            <Switch
+              value={filterStates[config.type] || false}
+              onValueChange={() => onToggleFilter(config.type)}
+              trackColor={{ false: '#ccc', true: config.color }}
+              thumbColor={filterStates[config.type] ? '#fff' : '#f4f3f4'}
+            />
+          </View>
+        ))}
       </View>
 
       {/* フィルター順序の設定 */}
@@ -111,7 +137,10 @@ const FilterControls: React.FC<FilterControlsProps> = ({
           <View style={styles.orderContainer}>
             {filterOrder.map((filterType, index) => {
               const isActive = filterStates[filterType];
+              const config = filterFactory.getFilterConfig(filterType);
               
+              if (!config) return null;
+
               return (
                 <View key={filterType} style={[
                   styles.orderItem,
@@ -123,7 +152,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                       styles.orderItemText,
                       !isActive && styles.orderItemTextInactive
                     ]}>
-                      {filterNames[filterType]}
+                      {config.name}
                     </Text>
                     {!isActive && (
                       <Text style={styles.inactiveLabel}>(無効)</Text>
@@ -167,7 +196,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
       )}
 
       {/* オーバーレイ画像の選択 */}
-      {filterStates.overlay && (
+      {filterStates['overlay'] && onSelectOverlayImage && (
         <>
           <Text style={styles.sectionTitle}>オーバーレイ画像</Text>
           <View style={styles.overlayImageSection}>
@@ -182,6 +211,23 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             {overlayImageUrl && (
               <Text style={styles.imageSelectedText}>✓ 画像が選択されています</Text>
             )}
+            
+            {/* オーバーレイの強度調整 */}
+            <View style={styles.overlayIntensitySection}>
+              <Text style={styles.intensityLabel}>オーバーレイの強度:</Text>
+              <SimpleSlider
+                value={getFilterOptions?.('overlay')?.opacity ?? 0.5}
+                onValueChange={(value) => {
+                  onSetFilterOptions?.('overlay', { opacity: value });
+                }}
+                minimumValue={0}
+                maximumValue={1}
+                step={0.1}
+              />
+              <Text style={styles.intensityValue}>
+                {Math.round((getFilterOptions?.('overlay')?.opacity ?? 0.5) * 100)}%
+              </Text>
+            </View>
           </View>
         </>
       )}
@@ -193,24 +239,24 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             'フィルターが適用されていません'
           ) : (
             (() => {
-              const activeFilters = filterOrder.filter(filter => filterStates[filter]);
-              const filterDescriptions = {
-                overlay: 'オーバーレイ効果',
-                imageMagick: 'ImageMagick風の効果 (エッジ検出、色反転、彩度強化等)',
-                glittery: 'ギラギラフィルター (超高彩度、メタリック効果等)'
-              };
-              
-              return activeFilters.map(filter => `• ${filterDescriptions[filter]}`).join('\n') + '\n';
+              const activeFilters = getActiveFilters();
+              return activeFilters.map(filterType => {
+                const config = filterFactory.getFilterConfig(filterType);
+                return config ? `• ${config.description}` : '';
+              }).filter(Boolean).join('\n') + '\n';
             })()
           )}
         </Text>
         
         {hasAnyFilterEnabled && (() => {
-          const activeFilters = filterOrder.filter(filter => filterStates[filter]);
+          const activeFilters = getActiveFilters();
           
           return (
             <Text style={styles.layerOrderInfo}>
-              ※ フィルターは「{activeFilters.map(filter => filterNames[filter]).join(' → ')}」の順で重ねて適用されます
+              ※ フィルターは「{activeFilters.map(filterType => {
+                const config = filterFactory.getFilterConfig(filterType);
+                return config?.name || filterType;
+              }).join(' → ')}」の順で重ねて適用されます
             </Text>
           );
         })()}
@@ -351,14 +397,6 @@ const styles = StyleSheet.create({
   orderButtonTextDisabled: {
     color: '#ccc',
   },
-  overlaySelection: {
-    flexDirection: 'row',
-    marginTop: 8,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 6,
-    paddingHorizontal: 5,
-    marginBottom: 15,
-  },
   overlayImageSection: {
     backgroundColor: 'white',
     borderRadius: 8,
@@ -390,25 +428,6 @@ const styles = StyleSheet.create({
     color: '#34C759',
     fontWeight: '500',
   },
-  overlayButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    borderRadius: 4,
-    marginHorizontal: 2,
-    minWidth: 80,
-  },
-  overlayButtonActive: {
-    backgroundColor: '#FF9500',
-  },
-  overlayButtonText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#888',
-  },
-  overlayButtonTextActive: {
-    color: 'white',
-  },
   effectsInfo: {
     marginTop: 15,
     padding: 12,
@@ -438,6 +457,52 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 8,
     lineHeight: 16,
+  },
+  sliderContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  sliderTrack: {
+    width: 200,
+    height: 20,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  sliderFill: {
+    height: 20,
+    backgroundColor: '#FF9500',
+    borderRadius: 10,
+    position: 'absolute',
+    left: 0,
+  },
+  sliderThumb: {
+    width: 16,
+    height: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    position: 'absolute',
+    borderWidth: 2,
+    borderColor: '#FF9500',
+    top: 2,
+  },
+  overlayIntensitySection: {
+    marginTop: 15,
+    alignItems: 'center',
+    width: '100%',
+  },
+  intensityLabel: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  intensityValue: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 5,
+    fontWeight: '600',
   },
 });
 

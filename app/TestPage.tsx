@@ -6,22 +6,50 @@ import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import FilterView, { FilterViewRef } from '@/components/FilterView';
 import FilterControls from '@/components/FilterControls';
-import type { FilterType, FilterState } from '@/types/filters';
+import { useFilterState } from '@/hooks/useFilterState';
 
+/**
+ * TestPage - 新しいフィルターシステムのリファレンス実装
+ * 
+ * このコンポーネントは、新しいフィルターアーキテクチャの使用方法を示すリファレンスとして機能します。
+ * 
+ * 主な特徴:
+ * - FilterFactory による動的フィルター管理
+ * - useFilterState フックによる状態管理の簡素化
+ * - 拡張可能なアーキテクチャ
+ * - 後方互換性の維持
+ * 
+ * 使用例:
+ * 1. 画像選択
+ * 2. フィルターの動的適用
+ * 3. フィルター順序の変更
+ * 4. 画像保存
+ */
 const TestPage: React.FC = () => {
+  // 画像関連の状態
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [filterStates, setFilterStates] = useState<FilterState>({
-    imageMagick: false,
-    glittery: false,
-    overlay: false,
-  });
-  const [filterOrder, setFilterOrder] = useState<FilterType[]>(['overlay', 'imageMagick', 'glittery']);
   const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null);
+  
+  // フィルター状態をカスタムフックで管理
+  const {
+    filterStates,
+    filterOrder,
+    activeFilters,
+    toggleFilter,
+    setFilterOrder,
+    setFilterOptions,
+    getFilterOptions,
+    getAllFilterOptions,
+  } = useFilterState();
+  
+  // FilterViewの参照
   const filterViewRef = useRef<FilterViewRef>(null);
 
+  /**
+   * メイン画像選択ハンドラー
+   */
   const handleSelectImage = async () => {
     try {
-      // パーミッションをリクエスト
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (status !== 'granted') {
@@ -32,7 +60,6 @@ const TestPage: React.FC = () => {
         return;
       }
 
-      // 画像を選択
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -49,9 +76,11 @@ const TestPage: React.FC = () => {
     }
   };
 
+  /**
+   * オーバーレイ画像選択ハンドラー
+   */
   const handleSelectOverlayImage = async () => {
     try {
-      // パーミッションをリクエスト
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (status !== 'granted') {
@@ -62,7 +91,6 @@ const TestPage: React.FC = () => {
         return;
       }
 
-      // 画像を選択
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -79,20 +107,11 @@ const TestPage: React.FC = () => {
     }
   };
 
-  const handleToggleFilter = (filterType: keyof FilterState) => {
-    setFilterStates(prev => ({
-      ...prev,
-      [filterType]: !prev[filterType]
-    }));
-  };
-
-  const handleReorderFilter = (newOrder: FilterType[]) => {
-    setFilterOrder(newOrder);
-  };
-
+  /**
+   * 画像保存ハンドラー
+   */
   const handleSaveImage = async () => {
     try {
-      // メディアライブラリのパーミッションをリクエスト
       const { status } = await MediaLibrary.requestPermissionsAsync();
       
       if (status !== 'granted') {
@@ -103,21 +122,18 @@ const TestPage: React.FC = () => {
         return;
       }
 
-      // FilterViewからスナップショットを取得
       const snapshot = filterViewRef.current?.makeImageSnapshot();
       if (!snapshot) {
         Alert.alert('エラー', '画像のスナップショットを取得できませんでした。');
         return;
       }
 
-      // スナップショットをBase64に変換
       const base64Data = snapshot.encodeToBase64();
       if (!base64Data) {
         Alert.alert('エラー', '画像のエンコードに失敗しました。');
         return;
       }
 
-      // 一時的にファイルシステムに保存
       const filename = `filtered_image_${Date.now()}.png`;
       const fileUri = `${FileSystem.documentDirectory}${filename}`;
       
@@ -125,7 +141,6 @@ const TestPage: React.FC = () => {
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      // メディアライブラリに保存
       const asset = await MediaLibrary.createAssetAsync(fileUri);
       await MediaLibrary.createAlbumAsync('Bloom', asset, false);
 
@@ -141,10 +156,6 @@ const TestPage: React.FC = () => {
     }
   };
 
-  // アクティブなフィルターのリストを生成
-  const activeFilters = filterOrder.filter(filter => filterStates[filter]);
-
-
   return (
     <View style={styles.mainContainer}>
       <ScrollView 
@@ -156,52 +167,72 @@ const TestPage: React.FC = () => {
       >
         <StatusBar style="auto" />
       
-      <Text style={styles.title}>複数フィルター合成システム</Text>
+        <Text style={styles.title}>拡張可能フィルターシステム</Text>
+        <Text style={styles.subtitle}>
+          動的フィルター管理とプラグアブル設計
+        </Text>
 
-      {imageUri ? (
-        <>
-          <FilterView 
-            ref={filterViewRef}
-            imageUrl={imageUri}
-            filters={activeFilters}
-            overlayImageUrl={overlayImageUrl || undefined}
-          />
-          <FilterControls
-            filterStates={filterStates}
-            filterOrder={filterOrder}
-            overlayImageUrl={overlayImageUrl}
-            onToggleFilter={handleToggleFilter}
-            onReorderFilter={handleReorderFilter}
-            onSelectOverlayImage={handleSelectOverlayImage}
-          />
+        {imageUri ? (
+          <>
+            {/* 新しいFilterViewを使用 */}
+            <FilterView 
+              ref={filterViewRef}
+              imageUrl={imageUri}
+              filters={activeFilters}
+              overlayImageUrl={overlayImageUrl || undefined}
+              filterOptions={getAllFilterOptions()}
+            />
+            
+            {/* 新しいFilterControlsを使用 */}
+            <FilterControls
+              filterStates={filterStates}
+              filterOrder={filterOrder}
+              overlayImageUrl={overlayImageUrl}
+              onToggleFilter={toggleFilter}
+              onReorderFilter={setFilterOrder}
+              onSelectOverlayImage={handleSelectOverlayImage}
+              onSetFilterOptions={setFilterOptions}
+              getFilterOptions={getFilterOptions}
+            />
           
-          {/* 保存ボタンを追加 */}
-          <TouchableOpacity 
-            style={styles.saveButton}
-            onPress={handleSaveImage}
-          >
-            <Text style={styles.saveButtonText}>
-              画像を保存
+            <TouchableOpacity 
+              style={styles.saveButton}
+              onPress={handleSaveImage}
+            >
+              <Text style={styles.saveButtonText}>
+                画像を保存
+              </Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <View style={styles.placeholderContainer}>
+            <Text style={styles.placeholderText}>
+              カメラロールから画像を選択してください
             </Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <View style={styles.placeholderContainer}>
-          <Text style={styles.placeholderText}>
-            カメラロールから画像を選択してください
+          </View>
+        )}
+
+        <TouchableOpacity 
+          style={styles.selectButton}
+          onPress={handleSelectImage}
+        >
+          <Text style={styles.selectButtonText}>
+            {imageUri ? '別の画像を選択' : '画像を選択'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* 実装情報セクション */}
+        <View style={styles.implementationInfo}>
+          <Text style={styles.implementationTitle}>実装のポイント</Text>
+          <Text style={styles.implementationText}>
+            {`• FilterFactory: フィルターの登録と動的管理
+• FilterStateManager: フィルター状態の一元管理  
+• FilterRenderer: 動的フィルター適用エンジン
+• useFilterState: フィルター状態管理フック
+• 新フィルター追加は FilterFactory.registerFilter() のみ`}
           </Text>
         </View>
-      )}
-
-      <TouchableOpacity 
-        style={styles.selectButton}
-        onPress={handleSelectImage}
-      >
-        <Text style={styles.selectButtonText}>
-          {imageUri ? '別の画像を選択' : '画像を選択'}
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
     </View>
   );
 };
@@ -218,32 +249,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     padding: 20,
-    paddingTop: 60, // 上部に十分な余白を追加
-    paddingBottom: 40, // 下部に余白を追加
+    paddingTop: 60,
+    paddingBottom: 40,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
     color: '#333',
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
     marginBottom: 20,
-  },
-  refreshButton: {
-    backgroundColor: '#007AFF',
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  refreshButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
   },
   selectButton: {
     backgroundColor: '#007AFF',
@@ -285,22 +306,26 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
-  commandInfo: {
+  implementationInfo: {
     marginTop: 30,
     padding: 15,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'white',
     borderRadius: 8,
     width: '100%',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
-  commandTitle: {
+  implementationTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 8,
     color: '#333',
   },
-  commandText: {
+  implementationText: {
     fontSize: 12,
-    fontFamily: 'monospace',
     color: '#555',
     lineHeight: 18,
   },
