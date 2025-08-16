@@ -7,6 +7,52 @@ import type {
   FilterType,
 } from "@/types/filters";
 
+// シンプルなスライダーコンポーネント
+const SimpleSlider: React.FC<{
+  value: number;
+  onValueChange: (value: number) => void;
+  minimumValue?: number;
+  maximumValue?: number;
+  step?: number;
+}> = React.memo(
+  ({
+    value,
+    onValueChange,
+    minimumValue = 0,
+    maximumValue = 1,
+    step = 0.1,
+  }) => {
+    const handlePress = (event: GestureResponderEvent) => {
+      const { locationX } = event.nativeEvent;
+      const sliderWidth = 200;
+      const ratio = Math.max(0, Math.min(1, locationX / sliderWidth));
+      const newValue = minimumValue + ratio * (maximumValue - minimumValue);
+      const steppedValue = Math.round(newValue / step) * step;
+      onValueChange(
+        Math.max(minimumValue, Math.min(maximumValue, steppedValue)),
+      );
+    };
+
+    const thumbPosition =
+      ((value - minimumValue) / (maximumValue - minimumValue)) * 200;
+
+    return (
+      <View style={styles.sliderContainer}>
+        <TouchableOpacity
+          style={styles.sliderTrack}
+          onPress={handlePress}
+          activeOpacity={0.8}
+        >
+          <View style={[styles.sliderFill, { width: thumbPosition }]} />
+          <View style={[styles.sliderThumb, { left: thumbPosition - 8 }]} />
+        </TouchableOpacity>
+      </View>
+    );
+  },
+);
+
+SimpleSlider.displayName = "SimpleSlider";
+
 interface FilterControlsProps {
   settings: FilterSettings;
   activeFilters: FilterType[];
@@ -89,52 +135,6 @@ const FilterControls: React.FC<FilterControlsProps> = React.memo(
       },
       [allConfigs, settings.states, onToggleFilter],
     );
-
-    // シンプルなスライダーコンポーネント
-    const SimpleSlider: React.FC<{
-      value: number;
-      onValueChange: (value: number) => void;
-      minimumValue?: number;
-      maximumValue?: number;
-      step?: number;
-    }> = React.memo(
-      ({
-        value,
-        onValueChange,
-        minimumValue = 0,
-        maximumValue = 1,
-        step = 0.1,
-      }) => {
-        const handlePress = (event: GestureResponderEvent) => {
-          const { locationX } = event.nativeEvent;
-          const sliderWidth = 200;
-          const ratio = Math.max(0, Math.min(1, locationX / sliderWidth));
-          const newValue = minimumValue + ratio * (maximumValue - minimumValue);
-          const steppedValue = Math.round(newValue / step) * step;
-          onValueChange(
-            Math.max(minimumValue, Math.min(maximumValue, steppedValue)),
-          );
-        };
-
-        const thumbPosition =
-          ((value - minimumValue) / (maximumValue - minimumValue)) * 200;
-
-        return (
-          <View style={styles.sliderContainer}>
-            <TouchableOpacity
-              style={styles.sliderTrack}
-              onPress={handlePress}
-              activeOpacity={0.8}
-            >
-              <View style={[styles.sliderFill, { width: thumbPosition }]} />
-              <View style={[styles.sliderThumb, { left: thumbPosition - 8 }]} />
-            </TouchableOpacity>
-          </View>
-        );
-      },
-    );
-
-    SimpleSlider.displayName = "SimpleSlider";
 
     return (
       <View style={styles.container}>
