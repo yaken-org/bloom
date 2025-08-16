@@ -3,7 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -28,9 +28,7 @@ import { useFilters } from "@/hooks/useFilters";
 const TestPage: React.FC = () => {
   const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null);
 
-  const {
-    imageUri,
-  } = useLocalSearchParams<{
+  const { imageUri } = useLocalSearchParams<{
     imageUri: string;
   }>();
 
@@ -176,12 +174,9 @@ const TestPage: React.FC = () => {
           </>
         ) : (
           <View style={styles.placeholderContainer}>
-            <Text style={styles.placeholderText}>
-              画像が渡されませんでした
-            </Text>
+            <Text style={styles.placeholderText}>画像が渡されませんでした</Text>
           </View>
         )}
-
       </ScrollView>
     </View>
   );
