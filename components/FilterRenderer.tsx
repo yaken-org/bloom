@@ -1,12 +1,17 @@
 import { Group, Image } from "@shopify/react-native-skia";
 import React from "react";
 import { filterFactory } from "@/lib/filters/FilterFactory";
-import type { FilterComponentProps, FilterType } from "@/types/filters";
+import type {
+  FilterComponentProps,
+  FilterOptions,
+  FilterType,
+  OverlayFilterOptions,
+} from "@/types/filters";
 
 interface FilterRendererProps extends FilterComponentProps {
   filters: FilterType[];
   overlayImageUrl?: string;
-  filterOptions?: Record<FilterType, Record<string, any>>;
+  filterOptions?: Record<FilterType, FilterOptions>;
 }
 
 /**
@@ -40,21 +45,27 @@ const FilterRenderer: React.FC<FilterRendererProps> = ({
 
     // オーバーレイフィルターの場合、追加プロパティを設定
     if (filterType === "overlay") {
-      const userOptions = filterOptions?.[filterType] || {};
-      const overlayProps: OverlayFilterProps = {
+      const userOptions =
+        (filterOptions?.[filterType] as OverlayFilterOptions) || {};
+      const overlayProps = {
         ...baseProps,
-        overlayImageUrl,
-        blendMode:
-          userOptions.blendMode || config.options?.blendMode || "multiply",
-        opacity:
-          userOptions.opacity !== undefined
-            ? userOptions.opacity
-            : config.options?.opacity || 0.5,
+        options: {
+          overlayImageUrl,
+          blendMode: userOptions.blendMode || "multiply",
+          opacity:
+            userOptions.opacity !== undefined ? userOptions.opacity : 0.5,
+        } as OverlayFilterOptions,
       };
       return <FilterComponent key={filterType} {...overlayProps} />;
     }
 
-    return <FilterComponent key={filterType} {...baseProps} />;
+    return (
+      <FilterComponent
+        key={filterType}
+        {...baseProps}
+        options={filterOptions?.[filterType]}
+      />
+    );
   };
 
   return (

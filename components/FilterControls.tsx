@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { GestureResponderEvent, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { filterFactory } from "@/lib/filters/FilterFactory";
 import type {
   FilterOptions,
@@ -105,7 +105,7 @@ const FilterControls: React.FC<FilterControlsProps> = React.memo(
         maximumValue = 1,
         step = 0.1,
       }) => {
-        const handlePress = (event: any) => {
+        const handlePress = (event: GestureResponderEvent) => {
           const { locationX } = event.nativeEvent;
           const sliderWidth = 200;
           const ratio = Math.max(0, Math.min(1, locationX / sliderWidth));
@@ -295,16 +295,13 @@ const FilterControls: React.FC<FilterControlsProps> = React.memo(
             {!hasActiveFilters
               ? "フィルターが適用されていません"
               : (() => {
-                  return (
-                    `${activeFilters
-                      .map((filterType) => {
-                        const config =
-                          filterFactory.getFilterConfig(filterType);
-                        return config ? `• ${config.description}` : "";
-                      })
-                      .filter(Boolean)
-                      .join("\n")}\n`
-                  );
+                  return `${activeFilters
+                    .map((filterType) => {
+                      const config = filterFactory.getFilterConfig(filterType);
+                      return config ? `• ${config.description}` : "";
+                    })
+                    .filter(Boolean)
+                    .join("\n")}\n`;
                 })()}
           </Text>
 
