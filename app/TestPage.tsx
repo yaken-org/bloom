@@ -39,8 +39,15 @@ const TestPage: React.FC = () => {
 
 
   return (
-    <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
-      <StatusBar style="auto" />
+    <View style={styles.mainContainer}>
+      <ScrollView 
+        style={styles.scrollContainer} 
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+        contentInsetAdjustmentBehavior="automatic"
+      >
+        <StatusBar style="auto" />
       
       <Text style={styles.title}>ImageMagick Filter Test</Text>
 
@@ -77,18 +84,23 @@ const TestPage: React.FC = () => {
         </Text>
       </View>
     </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
+  mainContainer: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  scrollContainer: {
+    flex: 1,
+  },
   container: {
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     padding: 20,
+    paddingTop: 60, // 上部に十分な余白を追加
     paddingBottom: 40, // 下部に余白を追加
   },
   title: {
