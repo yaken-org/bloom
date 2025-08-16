@@ -87,13 +87,3 @@ export interface FilterSettings {
   order: FilterType[];
   options: Record<FilterType, FilterOptions>;
 }
-
-// 廃止予定のタイプ（後方互換性のため）
-export type OverlayType = "vintage" | "grunge" | "light" | "texture";
-export interface FilterConfig {
-  type: FilterType;
-  enabled: boolean;
-  options?: {
-    overlayType?: OverlayType;
-  };
-}
