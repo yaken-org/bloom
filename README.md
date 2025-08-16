@@ -45,6 +45,14 @@ $ task up
 $ npm start
 ```
 
+### (任意) VSCode もしくはその fork を使っている人向け
+
+Workspace設定を用意しているのでそれを使うと設定が共有できるので便利です。
+
+```bash
+$ code .vscode/bloom.code-workspace
+```
+
 ## 関連ドキュメント
 
 - [Expo](https://expo.dev)

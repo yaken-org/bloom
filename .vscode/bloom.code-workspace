@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {},
+	"extensions": {
+		"recommendations": [
+			"biomejs.biome",
+			"usernamehw.errorlens"
+		]
+	}
+}
