@@ -175,9 +175,9 @@ export default function NeonCamera() {
           await MediaLibrary.saveToLibraryAsync(cropped.uri);
         }
 
-        // TestPageに遷移
+        // ローディング画面経由でTestPageに遷移
         router.push({
-          pathname: "/TestPage",
+          pathname: "/loading",
           params: { imageUri: cropped.uri },
         });
       } catch (error) {
