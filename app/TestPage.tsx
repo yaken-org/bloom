@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from 'expo-image-picker';
 import FilterView from '@/components/FilterView';
@@ -39,7 +39,7 @@ const TestPage: React.FC = () => {
 
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
       <StatusBar style="auto" />
       
       <Text style={styles.title}>ImageMagick Filter Test</Text>
@@ -76,17 +76,20 @@ const TestPage: React.FC = () => {
           output.jpg
         </Text>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  container: {
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    paddingBottom: 40, // 下部に余白を追加
   },
   title: {
     fontSize: 24,
