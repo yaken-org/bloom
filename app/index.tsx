@@ -100,7 +100,7 @@ export default function CameraPreview() {
           //Alert.alert("保存完了", "写真がギャラリーに保存されました。");
           router.push({
             pathname: "/TestPage",
-            params: { capturedImageUri: cropped.uri },
+            params: { imageUri: cropped.uri, width: cropSize, height: cropSize },
           });
         } else {
           Alert.alert(

@@ -26,19 +26,20 @@ import { useFilters } from "@/hooks/useFilters";
  * 4. 画像保存
  */
 const TestPage: React.FC = () => {
-  const [imageUri, setImageUri] = useState<string | null>(null);
   const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null);
 
-  const { capturedImageUri } = useLocalSearchParams<{
-    capturedImageUri: string;
+  const {
+    imageUri,
+    width: widthStr, 
+    height: heightStr,
+  } = useLocalSearchParams<{
+    imageUri: string;
+    width: string;
+    height: string;
   }>();
 
-  // useEffectを使用して副作用を適切に処理
-  useEffect(() => {
-    if (capturedImageUri) {
-      setImageUri(capturedImageUri);
-    }
-  }, [capturedImageUri]);
+  const width = parseInt(widthStr, 10);
+  const height = parseInt(heightStr, 10);
 
   const {
     settings,
@@ -52,38 +53,6 @@ const TestPage: React.FC = () => {
 
   // FilterViewの参照
   const filterViewRef = useRef<FilterViewRef>(null);
-
-  /**
-   * メイン画像選択ハンドラー
-   */
-  const handleSelectImage = async () => {
-    try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (status !== "granted") {
-        Alert.alert(
-          "パーミッション必要",
-          "カメラロールにアクセスするには写真へのアクセス許可が必要です。",
-        );
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        setImageUri(result.assets[0].uri);
-      }
-    } catch (error) {
-      Alert.alert("エラー", "画像の選択に失敗しました。");
-      console.error("Image picker error:", error);
-    }
-  };
 
   /**
    * オーバーレイ画像選択ハンドラー
@@ -104,7 +73,7 @@ const TestPage: React.FC = () => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 3],
+        aspect: [1, 1],
         quality: 1,
       });
 
@@ -215,19 +184,11 @@ const TestPage: React.FC = () => {
         ) : (
           <View style={styles.placeholderContainer}>
             <Text style={styles.placeholderText}>
-              カメラロールから画像を選択してください
+              画像が渡されませんでした
             </Text>
           </View>
         )}
 
-        <TouchableOpacity
-          style={styles.selectButton}
-          onPress={handleSelectImage}
-        >
-          <Text style={styles.selectButtonText}>
-            {imageUri ? "別の画像を選択" : "画像を選択"}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );
