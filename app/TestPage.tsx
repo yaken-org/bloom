@@ -71,18 +71,6 @@ const TestPage: React.FC = () => {
           {imageUri ? '別の画像を選択' : '画像を選択'}
         </Text>
       </TouchableOpacity>
-
-      <View style={styles.commandInfo}>
-        <Text style={styles.commandTitle}>適用されるImageMagickコマンド:</Text>
-        <Text style={styles.commandText}>
-          magick input.jpg{'\n'}
-          -edge 2 -negate{'\n'}
-          -blur 0x1{'\n'}
-          -modulate 100,300,100{'\n'}
-          -colorize 10,50,80{'\n'}
-          output.jpg
-        </Text>
-      </View>
     </ScrollView>
     </View>
   );
