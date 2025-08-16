@@ -11,14 +11,16 @@
       "**/node_modules/**",
       "**/package.json/**",
       "**/package-lock.json/**",
-      "**/*.d.ts/**"
+      "**/*.d.ts/**",
+      "**/.wrangler/**"
     ],
     "includes": [
       "**",
       "!**/node_modules",
       "!**/dist",
       "!**/build",
-      "!**/*.d.ts"
+      "!**/*.d.ts",
+      "!**/.wrangler"
     ]
   },
   "formatter": {
