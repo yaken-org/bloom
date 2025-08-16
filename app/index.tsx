@@ -1,5 +1,5 @@
 import { type CameraType, CameraView } from "expo-camera";
-import { useRef, useState, useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -17,7 +17,7 @@ export default function CameraPreview() {
   const { squareSize, squareTop, squareLeft } = useMemo(() => {
     const screenWidth = Dimensions.get("window").width;
     const screenHeight = Dimensions.get("window").height;
-    const squareSize = 300;
+    const squareSize = Math.min(screenWidth, screenHeight) * 0.95;
     const squareTop = (screenHeight - squareSize) / 2;
     const squareLeft = (screenWidth - squareSize) / 2;
     return { screenWidth, screenHeight, squareSize, squareTop, squareLeft };
