@@ -30,16 +30,9 @@ const TestPage: React.FC = () => {
 
   const {
     imageUri,
-    width: widthStr, 
-    height: heightStr,
   } = useLocalSearchParams<{
     imageUri: string;
-    width: string;
-    height: string;
   }>();
-
-  const width = parseInt(widthStr, 10);
-  const height = parseInt(heightStr, 10);
 
   const {
     settings,

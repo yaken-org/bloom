@@ -292,7 +292,7 @@ export default function NeonCamera() {
         // TestPageに遷移
         router.push({
           pathname: "/TestPage" as any,
-          params: { capturedImageUri: cropped.uri },
+          params: { imageUri: cropped.uri },
         });
       } catch (error) {
         console.error("Failed to take picture:", error);
