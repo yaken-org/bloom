@@ -281,7 +281,7 @@ export default function NeonCamera() {
               },
             },
           ],
-          { compress: 1, format: ImageManipulator.SaveFormat.JPEG },
+          { compress: 1, format: ImageManipulator.SaveFormat.PNG },
         );
 
         const { status } = await MediaLibrary.requestPermissionsAsync();
