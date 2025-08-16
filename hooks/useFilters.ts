@@ -82,14 +82,17 @@ export const useFilters = (
     setUpdateTrigger((prev) => prev + 1);
   }, []);
 
-  // 現在の設定を取得（メモ化）
+  // 現在の設定を取得
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // biome-ignore lint/correctness/useExhaustiveDependencies: updateTriggerは再レンダリングトリガーとして使っている
   const settings = useMemo(
     (): FilterSettings => ({
       states: manager.getFilterStates(),
       order: manager.getFilterOrder(),
       options: manager.getAllFilterOptions(),
     }),
-    // biome-ignore lint/correctness/useExhaustiveDependencies: updateTriggerは再レンダリングトリガーとして意図的に使用
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // biome-ignore lint/correctness/useExhaustiveDependencies: updateTriggerは再レンダリングトリガーとして使っている
     [manager, updateTrigger],
   );
 

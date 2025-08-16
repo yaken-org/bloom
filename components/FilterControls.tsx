@@ -1,5 +1,12 @@
 import React, { useCallback } from "react";
-import { GestureResponderEvent, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import {
+  type GestureResponderEvent,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { filterFactory } from "@/lib/filters/FilterFactory";
 import type {
   FilterOptions,
