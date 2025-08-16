@@ -67,7 +67,7 @@ const DebugPage: React.FC = () => {
 
     // TestPageに画像URIを渡して遷移
     router.push({
-      pathname: "./TestPage" as any,
+      pathname: "debug/TestPage" as any,
       params: {
         imageUri: selectedImageUri,
       },
