@@ -138,11 +138,9 @@ export default function LoadingScreen() {
       ]),
     ).start();
 
-    // TODO(feature-filter): フィルター適用処理実装時にここを修正
     const timer = setTimeout(() => {
-      // このページには戻ってほしくないので replace する
       router.replace({
-        pathname: "/TestPage",
+        pathname: "/view",
         params: { imageUri: imageUri },
       });
     }, 2000);
