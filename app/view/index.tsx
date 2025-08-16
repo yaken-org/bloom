@@ -1,12 +1,12 @@
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as Sharing from "expo-sharing";
 import { StatusBar } from "expo-status-bar";
 import React, { useRef, useState } from "react";
 import {
   Alert,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -91,6 +91,16 @@ const ViewPage: React.FC = () => {
 
   const handleShareImage = async () => {
     try {
+      // デバイスが共有機能をサポートしているかチェック
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert(
+          "エラー",
+          "このデバイスでは共有機能がサポートされていません。",
+        );
+        return;
+      }
+
       // 画像のスナップショットを取得
       const snapshot = filterViewRef.current?.makeImageSnapshot();
       if (!snapshot) {
@@ -113,19 +123,17 @@ const ViewPage: React.FC = () => {
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      // 共有機能を実行
-      const shareResult = await Share.share({
-        url: fileUri,
-        title: "Bloom - フィルター適用済み画像",
-        message: "Bloomアプリで作成した画像です！",
+      // expo-sharingを使用して共有
+      await Sharing.shareAsync(fileUri, {
+        mimeType: "image/png",
+        dialogTitle: "Bloom - フィルター適用済み画像を共有",
+        UTI: "public.png",
       });
+
+      console.log("画像が共有されました");
 
       // 共有後に一時ファイルを削除
       await FileSystem.deleteAsync(fileUri, { idempotent: true });
-
-      if (shareResult.action === Share.sharedAction) {
-        console.log("画像が共有されました");
-      }
     } catch (error) {
       console.error("Share image error:", error);
       Alert.alert("エラー", "画像の共有に失敗しました。");
