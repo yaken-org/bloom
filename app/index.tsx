@@ -44,7 +44,6 @@ export default function CameraPreview() {
 
   return (
     <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
-      {/* LGTM風オーバーレイ：正方形以外を黒くする */}
       <View style={StyleSheet.absoluteFillObject}>
         {/* 上 */}
         <View
