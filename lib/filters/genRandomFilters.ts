@@ -3,11 +3,13 @@ import type { FilterOptions, OverlayFilterOptions } from "@/types/filters";
 
 // フレーム画像をrequireで事前読み込み
 const FRAME_IMAGES = [
-  require("@/assets/flames/gold_frame.png"),
-  require("@/assets/flames/mirror_frame.png"),
-  require("@/assets/flames/purple_frame.png"),
-  require("@/assets/flames/red_frame.png"),
-  require("@/assets/flames/yellow_frame.png")
+  //require("@/assets/flames/gold_frame.png"),
+  //require("@/assets/flames/mirror_frame.png"),
+  //require("@/assets/flames/mirror_yellow_frame.png"),
+  //require("@/assets/flames/purple_frame.png"),
+  //require("@/assets/flames/red_frame.png"),
+  //require("@/assets/flames/yellow_frame.png"),
+  require("@/assets/flames/shizhimi_frame.png")
 ];
 
 /**

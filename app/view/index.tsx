@@ -23,6 +23,7 @@ import type { FilterType } from "@/types/filters";
 const ViewPage: React.FC = () => {
   const router = useRouter();
   const [overlayImageUrl] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const screenWidth = Dimensions.get("window").width;
 
   // キラキラアニメーション用（共通化）
@@ -114,7 +115,7 @@ const ViewPage: React.FC = () => {
     };
   }, [sparkleAnimValues, glowAnim]);
 
-  const { settings, activeFilters, toggleFilter } = useFilters();
+  const { settings, activeFilters, toggleFilter, setFilterOptions } = useFilters();
 
   // FilterViewの参照
   const filterViewRef = useRef<FilterViewRef>(null);
@@ -143,7 +144,7 @@ const ViewPage: React.FC = () => {
       
       setIsInitialized(true);
     }
-  }, [isInitialized, settings.states, toggleFilter, setFilterOptions]);
+  }, [isInitialized, setFilterOptions, settings.states, toggleFilter]);
 
   /**
    * 画像保存ハンドラー
