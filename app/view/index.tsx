@@ -1,6 +1,6 @@
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useRef, useState } from "react";
 import {
@@ -17,6 +17,7 @@ import getRandomFilters from "@/lib/filters/genRandomFilters";
 import type { FilterType } from "@/types/filters";
 
 const ViewPage: React.FC = () => {
+  const router = useRouter();
   const [overlayImageUrl] = useState<string | null>(null);
 
   const { imageUri } = useLocalSearchParams<{
@@ -91,6 +92,10 @@ const ViewPage: React.FC = () => {
     Alert.alert("共有", "画像を共有します。");
   };
 
+  const handleGoBack = () => {
+    router.push("/");
+  };
+
   return (
     <View style={styles.mainContainer}>
       <ScrollView
@@ -101,6 +106,11 @@ const ViewPage: React.FC = () => {
         contentInsetAdjustmentBehavior="automatic"
       >
         <StatusBar style="auto" />
+
+        {/* 戻るボタン */}
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+          <Text style={styles.backButtonText}>← カメラに戻る</Text>
+        </TouchableOpacity>
 
         {imageUri ? (
           <>
@@ -151,6 +161,21 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 40,
   },
+  backButton: {
+    position: "absolute",
+    top: 30,
+    left: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    zIndex: 10,
+  },
+  backButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
@@ -176,7 +201,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
-    marginTop: 10,
+    marginTop: 70,
   },
   saveButtonText: {
     color: "white",
