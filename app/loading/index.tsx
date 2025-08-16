@@ -1,3 +1,4 @@
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -19,6 +20,14 @@ export default function LoadingScreen() {
   const [explosionScale] = useState(() => new Animated.Value(0.5));
 
   useEffect(() => {
+    // 最初から強い振動でインパクトを与える
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+    // 0.2秒後にもう一度強い振動
+    setTimeout(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }, 200);
+
     // フェードイン
     Animated.timing(opacityAnim, {
       toValue: 1,
@@ -27,7 +36,7 @@ export default function LoadingScreen() {
     }).start();
 
     // スケールアニメーション（より激しく）
-    Animated.loop(
+    const scaleLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(scaleAnim, {
           toValue: 1.5,
@@ -42,7 +51,37 @@ export default function LoadingScreen() {
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    );
+    scaleLoop.start();
+
+    // パルスアニメーション（振動付き）
+    const pulseLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.3,
+          duration: 300,
+          easing: Easing.out(Easing.exp),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 300,
+          easing: Easing.in(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    pulseLoop.start();
+
+    // より激しい定期的な振動（より早く開始、より頻繁に）
+    const vibrationInterval = setInterval(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }, 800); // 0.8秒ごとに強い振動
+
+    // 追加の中程度の振動も並行して実行
+    const mediumVibrationInterval = setInterval(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }, 400); // 0.4秒ごとに中程度の振動
 
     // 回転アニメーション（より速く）
     Animated.loop(
@@ -92,24 +131,6 @@ export default function LoadingScreen() {
       ]),
     ).start();
 
-    // パルスアニメーション（新規）
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.3,
-          duration: 300,
-          easing: Easing.out(Easing.exp),
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 300,
-          easing: Easing.in(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
-    ).start();
-
     // シマーアニメーション（新規）
     Animated.loop(
       Animated.timing(shimmerAnim, {
@@ -120,8 +141,8 @@ export default function LoadingScreen() {
       }),
     ).start();
 
-    // 爆発的な拡大アニメーション（新規）
-    Animated.loop(
+    // 爆発的な拡大アニメーション（強い振動付き）
+    const explosionLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(explosionScale, {
           toValue: 2,
@@ -136,16 +157,31 @@ export default function LoadingScreen() {
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    );
+    explosionLoop.start();
 
-    const timer = setTimeout(() => {
-      router.replace({
-        pathname: "/view",
-        params: { imageUri: imageUri },
-      });
+    // 爆発的な拡大に合わせて強い振動
+    const explosionVibrationInterval = setInterval(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }, 2000);
 
-    return () => clearTimeout(timer);
+    // 完了時の成功振動
+    const timer = setTimeout(() => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setTimeout(() => {
+        router.replace({
+          pathname: "/view",
+          params: { imageUri: imageUri },
+        });
+      }, 200); // 振動後に少し待つ
+    }, 1800);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(vibrationInterval);
+      clearInterval(mediumVibrationInterval);
+      clearInterval(explosionVibrationInterval);
+    };
   }, [
     router,
     imageUri,
