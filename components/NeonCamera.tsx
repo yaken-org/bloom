@@ -49,7 +49,6 @@ export default function NeonCamera() {
   }
 
   const [particles, setParticles] = useState<Particle[]>([]);
-  const [touches, setTouches] = useState<{ x: number; y: number }[]>([]);
 
   // アニメーション値
   const [pulseAnim] = useState(() => new Animated.Value(1));
@@ -82,9 +81,10 @@ export default function NeonCamera() {
       "#8040ff",
     ];
 
-    for (let i = 0; i < 20; i++) {
-      const angle = (Math.PI * 2 * i) / 20;
-      const velocity = Math.random() * 8 + 2;
+    // パーティクル数を削減（20→12）
+    for (let i = 0; i < 12; i++) {
+      const angle = (Math.PI * 2 * i) / 12;
+      const velocity = Math.random() * 6 + 2; // 速度も少し下げる
 
       newParticles.push({
         id: ++particleIdCounter,
@@ -100,12 +100,12 @@ export default function NeonCamera() {
     console.log("Created particles:", newParticles.length);
     setParticles((prev) => [...prev, ...newParticles]);
 
-    // パーティクルを一定時間後に削除
+    // パーティクルの削除時間を短縮（2000→1500ms）
     setTimeout(() => {
       setParticles((prev) =>
         prev.filter((p) => !newParticles.some((np) => np.id === p.id)),
       );
-    }, 2000);
+    }, 1500);
   }, []);
 
   // パンレスポンダー（タッチ追跡用）
@@ -113,25 +113,18 @@ export default function NeonCamera() {
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => false, // moveイベントを無効化
         onPanResponderGrant: (evt) => {
           const { pageX, pageY } = evt.nativeEvent;
           console.log("Touch detected at:", pageX, pageY);
           createBurstEffect(pageX, pageY);
-          setTouches([{ x: pageX, y: pageY }]);
         },
-        onPanResponderMove: (evt) => {
-          const { pageX, pageY } = evt.nativeEvent;
-          createBurstEffect(pageX, pageY);
-          setTouches([{ x: pageX, y: pageY }]);
-        },
+        // onPanResponderMoveを削除してmove中のエフェクト生成を停止
         onPanResponderRelease: () => {
           console.log("Touch released");
-          setTouches([]);
         },
         onPanResponderTerminate: () => {
           console.log("Touch terminated");
-          setTouches([]);
         },
       }),
     [createBurstEffect],
@@ -234,8 +227,8 @@ export default function NeonCamera() {
       // パーティクルを一定時間後に削除
       setTimeout(() => {
         setParticles((prev) => prev.filter((p) => p.id !== particle.id));
-      }, 4000);
-    }, 500);
+      }, 3000); // 4000→3000msに短縮
+    }, 800); // 500→800msに頻度を下げる
 
     return () => clearInterval(interval);
   }, []);
@@ -617,20 +610,6 @@ export default function NeonCamera() {
         />
       ))}
 
-      {/* タッチ追従ライト */}
-      {touches.map((touch, index) => (
-        <View
-          key={`touch-${index}-${touch.x}-${touch.y}`}
-          style={[
-            styles.touchLight,
-            {
-              left: touch.x - 50,
-              top: touch.y - 50,
-            },
-          ]}
-        />
-      ))}
-
       {/* コントロールボタン */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -736,13 +715,6 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-  },
-  touchLight: {
-    position: "absolute",
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "rgba(255, 255, 0, 0.2)",
   },
   buttonContainer: {
     position: "absolute",
