@@ -91,8 +91,6 @@ export const useFilters = (
       order: manager.getFilterOrder(),
       options: manager.getAllFilterOptions(),
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    // biome-ignore lint/correctness/useExhaustiveDependencies: updateTriggerは再レンダリングトリガーとして使っている
     [manager, updateTrigger],
   );
 
