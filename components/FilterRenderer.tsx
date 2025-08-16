@@ -1,7 +1,7 @@
-import React from 'react';
-import { Group, Image } from '@shopify/react-native-skia';
-import type { FilterComponentProps, FilterType } from '@/types/filters';
-import { filterFactory } from '@/lib/filters/FilterFactory';
+import { Group, Image } from "@shopify/react-native-skia";
+import React from "react";
+import { filterFactory } from "@/lib/filters/FilterFactory";
+import type { FilterComponentProps, FilterType } from "@/types/filters";
 
 interface FilterRendererProps extends FilterComponentProps {
   filters: FilterType[];
@@ -19,12 +19,12 @@ const FilterRenderer: React.FC<FilterRendererProps> = ({
   height,
   filters,
   overlayImageUrl,
-  filterOptions
+  filterOptions,
 }) => {
   const renderFilter = (filterType: FilterType, isFirst: boolean) => {
     const FilterComponent = filterFactory.getFilterComponent(filterType);
     const config = filterFactory.getFilterConfig(filterType);
-    
+
     if (!FilterComponent || !config) {
       console.warn(`Filter "${filterType}" not found in registry`);
       return null;
@@ -35,17 +35,21 @@ const FilterRenderer: React.FC<FilterRendererProps> = ({
       image,
       width,
       height,
-      isBaseLayer: isFirst
+      isBaseLayer: isFirst,
     };
 
     // オーバーレイフィルターの場合、追加プロパティを設定
-    if (filterType === 'overlay') {
+    if (filterType === "overlay") {
       const userOptions = filterOptions?.[filterType] || {};
       const overlayProps: OverlayFilterProps = {
         ...baseProps,
         overlayImageUrl,
-        blendMode: userOptions.blendMode || config.options?.blendMode || 'multiply',
-        opacity: userOptions.opacity !== undefined ? userOptions.opacity : (config.options?.opacity || 0.5)
+        blendMode:
+          userOptions.blendMode || config.options?.blendMode || "multiply",
+        opacity:
+          userOptions.opacity !== undefined
+            ? userOptions.opacity
+            : config.options?.opacity || 0.5,
       };
       return <FilterComponent key={filterType} {...overlayProps} />;
     }
@@ -66,14 +70,13 @@ const FilterRenderer: React.FC<FilterRendererProps> = ({
           fit="cover"
         />
       )}
-      
+
       {/* フィルターを順序通りに適用 */}
-      {filters.length > 0 && 
+      {filters.length > 0 &&
         filters.map((filterType, index) => {
           const isFirst = index === 0;
           return renderFilter(filterType, isFirst);
-        })
-      }
+        })}
     </Group>
   );
 };

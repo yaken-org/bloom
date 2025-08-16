@@ -1,17 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import * as ImagePicker from 'expo-image-picker';
-import * as MediaLibrary from 'expo-media-library';
-import * as FileSystem from 'expo-file-system';
-import FilterView, { FilterViewRef } from '@/components/FilterView';
-import FilterControls from '@/components/FilterControls';
-import { useFilters } from '@/hooks/useFilters';
-import { useLocalSearchParams } from 'expo-router';
+import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
+import { useLocalSearchParams } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import FilterControls from "@/components/FilterControls";
+import FilterView, { type FilterViewRef } from "@/components/FilterView";
+import { useFilters } from "@/hooks/useFilters";
 
 /**
  * TestPage - フィルターシステムの実装
- * 
+ *
  * 主な機能:
  * 1. 画像選択
  * 2. フィルターの適用
@@ -22,15 +29,17 @@ const TestPage: React.FC = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null);
 
-  const { capturedImageUri } = useLocalSearchParams<{ capturedImageUri: string }>();
-  
+  const { capturedImageUri } = useLocalSearchParams<{
+    capturedImageUri: string;
+  }>();
+
   // useEffectを使用して副作用を適切に処理
   useEffect(() => {
     if (capturedImageUri) {
       setImageUri(capturedImageUri);
     }
   }, [capturedImageUri]);
-  
+
   const {
     settings,
     activeFilters,
@@ -40,7 +49,7 @@ const TestPage: React.FC = () => {
     setFilterOptions,
     getFilterOptions,
   } = useFilters();
-  
+
   // FilterViewの参照
   const filterViewRef = useRef<FilterViewRef>(null);
 
@@ -49,12 +58,13 @@ const TestPage: React.FC = () => {
    */
   const handleSelectImage = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (status !== 'granted') {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== "granted") {
         Alert.alert(
-          'パーミッション必要',
-          'カメラロールにアクセスするには写真へのアクセス許可が必要です。'
+          "パーミッション必要",
+          "カメラロールにアクセスするには写真へのアクセス許可が必要です。",
         );
         return;
       }
@@ -70,8 +80,8 @@ const TestPage: React.FC = () => {
         setImageUri(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert('エラー', '画像の選択に失敗しました。');
-      console.error('Image picker error:', error);
+      Alert.alert("エラー", "画像の選択に失敗しました。");
+      console.error("Image picker error:", error);
     }
   };
 
@@ -80,12 +90,13 @@ const TestPage: React.FC = () => {
    */
   const handleSelectOverlayImage = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (status !== 'granted') {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== "granted") {
         Alert.alert(
-          'パーミッション必要',
-          'カメラロールにアクセスするには写真へのアクセス許可が必要です。'
+          "パーミッション必要",
+          "カメラロールにアクセスするには写真へのアクセス許可が必要です。",
         );
         return;
       }
@@ -100,11 +111,11 @@ const TestPage: React.FC = () => {
       if (!result.canceled && result.assets[0]) {
         setOverlayImageUrl(result.assets[0].uri);
         // オーバーレイ画像URLをフィルターオプションに設定
-        setFilterOptions('overlay', { overlayImageUrl: result.assets[0].uri });
+        setFilterOptions("overlay", { overlayImageUrl: result.assets[0].uri });
       }
     } catch (error) {
-      Alert.alert('エラー', 'オーバーレイ画像の選択に失敗しました。');
-      console.error('Overlay image picker error:', error);
+      Alert.alert("エラー", "オーバーレイ画像の選択に失敗しました。");
+      console.error("Overlay image picker error:", error);
     }
   };
 
@@ -114,60 +125,59 @@ const TestPage: React.FC = () => {
   const handleSaveImage = async () => {
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
-      
-      if (status !== 'granted') {
+
+      if (status !== "granted") {
         Alert.alert(
-          'パーミッション必要',
-          '画像を保存するにはメディアライブラリへのアクセス許可が必要です。'
+          "パーミッション必要",
+          "画像を保存するにはメディアライブラリへのアクセス許可が必要です。",
         );
         return;
       }
 
       const snapshot = filterViewRef.current?.makeImageSnapshot();
       if (!snapshot) {
-        Alert.alert('エラー', '画像のスナップショットを取得できませんでした。');
+        Alert.alert("エラー", "画像のスナップショットを取得できませんでした。");
         return;
       }
 
       const base64Data = snapshot.encodeToBase64();
       if (!base64Data) {
-        Alert.alert('エラー', '画像のエンコードに失敗しました。');
+        Alert.alert("エラー", "画像のエンコードに失敗しました。");
         return;
       }
 
       const filename = `filtered_image_${Date.now()}.png`;
       const fileUri = `${FileSystem.documentDirectory}${filename}`;
-      
+
       await FileSystem.writeAsStringAsync(fileUri, base64Data, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
       const asset = await MediaLibrary.createAssetAsync(fileUri);
-      await MediaLibrary.createAlbumAsync('Bloom', asset, false);
+      await MediaLibrary.createAlbumAsync("Bloom", asset, false);
 
       Alert.alert(
-        '保存完了',
-        'フィルター適用済みの画像を写真アルバムに保存しました。',
-        [{ text: 'OK' }]
+        "保存完了",
+        "フィルター適用済みの画像を写真アルバムに保存しました。",
+        [{ text: "OK" }],
       );
-
     } catch (error) {
-      console.error('Save image error:', error);
-      Alert.alert('エラー', '画像の保存に失敗しました。');
+      console.error("Save image error:", error);
+      Alert.alert("エラー", "画像の保存に失敗しました。");
     }
   };
 
   return (
     <View style={styles.mainContainer}>
-      <ScrollView 
-        style={styles.scrollContainer} 
+      <ScrollView
+        style={styles.scrollContainer}
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
         bounces={true}
         contentInsetAdjustmentBehavior="automatic"
       >
         <StatusBar style="auto" />
-      
+
         <Text style={styles.title}>フィルターシステム</Text>
         <Text style={styles.subtitle}>
           フィルター管理とパフォーマンス最適化
@@ -175,14 +185,14 @@ const TestPage: React.FC = () => {
 
         {imageUri ? (
           <>
-            <FilterView 
+            <FilterView
               ref={filterViewRef}
               imageUrl={imageUri}
               filters={activeFilters}
               overlayImageUrl={overlayImageUrl || undefined}
               filterOptions={settings.options}
             />
-            
+
             <FilterControls
               settings={settings}
               activeFilters={activeFilters}
@@ -194,14 +204,12 @@ const TestPage: React.FC = () => {
               onSetFilterOptions={setFilterOptions}
               onGetFilterOptions={getFilterOptions}
             />
-          
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.saveButton}
               onPress={handleSaveImage}
             >
-              <Text style={styles.saveButtonText}>
-                画像を保存
-              </Text>
+              <Text style={styles.saveButtonText}>画像を保存</Text>
             </TouchableOpacity>
           </>
         ) : (
@@ -212,15 +220,14 @@ const TestPage: React.FC = () => {
           </View>
         )}
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.selectButton}
           onPress={handleSelectImage}
         >
           <Text style={styles.selectButtonText}>
-            {imageUri ? '別の画像を選択' : '画像を選択'}
+            {imageUri ? "別の画像を選択" : "画像を選択"}
           </Text>
         </TouchableOpacity>
-
       </ScrollView>
     </View>
   );
@@ -229,71 +236,71 @@ const TestPage: React.FC = () => {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   scrollContainer: {
     flex: 1,
   },
   container: {
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    alignItems: "center",
+    justifyContent: "flex-start",
     padding: 20,
     paddingTop: 60,
     paddingBottom: 40,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
-    color: '#333',
-    textAlign: 'center',
+    color: "#333",
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     marginBottom: 20,
     paddingHorizontal: 20,
   },
   selectButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 20,
   },
   selectButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
   },
   saveButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: "#28a745",
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 10,
   },
   saveButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
   },
   placeholderContainer: {
     width: 300,
     height: 225,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
     borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 20,
   },
   placeholderText: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
   },
 });
 

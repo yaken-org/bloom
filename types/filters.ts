@@ -1,20 +1,25 @@
-import type { SkImage } from '@shopify/react-native-skia';
-import type { ComponentType } from 'react';
+import type { SkImage } from "@shopify/react-native-skia";
+import type { ComponentType } from "react";
 
 // フィルタータイプの定義（型安全性向上）
-export type FilterType = 
-  | 'sepia'
-  | 'blue' 
-  | 'overlay'
-  | 'glittery'
-  | 'imageMagick'
+export type FilterType =
+  | "sepia"
+  | "blue"
+  | "overlay"
+  | "glittery"
+  | "imageMagick"
   | string; // 拡張性のためstringも許可
 
 // ブレンドモードの定義
-export type BlendMode = 'multiply' | 'overlay' | 'screen' | 'colorDodge' | 'lighten';
+export type BlendMode =
+  | "multiply"
+  | "overlay"
+  | "screen"
+  | "colorDodge"
+  | "lighten";
 
 // フィルターカテゴリー
-export type FilterCategory = 'enhancement' | 'artistic' | 'blend' | 'effect';
+export type FilterCategory = "enhancement" | "artistic" | "blend" | "effect";
 
 // フィルター状態の管理
 export type FilterState = Record<FilterType, boolean>;
@@ -38,9 +43,9 @@ export interface GlitteryFilterOptions extends BaseFilterOptions {
 }
 
 // フィルターオプションのユニオン型
-export type FilterOptions = 
-  | BaseFilterOptions 
-  | OverlayFilterOptions 
+export type FilterOptions =
+  | BaseFilterOptions
+  | OverlayFilterOptions
   | GlitteryFilterOptions;
 
 // フィルターコンポーネントの基本Props
@@ -84,7 +89,7 @@ export interface FilterSettings {
 }
 
 // 廃止予定のタイプ（後方互換性のため）
-export type OverlayType = 'vintage' | 'grunge' | 'light' | 'texture';
+export type OverlayType = "vintage" | "grunge" | "light" | "texture";
 export interface FilterConfig {
   type: FilterType;
   enabled: boolean;

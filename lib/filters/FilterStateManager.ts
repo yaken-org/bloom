@@ -1,5 +1,10 @@
-import type { FilterType, FilterSettings, FilterOptions, FilterInstance } from '@/types/filters';
-import { filterFactory } from './FilterFactory';
+import type {
+  FilterInstance,
+  FilterOptions,
+  FilterSettings,
+  FilterType,
+} from "@/types/filters";
+import { filterFactory } from "./FilterFactory";
 
 /**
  * フィルター状態を管理するクラス
@@ -8,25 +13,31 @@ import { filterFactory } from './FilterFactory';
 export class FilterStateManager {
   private settings: FilterSettings;
 
-  constructor(initialOrder?: FilterType[], initialSettings?: Partial<FilterSettings>) {
+  constructor(
+    initialOrder?: FilterType[],
+    initialSettings?: Partial<FilterSettings>,
+  ) {
     this.settings = {
       states: {},
       order: [],
       options: {},
     };
-    
+
     this.initializeStates(initialOrder, initialSettings);
   }
 
   /**
    * フィルター状態を初期化
    */
-  private initializeStates(customOrder?: FilterType[], initialSettings?: Partial<FilterSettings>): void {
+  private initializeStates(
+    customOrder?: FilterType[],
+    initialSettings?: Partial<FilterSettings>,
+  ): void {
     this.refreshAvailableFilters();
-    
+
     // フィルター順序を設定
     this.settings.order = customOrder || filterFactory.getDefaultFilterOrder();
-    
+
     // 初期設定の適用
     if (initialSettings?.states) {
       Object.assign(this.settings.states, initialSettings.states);
@@ -44,13 +55,13 @@ export class FilterStateManager {
    */
   private refreshAvailableFilters(): void {
     const availableFilters = filterFactory.getAvailableFilterTypes();
-    
+
     // 新しく追加されたフィルターを初期化
-    availableFilters.forEach(filterType => {
+    availableFilters.forEach((filterType) => {
       if (!(filterType in this.settings.states)) {
         const config = filterFactory.getFilterConfig(filterType);
         this.settings.states[filterType] = config?.defaultEnabled ?? false;
-        
+
         // デフォルトオプションを設定
         if (config?.defaultOptions) {
           this.settings.options[filterType] = { ...config.defaultOptions };
@@ -59,7 +70,7 @@ export class FilterStateManager {
     });
 
     // 削除されたフィルターを除去
-    Object.keys(this.settings.states).forEach(filterType => {
+    Object.keys(this.settings.states).forEach((filterType) => {
       if (!availableFilters.includes(filterType)) {
         delete this.settings.states[filterType];
         delete this.settings.options[filterType];
@@ -72,7 +83,7 @@ export class FilterStateManager {
    */
   public toggleFilter(filterType: FilterType): void {
     this.refreshAvailableFilters();
-    
+
     if (filterType in this.settings.states) {
       this.settings.states[filterType] = !this.settings.states[filterType];
     }
@@ -83,8 +94,8 @@ export class FilterStateManager {
    */
   public setFilterEnabled(filterType: FilterType, enabled: boolean): void {
     this.refreshAvailableFilters();
-    
-    if (Object.prototype.hasOwnProperty.call(this.settings.states, filterType)) {
+
+    if (Object.hasOwn(this.settings.states, filterType)) {
       this.settings.states[filterType] = enabled;
     }
   }
@@ -103,7 +114,10 @@ export class FilterStateManager {
     const index = this.settings.order.indexOf(filterType);
     if (index > 0) {
       const newOrder = [...this.settings.order];
-      [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]];
+      [newOrder[index], newOrder[index - 1]] = [
+        newOrder[index - 1],
+        newOrder[index],
+      ];
       this.settings.order = newOrder;
     }
   }
@@ -115,7 +129,10 @@ export class FilterStateManager {
     const index = this.settings.order.indexOf(filterType);
     if (index < this.settings.order.length - 1) {
       const newOrder = [...this.settings.order];
-      [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+      [newOrder[index], newOrder[index + 1]] = [
+        newOrder[index + 1],
+        newOrder[index],
+      ];
       this.settings.order = newOrder;
     }
   }
@@ -123,7 +140,10 @@ export class FilterStateManager {
   /**
    * フィルターオプションを設定
    */
-  public setFilterOptions(filterType: FilterType, options: FilterOptions): void {
+  public setFilterOptions(
+    filterType: FilterType,
+    options: FilterOptions,
+  ): void {
     this.settings.options[filterType] = { ...options };
   }
 
@@ -142,18 +162,22 @@ export class FilterStateManager {
   public getFilterOrder(): FilterType[] {
     // 最新のフィルターリストを反映
     this.refreshAvailableFilters();
-    
+
     // 現在の順序に含まれていない新しいフィルターを追加
     const availableFilters = filterFactory.getAvailableFilterTypes();
-    const missingFilters = availableFilters.filter(filter => !this.settings.order.includes(filter));
-    
+    const missingFilters = availableFilters.filter(
+      (filter) => !this.settings.order.includes(filter),
+    );
+
     if (missingFilters.length > 0) {
       this.settings.order = [...this.settings.order, ...missingFilters];
     }
-    
+
     // 削除されたフィルターを順序から除去
-    this.settings.order = this.settings.order.filter(filter => availableFilters.includes(filter));
-    
+    this.settings.order = this.settings.order.filter((filter) =>
+      availableFilters.includes(filter),
+    );
+
     return [...this.settings.order];
   }
 
@@ -161,7 +185,9 @@ export class FilterStateManager {
    * アクティブなフィルターのリストを取得
    */
   public getActiveFilters(): FilterType[] {
-    return this.settings.order.filter(filterType => this.settings.states[filterType]);
+    return this.settings.order.filter(
+      (filterType) => this.settings.states[filterType],
+    );
   }
 
   /**
@@ -172,7 +198,7 @@ export class FilterStateManager {
       type: filterType,
       enabled: this.settings.states[filterType],
       order: index,
-      options: this.settings.options[filterType] || {}
+      options: this.settings.options[filterType] || {},
     }));
   }
 
@@ -180,7 +206,7 @@ export class FilterStateManager {
    * 全てのフィルターを無効化
    */
   public disableAllFilters(): void {
-    Object.keys(this.settings.states).forEach(filterType => {
+    Object.keys(this.settings.states).forEach((filterType) => {
       this.settings.states[filterType] = false;
     });
   }
@@ -196,7 +222,7 @@ export class FilterStateManager {
    * 有効なフィルターがあるかチェック
    */
   public hasActiveFilters(): boolean {
-    return Object.values(this.settings.states).some(enabled => enabled);
+    return Object.values(this.settings.states).some((enabled) => enabled);
   }
 
   /**

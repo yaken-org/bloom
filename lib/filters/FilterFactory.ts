@@ -1,9 +1,13 @@
-import type { FilterType, FilterConfiguration, FilterComponent } from '@/types/filters';
-import ImageMagickFilter from '@/components/filters/ImageMagickFilter';
-import GlitteryFilter from '@/components/filters/GlitteryFilter';
-import OverlayFilter from '@/components/filters/OverlayFilter';
-import SepiaFilter from '@/components/filters/SepiaFilter';
-import BlueFilter from '@/components/filters/BlueFilter';
+import BlueFilter from "@/components/filters/BlueFilter";
+import GlitteryFilter from "@/components/filters/GlitteryFilter";
+import ImageMagickFilter from "@/components/filters/ImageMagickFilter";
+import OverlayFilter from "@/components/filters/OverlayFilter";
+import SepiaFilter from "@/components/filters/SepiaFilter";
+import type {
+  FilterComponent,
+  FilterConfiguration,
+  FilterType,
+} from "@/types/filters";
 
 /**
  * フィルターファクトリークラス
@@ -29,54 +33,54 @@ export class FilterFactory {
    */
   private initializeDefaultFilters(): void {
     this.registerFilter({
-      type: 'sepia',
-      name: 'セピア',
-      description: 'ビンテージな茶色がかったセピアトーン効果',
+      type: "sepia",
+      name: "セピア",
+      description: "ビンテージな茶色がかったセピアトーン効果",
       component: SepiaFilter,
       defaultEnabled: false,
-      color: '#8B4513',
-      category: 'artistic'
+      color: "#8B4513",
+      category: "artistic",
     });
 
     this.registerFilter({
-      type: 'blue',
-      name: 'ブルー',
-      description: 'クールで青みがかったトーン効果',
+      type: "blue",
+      name: "ブルー",
+      description: "クールで青みがかったトーン効果",
       component: BlueFilter,
       defaultEnabled: false,
-      color: '#4169E1',
-      category: 'artistic'
+      color: "#4169E1",
+      category: "artistic",
     });
 
     this.registerFilter({
-      type: 'imageMagick',
-      name: 'ImageMagick風',
-      description: 'ImageMagick風の効果 (エッジ検出、色反転、彩度強化等)',
+      type: "imageMagick",
+      name: "ImageMagick風",
+      description: "ImageMagick風の効果 (エッジ検出、色反転、彩度強化等)",
       component: ImageMagickFilter,
       defaultEnabled: false,
-      color: '#007AFF',
-      category: 'enhancement'
+      color: "#007AFF",
+      category: "enhancement",
     });
 
     this.registerFilter({
-      type: 'glittery',
-      name: 'ギラギラ',
-      description: 'ギラギラフィルター (超高彩度、メタリック効果等)',
+      type: "glittery",
+      name: "ギラギラ",
+      description: "ギラギラフィルター (超高彩度、メタリック効果等)",
       component: GlitteryFilter,
       defaultEnabled: false,
-      color: '#34C759',
-      category: 'artistic'
+      color: "#34C759",
+      category: "artistic",
     });
 
     this.registerFilter({
-      type: 'overlay',
-      name: 'オーバーレイ',
-      description: 'オーバーレイ効果',
+      type: "overlay",
+      name: "オーバーレイ",
+      description: "オーバーレイ効果",
       component: OverlayFilter,
       defaultEnabled: false,
-      color: '#FF9500',
-      category: 'blend',
-      requiresAsset: true
+      color: "#FF9500",
+      category: "blend",
+      requiresAsset: true,
     });
   }
 
@@ -128,7 +132,7 @@ export class FilterFactory {
    */
   public getFiltersByCategory(category: string): FilterConfiguration[] {
     return Array.from(this.filterRegistry.values()).filter(
-      config => config.category === category
+      (config) => config.category === category,
     );
   }
 
@@ -144,27 +148,33 @@ export class FilterFactory {
    */
   public getDefaultFilterOrder(): FilterType[] {
     const availableTypes = this.getAvailableFilterTypes();
-    
+
     // 優先順序を定義（存在するもののみ使用）
-    const priorityOrder: FilterType[] = ['sepia', 'blue', 'overlay', 'imageMagick', 'glittery'];
-    
+    const priorityOrder: FilterType[] = [
+      "sepia",
+      "blue",
+      "overlay",
+      "imageMagick",
+      "glittery",
+    ];
+
     // 優先順序に従って並べた後、残りを追加
     const orderedTypes: FilterType[] = [];
-    
+
     // 優先順序のフィルターを最初に追加
-    priorityOrder.forEach(type => {
+    priorityOrder.forEach((type) => {
       if (availableTypes.includes(type)) {
         orderedTypes.push(type);
       }
     });
-    
+
     // 優先順序にないフィルターを後に追加
-    availableTypes.forEach(type => {
+    availableTypes.forEach((type) => {
       if (!orderedTypes.includes(type)) {
         orderedTypes.push(type);
       }
     });
-    
+
     return orderedTypes;
   }
 }
