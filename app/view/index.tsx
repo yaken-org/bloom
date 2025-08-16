@@ -115,7 +115,8 @@ const ViewPage: React.FC = () => {
     };
   }, [sparkleAnimValues, glowAnim]);
 
-  const { settings, activeFilters, toggleFilter, setFilterOptions } = useFilters();
+  const { settings, activeFilters, toggleFilter, setFilterOptions } =
+    useFilters();
 
   // FilterViewの参照
   const filterViewRef = useRef<FilterViewRef>(null);
@@ -124,16 +125,16 @@ const ViewPage: React.FC = () => {
   React.useEffect(() => {
     if (!isInitialized) {
       const [randomFilters, overlayOptions] = getRandomFilters();
-      
+
       console.log("ViewPage - randomFilters:", randomFilters);
       console.log("ViewPage - overlayOptions:", overlayOptions);
-      
+
       // OverlayFilterのオプションを設定
       if (Object.keys(overlayOptions).length > 0) {
         console.log("ViewPage - setting overlay options:", overlayOptions);
         setFilterOptions("overlay", overlayOptions);
       }
-      
+
       // ランダムに選択されたフィルターを有効化
       Object.keys(settings.states).forEach((filterType) => {
         const shouldEnable = randomFilters.includes(filterType);
@@ -141,7 +142,7 @@ const ViewPage: React.FC = () => {
           toggleFilter(filterType as FilterType);
         }
       });
-      
+
       setIsInitialized(true);
     }
   }, [isInitialized, setFilterOptions, settings.states, toggleFilter]);

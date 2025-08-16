@@ -9,7 +9,7 @@ const FRAME_IMAGES = [
   //require("@/assets/flames/purple_frame.png"),
   //require("@/assets/flames/red_frame.png"),
   //require("@/assets/flames/yellow_frame.png"),
-  require("@/assets/flames/shizhimi_frame.png")
+  require("@/assets/flames/shizhimi_frame.png"),
 ];
 
 /**
@@ -28,21 +28,25 @@ export default function getRandomFilters(): [string[], FilterOptions] {
   // ランダムに2つ選択
   const shuffled = fisherYatesShuffle(availableFilters);
   const selectedFilters = shuffled.slice(0, 2);
-  
+
   // オーバーレイフィルターを追加
   selectedFilters.splice(0, 0, "overlay");
 
   const overlayImageUrl = chooseOverlayImageUrl();
   // オーバーレイフィルターのオプションを設定
   const options: FilterOptions = overlayImageUrl
-    ? { overlayImageUrl, opacity: 1, blendMode: "colorDodge" } as OverlayFilterOptions
+    ? ({
+        overlayImageUrl,
+        opacity: 1,
+        blendMode: "colorDodge",
+      } as OverlayFilterOptions)
     : {};
-  
+
   return [selectedFilters, options];
 }
 
 function chooseOverlayImageUrl() {
-    return fisherYatesShuffle(FRAME_IMAGES)[0];
+  return fisherYatesShuffle(FRAME_IMAGES)[0];
 }
 
 function fisherYatesShuffle<T>(array: T[]): T[] {

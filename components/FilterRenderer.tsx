@@ -48,8 +48,11 @@ const FilterRenderer: React.FC<FilterRendererProps> = ({
       const userOptions =
         (filterOptions?.[filterType] as OverlayFilterOptions) || {};
       console.log("FilterRenderer - overlay userOptions:", userOptions);
-      console.log("FilterRenderer - overlay prop overlayImageUrl:", overlayImageUrl);
-      
+      console.log(
+        "FilterRenderer - overlay prop overlayImageUrl:",
+        overlayImageUrl,
+      );
+
       const overlayProps = {
         ...baseProps,
         options: {
@@ -59,8 +62,11 @@ const FilterRenderer: React.FC<FilterRendererProps> = ({
             userOptions.opacity !== undefined ? userOptions.opacity : 0.5,
         } as OverlayFilterOptions,
       };
-      
-      console.log("FilterRenderer - final overlayProps.options:", overlayProps.options);
+
+      console.log(
+        "FilterRenderer - final overlayProps.options:",
+        overlayProps.options,
+      );
       return <FilterComponent key={filterType} {...overlayProps} />;
     }
 
