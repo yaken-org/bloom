@@ -6,6 +6,7 @@ import React, { useRef, useState } from "react";
 import {
   Alert,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -89,7 +90,46 @@ const ViewPage: React.FC = () => {
   };
 
   const handleShareImage = async () => {
-    Alert.alert("共有", "画像を共有します。");
+    try {
+      // 画像のスナップショットを取得
+      const snapshot = filterViewRef.current?.makeImageSnapshot();
+      if (!snapshot) {
+        Alert.alert("エラー", "画像のスナップショットを取得できませんでした。");
+        return;
+      }
+
+      // Base64データにエンコード
+      const base64Data = snapshot.encodeToBase64();
+      if (!base64Data) {
+        Alert.alert("エラー", "画像のエンコードに失敗しました。");
+        return;
+      }
+
+      // 一時ファイルを作成
+      const filename = `bloom_image_${Date.now()}.png`;
+      const fileUri = `${FileSystem.documentDirectory}${filename}`;
+
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // 共有機能を実行
+      const shareResult = await Share.share({
+        url: fileUri,
+        title: "Bloom - フィルター適用済み画像",
+        message: "Bloomアプリで作成した画像です！",
+      });
+
+      // 共有後に一時ファイルを削除
+      await FileSystem.deleteAsync(fileUri, { idempotent: true });
+
+      if (shareResult.action === Share.sharedAction) {
+        console.log("画像が共有されました");
+      }
+    } catch (error) {
+      console.error("Share image error:", error);
+      Alert.alert("エラー", "画像の共有に失敗しました。");
+    }
   };
 
   const handleGoBack = () => {
