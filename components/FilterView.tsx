@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, Switch, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, Switch, TouchableOpacity, ScrollView } from 'react-native';
 import { Canvas, useImage, Image, Group } from '@shopify/react-native-skia';
 import ImageMagickFilter from '@/hooks/filters/ImageMagickFilter';
 import GlitteryFilter from '@/hooks/filters/GlitteryFilter';
+import OverlayFilter from '@/hooks/filters/OverlayFilter';
 
 interface FilterViewProps {
   imageUrl: string;
@@ -11,7 +12,8 @@ interface FilterViewProps {
 
 const FilterView: React.FC<FilterViewProps> = ({ imageUrl, onFilterApplied }) => {
   const [isFilterEnabled, setIsFilterEnabled] = useState(true);
-  const [filterType, setFilterType] = useState<'imagemagick' | 'glittery'>('imagemagick');
+  const [filterType, setFilterType] = useState<'imagemagick' | 'glittery' | 'overlay'>('imagemagick');
+  const [overlayType, setOverlayType] = useState<'vintage' | 'grunge' | 'light' | 'texture'>('vintage');
   const [isLoading, setIsLoading] = useState(true);
   const image = useImage(imageUrl);
 
@@ -59,11 +61,18 @@ const FilterView: React.FC<FilterViewProps> = ({ imageUrl, onFilterApplied }) =>
                   width={canvasWidth}
                   height={canvasHeight}
                 />
-              ) : (
+              ) : filterType === 'glittery' ? (
                 <GlitteryFilter
                   image={image}
                   width={canvasWidth}
                   height={canvasHeight}
+                />
+              ) : (
+                <OverlayFilter
+                  image={image}
+                  width={canvasWidth}
+                  height={canvasHeight}
+                  templateType={overlayType}
                 />
               )
             ) : (
@@ -90,7 +99,7 @@ const FilterView: React.FC<FilterViewProps> = ({ imageUrl, onFilterApplied }) =>
         />
       </View>
 
-      <View style={styles.filterSelection}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterSelection}>
         <TouchableOpacity
           style={[
             styles.filterButton,
@@ -120,17 +129,107 @@ const FilterView: React.FC<FilterViewProps> = ({ imageUrl, onFilterApplied }) =>
             ギラギラ
           </Text>
         </TouchableOpacity>
-      </View>
+
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            filterType === 'overlay' && styles.filterButtonActive
+          ]}
+          onPress={() => setFilterType('overlay')}
+        >
+          <Text style={[
+            styles.filterButtonText,
+            filterType === 'overlay' && styles.filterButtonTextActive
+          ]}>
+            オーバーレイ
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* オーバーレイフィルターのサブ選択 */}
+      {filterType === 'overlay' && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.overlaySelection}>
+          <TouchableOpacity
+            style={[
+              styles.overlayButton,
+              overlayType === 'vintage' && styles.overlayButtonActive
+            ]}
+            onPress={() => setOverlayType('vintage')}
+          >
+            <Text style={[
+              styles.overlayButtonText,
+              overlayType === 'vintage' && styles.overlayButtonTextActive
+            ]}>
+              ヴィンテージ
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.overlayButton,
+              overlayType === 'grunge' && styles.overlayButtonActive
+            ]}
+            onPress={() => setOverlayType('grunge')}
+          >
+            <Text style={[
+              styles.overlayButtonText,
+              overlayType === 'grunge' && styles.overlayButtonTextActive
+            ]}>
+              グランジ
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.overlayButton,
+              overlayType === 'light' && styles.overlayButtonActive
+            ]}
+            onPress={() => setOverlayType('light')}
+          >
+            <Text style={[
+              styles.overlayButtonText,
+              overlayType === 'light' && styles.overlayButtonTextActive
+            ]}>
+              ライト効果
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.overlayButton,
+              overlayType === 'texture' && styles.overlayButtonActive
+            ]}
+            onPress={() => setOverlayType('texture')}
+          >
+            <Text style={[
+              styles.overlayButtonText,
+              overlayType === 'texture' && styles.overlayButtonTextActive
+            ]}>
+              テクスチャ
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      )}
 
       <View style={styles.effectsInfo}>
         <Text style={styles.effectsTitle}>
-          {filterType === 'imagemagick' ? 'ImageMagick風の効果:' : 'ギラギラフィルターの効果:'}
+          {filterType === 'imagemagick' ? 'ImageMagick風の効果:' : 
+           filterType === 'glittery' ? 'ギラギラフィルターの効果:' : 
+           `オーバーレイ効果 (${overlayType}):`}
         </Text>
         <Text style={styles.effectsText}>
           {filterType === 'imagemagick' ? (
             '• Edge Detection (輪郭検出)\n• Negate (色反転)\n• Blur (ぼかし)\n• Modulate (彩度強化)\n• Colorize (着色)'
-          ) : (
+          ) : filterType === 'glittery' ? (
             '• 超高彩度 (Hyper Saturation)\n• メタリック効果 (Metallic)\n• ゴールド効果 (Gold)\n• シャープネス強化 (Sharp)\n• ハイライト強調 (Highlight)\n• 高コントラスト (High Contrast)'
+          ) : overlayType === 'vintage' ? (
+            '• セピア調の色味\n• 古い写真風のテクスチャ\n• 暖かみのある色調\n• ヴィンテージ感の演出'
+          ) : overlayType === 'grunge' ? (
+            '• グレースケールテクスチャ\n• 高コントラスト効果\n• ラフな質感\n• モノクロ調のオーバーレイ'
+          ) : overlayType === 'light' ? (
+            '• 明るいライト効果\n• 柔らかな光のオーバーレイ\n• 透明度の高い合成\n• 幻想的な雰囲気'
+          ) : (
+            '• テクスチャパターン\n• グレーベースの質感\n• 素材感の追加\n• 立体的な効果'
           )}
         </Text>
       </View>
@@ -211,18 +310,20 @@ const styles = StyleSheet.create({
     marginTop: 10,
     backgroundColor: 'white',
     borderRadius: 8,
-    overflow: 'hidden',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
+    paddingHorizontal: 5,
   },
   filterButton: {
-    flex: 1,
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     alignItems: 'center',
+    borderRadius: 6,
+    marginHorizontal: 2,
+    minWidth: 100,
   },
   filterButtonActive: {
     backgroundColor: '#007AFF',
@@ -233,6 +334,32 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   filterButtonTextActive: {
+    color: 'white',
+  },
+  overlaySelection: {
+    flexDirection: 'row',
+    marginTop: 8,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 6,
+    paddingHorizontal: 5,
+  },
+  overlayButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    borderRadius: 4,
+    marginHorizontal: 2,
+    minWidth: 80,
+  },
+  overlayButtonActive: {
+    backgroundColor: '#34C759',
+  },
+  overlayButtonText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#888',
+  },
+  overlayButtonTextActive: {
     color: 'white',
   },
 });
