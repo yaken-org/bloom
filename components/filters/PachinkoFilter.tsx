@@ -14,10 +14,26 @@ const PachinkoFilter: React.FC<FilterComponentProps> = React.memo(
     const pachinkoMatrix = useMemo(() => {
       const i = intensity;
       return [
-        2.2 * i, 0, 0, 0, 0,    // 赤を強め
-        0, 2.0 * i, 0, 0, 0,    // 緑を少し強め
-        0, 0, 2.8 * i, 0, 0,    // 青を強調して華やかに
-        0, 0, 0, 1, 0,
+        2.2 * i,
+        0,
+        0,
+        0,
+        0, // 赤を強め
+        0,
+        2.0 * i,
+        0,
+        0,
+        0, // 緑を少し強め
+        0,
+        0,
+        2.8 * i,
+        0,
+        0, // 青を強調して華やかに
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 
@@ -25,10 +41,26 @@ const PachinkoFilter: React.FC<FilterComponentProps> = React.memo(
     const shineMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.1 * i, 0, 0, 0, 0.05 * i,
-        0, 1.0 * i, 0, 0, 0.02 * i,
-        0, 0, 1.3 * i, 0, 0.03 * i,
-        0, 0, 0, 1, 0,
+        1.1 * i,
+        0,
+        0,
+        0,
+        0.05 * i,
+        0,
+        1.0 * i,
+        0,
+        0,
+        0.02 * i,
+        0,
+        0,
+        1.3 * i,
+        0,
+        0.03 * i,
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 
@@ -36,7 +68,14 @@ const PachinkoFilter: React.FC<FilterComponentProps> = React.memo(
       <Group>
         {/* ベースレイヤー */}
         {isBaseLayer && (
-          <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />
+          <Image
+            image={image}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fit="cover"
+          />
         )}
 
         {/* Pachinkoカラー強調 */}
@@ -68,7 +107,7 @@ const PachinkoFilter: React.FC<FilterComponentProps> = React.memo(
         </Image>
       </Group>
     );
-  }
+  },
 );
 
 PachinkoFilter.displayName = "PachinkoFilter";

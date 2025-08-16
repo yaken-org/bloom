@@ -1,14 +1,14 @@
 import BlueFilter from "@/components/filters/BlueFilter";
+import DazzlingFilter from "@/components/filters/DazzlingFilter";
+import ElectricFilter from "@/components/filters/ElectricFilter";
 import GlitteryFilter from "@/components/filters/GlitteryFilter";
 import ImageMagickFilter from "@/components/filters/ImageMagickFilter";
-import OverlayFilter from "@/components/filters/OverlayFilter";
-import SepiaFilter from "@/components/filters/SepiaFilter";
-import DazzlingFilter from "@/components/filters/DazzlingFilter";
-import RainbowFilter from "@/components/filters/RainbowFilter";
-import NeonFilter from "@/components/filters/NeonFilter";
-import ElectricFilter from "@/components/filters/ElectricFilter";
-import PachinkoFilter from "@/components/filters/PachinkoFilter";
 import JewelFilter from "@/components/filters/JewelFilter";
+import NeonFilter from "@/components/filters/NeonFilter";
+import OverlayFilter from "@/components/filters/OverlayFilter";
+import PachinkoFilter from "@/components/filters/PachinkoFilter";
+import RainbowFilter from "@/components/filters/RainbowFilter";
+import SepiaFilter from "@/components/filters/SepiaFilter";
 
 import type {
   FilterComponent,

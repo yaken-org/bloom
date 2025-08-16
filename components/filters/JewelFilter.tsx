@@ -14,10 +14,26 @@ const JewelFilter: React.FC<FilterComponentProps> = React.memo(
     const jewelMatrix = useMemo(() => {
       const i = intensity;
       return [
-        2.0 * i, 0, 0, 0, 0,        // 赤
-        0, 2.2 * i, 0, 0, 0,        // 緑
-        0, 0, 2.5 * i, 0, 0.05 * i, // 青、青に少しシフト
-        0, 0, 0, 1, 0,
+        2.0 * i,
+        0,
+        0,
+        0,
+        0, // 赤
+        0,
+        2.2 * i,
+        0,
+        0,
+        0, // 緑
+        0,
+        0,
+        2.5 * i,
+        0,
+        0.05 * i, // 青、青に少しシフト
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 
@@ -50,7 +66,7 @@ const JewelFilter: React.FC<FilterComponentProps> = React.memo(
         </Image>
       </Group>
     );
-  }
+  },
 );
 
 JewelFilter.displayName = "JewelFilter";

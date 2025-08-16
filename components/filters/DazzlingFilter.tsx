@@ -14,10 +14,26 @@ const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
     const brightnessMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.8 * i, 0,       0,       0, 0,
-        0,       1.8 * i, 0,       0, 0,
-        0,       0,       1.8 * i, 0, 0,
-        0,       0,       0,       1, 0,
+        1.8 * i,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1.8 * i,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1.8 * i,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 
@@ -25,12 +41,7 @@ const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
     const contrastMatrix = useMemo(() => {
       const i = intensity * 2.0;
       const t = (1 - i) * 128;
-      return [
-        i, 0, 0, 0, t,
-        0, i, 0, 0, t,
-        0, 0, i, 0, t,
-        0, 0, 0, 1, 0,
-      ];
+      return [i, 0, 0, 0, t, 0, i, 0, 0, t, 0, 0, i, 0, t, 0, 0, 0, 1, 0];
     }, [intensity]);
 
     // 彩度調整
@@ -38,13 +49,29 @@ const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
       const s = 2.2 * intensity;
       const lumR = 0.3086;
       const lumG = 0.6094;
-      const lumB = 0.0820;
+      const lumB = 0.082;
 
       return [
-        lumR*(1-s)+s, lumG*(1-s),   lumB*(1-s),   0, 0,
-        lumR*(1-s),   lumG*(1-s)+s, lumB*(1-s),   0, 0,
-        lumR*(1-s),   lumG*(1-s),   lumB*(1-s)+s, 0, 0,
-        0,            0,            0,            1, 0,
+        lumR * (1 - s) + s,
+        lumG * (1 - s),
+        lumB * (1 - s),
+        0,
+        0,
+        lumR * (1 - s),
+        lumG * (1 - s) + s,
+        lumB * (1 - s),
+        0,
+        0,
+        lumR * (1 - s),
+        lumG * (1 - s),
+        lumB * (1 - s) + s,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 

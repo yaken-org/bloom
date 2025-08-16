@@ -14,10 +14,26 @@ const RainbowFilter: React.FC<FilterComponentProps> = React.memo(
     const rainbowMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.8 * i, 0, 0, 0, 0,  // R
-        0, 2.0 * i, 0, 0, 0,  // G
-        0, 0, 3.0 * i, 0, 0,  // B
-        0, 0, 0, 1, 0,         // A
+        1.8 * i,
+        0,
+        0,
+        0,
+        0, // R
+        0,
+        2.0 * i,
+        0,
+        0,
+        0, // G
+        0,
+        0,
+        3.0 * i,
+        0,
+        0, // B
+        0,
+        0,
+        0,
+        1,
+        0, // A
       ];
     }, [intensity]);
 
@@ -27,10 +43,26 @@ const RainbowFilter: React.FC<FilterComponentProps> = React.memo(
       const cosA = Math.cos(angle);
       const sinA = Math.sin(angle);
       return [
-        0.299 + 0.701 * cosA + -0.168 * sinA, 0.587 - 0.587 * cosA + -0.330 * sinA, 0.114 - 0.114 * cosA + 0.498 * sinA, 0, 0,
-        0.299 - 0.299 * cosA + 0.143 * sinA, 0.587 + 0.413 * cosA + 0.140 * sinA, 0.114 - 0.114 * cosA - 0.283 * sinA, 0, 0,
-        0.299 - 0.300 * cosA - 0.328 * sinA, 0.587 - 0.588 * cosA + 0.328 * sinA, 0.114 + 0.886 * cosA + 0.000 * sinA, 0, 0,
-        0, 0, 0, 1, 0,
+        0.299 + 0.701 * cosA + -0.168 * sinA,
+        0.587 - 0.587 * cosA + -0.33 * sinA,
+        0.114 - 0.114 * cosA + 0.498 * sinA,
+        0,
+        0,
+        0.299 - 0.299 * cosA + 0.143 * sinA,
+        0.587 + 0.413 * cosA + 0.14 * sinA,
+        0.114 - 0.114 * cosA - 0.283 * sinA,
+        0,
+        0,
+        0.299 - 0.3 * cosA - 0.328 * sinA,
+        0.587 - 0.588 * cosA + 0.328 * sinA,
+        0.114 + 0.886 * cosA + 0.0 * sinA,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, []);
 
@@ -38,7 +70,14 @@ const RainbowFilter: React.FC<FilterComponentProps> = React.memo(
       <Group>
         {/* ベース画像 */}
         {isBaseLayer && (
-          <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />
+          <Image
+            image={image}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fit="cover"
+          />
         )}
 
         {/* 彩度・明度調整 */}
@@ -70,7 +109,7 @@ const RainbowFilter: React.FC<FilterComponentProps> = React.memo(
         </Image>
       </Group>
     );
-  }
+  },
 );
 
 RainbowFilter.displayName = "RainbowFilter";

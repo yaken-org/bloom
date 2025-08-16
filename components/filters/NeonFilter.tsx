@@ -14,10 +14,26 @@ const NeonFilter: React.FC<FilterComponentProps> = React.memo(
     const neonMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.0 * i, 0, 0, 0, 0,  // R
-        0, 0.2 * i + 0.8, 0, 0, 0, // Gを抑えめ
-        0, 0, 1.5 * i, 0, 0,  // Bを強調
-        0, 0, 0, 1, 0,
+        1.0 * i,
+        0,
+        0,
+        0,
+        0, // R
+        0,
+        0.2 * i + 0.8,
+        0,
+        0,
+        0, // Gを抑えめ
+        0,
+        0,
+        1.5 * i,
+        0,
+        0, // Bを強調
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 
@@ -25,10 +41,26 @@ const NeonFilter: React.FC<FilterComponentProps> = React.memo(
     const glowMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.5 * i, 0, 0, 0, 0,
-        0, 1.0 * i, 0, 0, 0,
-        0, 0, 1.5 * i, 0, 0,
-        0, 0, 0, 1, 0,
+        1.5 * i,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1.0 * i,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1.5 * i,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 
@@ -36,7 +68,14 @@ const NeonFilter: React.FC<FilterComponentProps> = React.memo(
       <Group>
         {/* ベース画像 */}
         {isBaseLayer && (
-          <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />
+          <Image
+            image={image}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fit="cover"
+          />
         )}
 
         {/* ネオンカラー強調 */}
@@ -68,7 +107,7 @@ const NeonFilter: React.FC<FilterComponentProps> = React.memo(
         </Image>
       </Group>
     );
-  }
+  },
 );
 
 NeonFilter.displayName = "NeonFilter";
