@@ -475,7 +475,7 @@ export default function NeonCamera() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.debugButton}
-            onPress={() => router.push("/debug" as any)}
+            onPress={() => router.push("/debug")}
           >
             <Text style={styles.debugButtonText}>🐛</Text>
           </TouchableOpacity>

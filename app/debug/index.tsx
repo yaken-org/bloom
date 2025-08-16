@@ -67,7 +67,7 @@ const DebugPage: React.FC = () => {
 
     // TestPageに画像URIを渡して遷移
     router.push({
-      pathname: "debug/TestPage" as any,
+      pathname: "/debug/TestPage",
       params: {
         imageUri: selectedImageUri,
       },
@@ -119,23 +119,20 @@ const DebugPage: React.FC = () => {
         {selectedImageUri && (
           <View style={styles.imagePreviewContainer}>
             <Text style={styles.imagePreviewLabel}>選択された画像:</Text>
-            <Image source={{ uri: selectedImageUri }} style={styles.imagePreview} />
+            <Image
+              source={{ uri: selectedImageUri }}
+              style={styles.imagePreview}
+            />
           </View>
         )}
 
         {/* 写真選択ボタン */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleSelectImage}
-        >
+        <TouchableOpacity style={styles.button} onPress={handleSelectImage}>
           <Text style={styles.buttonText}>📱 端末から写真を選択</Text>
         </TouchableOpacity>
 
         {/* カメラ撮影ボタン */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleTakePhoto}
-        >
+        <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
           <Text style={styles.buttonText}>📷 カメラで写真を撮影</Text>
         </TouchableOpacity>
 
