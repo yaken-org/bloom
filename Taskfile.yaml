@@ -16,3 +16,15 @@ tasks:
     desc: "アプリを起動する"
     cmds:
       - npm start
+
+  db:update-schema:
+    desc: "データベースのスキーマを更新する"
+    dir: ./functions/bloom-socials
+    cmds:
+      - npm run db:update-schema
+
+  db:migrate:
+    desc: "データベースのマイグレーションを実行する"
+    dir: ./functions/bloom-socials
+    cmds:
+      - npx -y wrangler@latest d1 migrations apply bloom-socials --local
