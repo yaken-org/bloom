@@ -10,48 +10,26 @@ interface GlitteryFilterProps {
   image: SkImage;
   width: number;
   height: number;
+  isBaseLayer?: boolean;
 }
 
 const GlitteryFilter: React.FC<GlitteryFilterProps> = ({
   image,
   width,
   height,
+  isBaseLayer = true,
 }) => {
-  // ハイライト強調マトリックス（光る部分を作る）
-  const highlightMatrix = useMemo(() => [
-    1.8, 0.3, 0.3, 0, 0.2,  // 赤を強調
-    0.3, 1.8, 0.3, 0, 0.2,  // 緑を強調
-    0.3, 0.3, 1.8, 0, 0.2,  // 青を強調
-    0, 0, 0, 1, 0,
-  ], []);
-
-  // メタリック効果マトリックス（銀色っぽく）
-  const metallicMatrix = useMemo(() => [
-    10000, 10000, 100000, 10000, 10000,
-    2.8, 2.2, 0.8, 0, 0.15,
-    2.8, 2.8, 1.2, 0, 0.15,
-    -100, -100, -100, -100, -100,
-  ], []);
-
-  // ゴールド効果マトリックス（金色っぽく）
-  const goldMatrix = useMemo(() => [
-    1.5, 1.0, 0.3, 0, 0.1,  // 赤と緑を強調して金色に
-    1.0, 1.3, 0.5, 0, 0.05,
-    0.2, 0.4, 0.8, 0, 0.0,
-    0, 0, 0, 1, 0,
-  ], []);
-
-  // シャープネス強調マトリックス（エッジをくっきり）
+  // シャープネス強調マトリックス（控えめに）
   const sharpnessMatrix = useMemo(() => [
-    2.0, -0.3, -0.3, 0, 0,
-    -0.3, 2.0, -0.3, 0, 0,
-    -0.3, -0.3, 2.0, 0, 0,
+    1.4, -0.1, -0.1, 0, 0,
+    -0.1, 1.4, -0.1, 0, 0,
+    -0.1, -0.1, 1.4, 0, 0,
     0, 0, 0, 1, 0,
   ], []);
 
   // 彩度爆上げマトリックス（ギラギラ感を出す）
   const hyperSaturationMatrix = useMemo(() => {
-    const saturation = 4.0; // 超高彩度
+    const saturation = 2.8; // 高彩度だが合成を考慮
     const lumR = 0.3086;
     const lumG = 0.6094;
     const lumB = 0.0820;
@@ -61,24 +39,44 @@ const GlitteryFilter: React.FC<GlitteryFilterProps> = ({
     const sb = (1 - saturation) * lumB;
 
     return [
-      sr + saturation, sg, sb, 0, 0.1,
-      sr, sg + saturation, sb, 0, 0.1,
-      sr, sg, sb + saturation, 0, 0.1,
+      sr + saturation, sg, sb, 0, 0.08,
+      sr, sg + saturation, sb, 0, 0.08,
+      sr, sg, sb + saturation, 0, 0.08,
       0, 0, 0, 1, 0,
     ];
   }, []);
 
-  // コントラスト強化マトリックス
-  const highContrastMatrix = useMemo(() => [
-    1.8, 0, 0, 0, -0.2,     // 高コントラスト
-    0, 1.8, 0, 0, -0.2,
-    0, 0, 1.8, 0, -0.2,
+  // メタリック効果マトリックス（銀色っぽく、控えめに）
+  const metallicMatrix = useMemo(() => [
+    1.4, 1.2, 1.0, 0, 0.1,
+    1.2, 1.4, 1.0, 0, 0.1,
+    1.0, 1.0, 1.2, 0, 0.1,
+    0, 0, 0, 1, 0,
+  ], []);
+
+  // ハイライト強調マトリックス（光る部分を作る）
+  const highlightMatrix = useMemo(() => [
+    1.5, 0.2, 0.2, 0, 0.15,  // 赤を強調
+    0.2, 1.5, 0.2, 0, 0.15,  // 緑を強調
+    0.2, 0.2, 1.5, 0, 0.15,  // 青を強調
     0, 0, 0, 1, 0,
   ], []);
 
   return (
     <Group>
-      {/* Layer 1: ベースのシャープネス強化 */}
+      {/* ベースレイヤーが必要な場合のみベース画像を表示 */}
+      {isBaseLayer && (
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+        />
+      )}
+      
+      {/* Layer 1: シャープネス強化 */}
       <Image
         image={image}
         x={0}
@@ -86,7 +84,8 @@ const GlitteryFilter: React.FC<GlitteryFilterProps> = ({
         width={width}
         height={height}
         fit="cover"
-        opacity={0.4}
+        opacity={0.6}
+        {...(!isBaseLayer && { blendMode: 'overlay' })}
       >
         <ColorMatrix matrix={sharpnessMatrix} />
       </Image>
@@ -99,7 +98,8 @@ const GlitteryFilter: React.FC<GlitteryFilterProps> = ({
         width={width}
         height={height}
         fit="cover"
-        opacity={0.6}
+        opacity={0.7}
+        {...(!isBaseLayer && { blendMode: 'colorDodge' })}
       >
         <ColorMatrix matrix={hyperSaturationMatrix} />
       </Image>
@@ -112,12 +112,13 @@ const GlitteryFilter: React.FC<GlitteryFilterProps> = ({
         width={width}
         height={height}
         fit="cover"
-        opacity={0.3}
+        opacity={0.5}
+        {...(!isBaseLayer && { blendMode: 'screen' })}
       >
         <ColorMatrix matrix={metallicMatrix} />
       </Image>
 
-      {/* Layer 4: ゴールド効果 */}
+      {/* Layer 4: ハイライト強調 */}
       <Image
         image={image}
         x={0}
@@ -125,35 +126,10 @@ const GlitteryFilter: React.FC<GlitteryFilterProps> = ({
         width={width}
         height={height}
         fit="cover"
-        opacity={0.4}
-      >
-        <ColorMatrix matrix={goldMatrix} />
-      </Image>
-
-      {/* Layer 5: ハイライト強調 */}
-      <Image
-        image={image}
-        x={0}
-        y={0}
-        width={width}
-        height={height}
-        fit="cover"
-        opacity={0.5}
+        opacity={0.6}
+        {...(!isBaseLayer && { blendMode: 'lighten' })}
       >
         <ColorMatrix matrix={highlightMatrix} />
-      </Image>
-
-      {/* Layer 6: 最終コントラスト強化 */}
-      <Image
-        image={image}
-        x={0}
-        y={0}
-        width={width}
-        height={height}
-        fit="cover"
-        opacity={0.4}
-      >
-        <ColorMatrix matrix={highContrastMatrix} />
       </Image>
     </Group>
   );

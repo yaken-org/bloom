@@ -49,7 +49,7 @@ const TestPage: React.FC = () => {
       >
         <StatusBar style="auto" />
       
-      <Text style={styles.title}>ImageMagick Filter Test</Text>
+      <Text style={styles.title}>複数フィルター合成システム</Text>
 
       {imageUri ? (
         <FilterView 

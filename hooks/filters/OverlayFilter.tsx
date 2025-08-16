@@ -12,6 +12,7 @@ interface OverlayFilterProps {
   width: number;
   height: number;
   templateType?: 'vintage' | 'grunge' | 'light' | 'texture';
+  isBaseLayer?: boolean;
 }
 
 const OverlayFilter: React.FC<OverlayFilterProps> = ({
@@ -19,6 +20,7 @@ const OverlayFilter: React.FC<OverlayFilterProps> = ({
   width,
   height,
   templateType = 'vintage',
+  isBaseLayer = true,
 }) => {
   // テンプレート画像のURL（実際のプロジェクトでは適切な画像URLを使用）
   const templateUrls = {
@@ -116,32 +118,34 @@ const OverlayFilter: React.FC<OverlayFilterProps> = ({
   const overlaySettings = useMemo(() => {
     switch (templateType) {
       case 'vintage':
-        return { opacity: 0.85, baseOpacity: 0.8, blendMode: 'multiply' as const };
+        return { opacity: 0.7, baseOpacity: 0.9, blendMode: 'multiply' as const };
       case 'grunge':
-        return { opacity: 0.8, baseOpacity: 0.9, blendMode: 'overlay' as const };
+        return { opacity: 0.6, baseOpacity: 0.95, blendMode: 'overlay' as const };
       case 'light':
-        return { opacity: 0.6, baseOpacity: 1.0, blendMode: 'screen' as const };
+        return { opacity: 0.5, baseOpacity: 1.0, blendMode: 'screen' as const };
       case 'texture':
-        return { opacity: 1.0, baseOpacity: 0.85, blendMode: 'multiply' as const };
+        return { opacity: 0.8, baseOpacity: 0.9, blendMode: 'multiply' as const };
       default:
-        return { opacity: 0.7, baseOpacity: 1.0, blendMode: 'multiply' as const };
+        return { opacity: 0.6, baseOpacity: 1.0, blendMode: 'multiply' as const };
     }
   }, [templateType]);
 
   return (
     <Group>
-      {/* ベース画像 (調整済み) */}
-      <Image
-        image={image}
-        x={0}
-        y={0}
-        width={width}
-        height={height}
-        fit="cover"
-        opacity={overlaySettings.baseOpacity}
-      >
-        <ColorMatrix matrix={baseAdjustMatrix} />
-      </Image>
+      {/* ベース画像 (調整済み) - ベースレイヤーの場合のみ表示 */}
+      {isBaseLayer && (
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          opacity={overlaySettings.baseOpacity}
+        >
+          <ColorMatrix matrix={baseAdjustMatrix} />
+        </Image>
+      )}
 
       {/* テンプレート画像のオーバーレイ */}
       {templateImage && (
@@ -168,12 +172,13 @@ const OverlayFilter: React.FC<OverlayFilterProps> = ({
           width={width}
           height={height}
           fit="cover"
-          opacity={0.5}
+          opacity={0.3}
+          blendMode="multiply"
         >
           <ColorMatrix matrix={[
-            0.6, 0.3, 0.1, 0, 0.1,   // さらにセピア強化
-            0.3, 0.6, 0.1, 0, 0.05,
-            0.1, 0.2, 0.4, 0, 0.0,
+            0.7, 0.3, 0.1, 0, 0.08,   // セピア強化（控えめ）
+            0.3, 0.7, 0.1, 0, 0.04,
+            0.1, 0.2, 0.5, 0, 0.0,
             0, 0, 0, 1, 0,
           ]} />
         </Image>
@@ -187,12 +192,13 @@ const OverlayFilter: React.FC<OverlayFilterProps> = ({
           width={width}
           height={height}
           fit="cover"
-          opacity={0.4}
+          opacity={0.3}
+          blendMode="overlay"
         >
           <ColorMatrix matrix={[
-            1.5, 0.0, 0.0, 0, -0.1,   // 高コントラスト
-            0.0, 1.5, 0.0, 0, -0.1,
-            0.0, 0.0, 1.5, 0, -0.1,
+            1.3, 0.0, 0.0, 0, -0.05,   // コントラスト（控えめ）
+            0.0, 1.3, 0.0, 0, -0.05,
+            0.0, 0.0, 1.3, 0, -0.05,
             0, 0, 0, 1, 0,
           ]} />
         </Image>

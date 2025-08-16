@@ -10,34 +10,28 @@ interface ImageMagickFilterProps {
   image: SkImage;
   width: number;
   height: number;
+  isBaseLayer?: boolean;
 }
 
 const ImageMagickFilter: React.FC<ImageMagickFilterProps> = ({
   image,
   width,
   height,
+  isBaseLayer = true,
 }) => {
   // エッジ検出のためのカラーマトリックス
   const edgeDetectionMatrix = useMemo(() => [
-    // エッジ検出風の効果を作るためのカラーマトリックス
-    1.5, -0.5, -0.5, 0, 0,
-    -0.5, 1.5, -0.5, 0, 0,
-    -0.5, -0.5, 1.5, 0, 0,
+    // より控えめなエッジ検出効果
+    1.2, -0.1, -0.1, 0, 0,
+    -0.1, 1.2, -0.1, 0, 0,
+    -0.1, -0.1, 1.2, 0, 0,
     0, 0, 0, 1, 0,
   ], []);
 
-  // 色反転のためのカラーマトリックス
-  const negateMatrix = useMemo(() => [
-    -1, 0, 0, 0, 1,
-    0, -1, 0, 0, 1,
-    0, 0, -1, 0, 1,
-    0, 0, 0, 1, 0,
-  ], []);
-
-  // 彩度強化とカラー調整のマトリックス
-  // modulate 100,300,100 (彩度3倍) + colorize 10,50,80の効果
-  const modulateColorizeMatrix = useMemo(() => {
-    const saturation = 2.5; // 彩度強化
+  // 彩度強化とコントラスト調整のマトリックス
+  const enhanceMatrix = useMemo(() => {
+    const contrast = 1.3; // コントラスト強化
+    const saturation = 1.8; // 彩度強化
     const lumR = 0.3086;
     const lumG = 0.6094;
     const lumB = 0.0820;
@@ -47,24 +41,36 @@ const ImageMagickFilter: React.FC<ImageMagickFilterProps> = ({
     const sb = (1 - saturation) * lumB;
 
     return [
-      sr + saturation * 1.1, sg * 0.9, sb * 0.8, 0, 0.1, // Red channel + colorize
-      sr * 0.8, sg + saturation * 1.5, sb * 0.7, 0, 0.5, // Green channel + colorize
-      sr * 0.6, sg * 0.8, sb + saturation * 1.8, 0, 0.8, // Blue channel + colorize
+      (sr + saturation) * contrast, sg * contrast, sb * contrast, 0, 0.05,
+      sr * contrast, (sg + saturation) * contrast, sb * contrast, 0, 0.05,
+      sr * contrast, sg * contrast, (sb + saturation) * contrast, 0, 0.05,
       0, 0, 0, 1, 0,
     ];
   }, []);
 
-  // 最終合成用のマトリックス（全体の効果を調整）
-  const finalMatrix = useMemo(() => [
-    0.8, 0.1, 0.1, 0, 0.1,
-    0.2, 0.9, 0.2, 0, 0.0,
-    0.3, 0.3, 1.2, 0, 0.0,
+  // 色調調整マトリックス（温かみを追加）
+  const warmToneMatrix = useMemo(() => [
+    1.1, 0.05, 0.0, 0, 0.05,  // 赤みを少し追加
+    0.05, 1.0, 0.0, 0, 0.02,
+    0.0, 0.0, 0.95, 0, 0.0,   // 青を少し抑制
     0, 0, 0, 1, 0,
   ], []);
 
   return (
     <Group>
-      {/* Step 1: エッジ検出効果 */}
+      {/* ベースレイヤーが必要な場合のみベース画像を表示 */}
+      {isBaseLayer && (
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+        />
+      )}
+      
+      {/* Step 1: エッジ検出とシャープネス */}
       <Image
         image={image}
         x={0}
@@ -72,12 +78,13 @@ const ImageMagickFilter: React.FC<ImageMagickFilterProps> = ({
         width={width}
         height={height}
         fit="cover"
-        opacity={0.3}
+        opacity={0.7}
+        {...(!isBaseLayer && { blendMode: 'overlay' })}
       >
         <ColorMatrix matrix={edgeDetectionMatrix} />
       </Image>
 
-      {/* Step 2: 色反転効果 */}
+      {/* Step 2: 彩度とコントラスト強化 */}
       <Image
         image={image}
         x={0}
@@ -85,12 +92,13 @@ const ImageMagickFilter: React.FC<ImageMagickFilterProps> = ({
         width={width}
         height={height}
         fit="cover"
-        opacity={0.4}
+        opacity={0.8}
+        {...(!isBaseLayer && { blendMode: 'multiply' })}
       >
-        <ColorMatrix matrix={negateMatrix} />
+        <ColorMatrix matrix={enhanceMatrix} />
       </Image>
 
-      {/* Step 3: 彩度強化とカラーライズ効果 */}
+      {/* Step 3: 暖色調整 */}
       <Image
         image={image}
         x={0}
@@ -99,21 +107,9 @@ const ImageMagickFilter: React.FC<ImageMagickFilterProps> = ({
         height={height}
         fit="cover"
         opacity={0.6}
+        {...(!isBaseLayer && { blendMode: 'screen' })}
       >
-        <ColorMatrix matrix={modulateColorizeMatrix} />
-      </Image>
-
-      {/* Step 4: 最終合成 */}
-      <Image
-        image={image}
-        x={0}
-        y={0}
-        width={width}
-        height={height}
-        fit="cover"
-        opacity={0.5}
-      >
-        <ColorMatrix matrix={finalMatrix} />
+        <ColorMatrix matrix={warmToneMatrix} />
       </Image>
     </Group>
   );
