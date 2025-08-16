@@ -4,7 +4,7 @@ import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -25,18 +25,33 @@ const ViewPage: React.FC = () => {
   const [overlayImageUrl] = useState<string | null>(null);
   const screenWidth = Dimensions.get("window").width;
 
-  // キラキラアニメーション用
-  const [sparkleAnim1] = useState(() => new Animated.Value(0));
-  const [sparkleAnim2] = useState(() => new Animated.Value(0));
-  const [sparkleAnim3] = useState(() => new Animated.Value(0));
-  const [sparkleAnim4] = useState(() => new Animated.Value(0));
-  const [sparkleAnim5] = useState(() => new Animated.Value(0));
+  // キラキラアニメーション用（共通化）
+  const sparkleAnimValues = useMemo(
+    () => [
+      new Animated.Value(0),
+      new Animated.Value(0),
+      new Animated.Value(0),
+      new Animated.Value(0),
+      new Animated.Value(0),
+      new Animated.Value(0),
+      new Animated.Value(0),
+      new Animated.Value(0),
+    ],
+    [],
+  );
   const [glowAnim] = useState(() => new Animated.Value(0));
 
-  // 追加のキラキラアニメーション用
-  const [sparkleAnim6] = useState(() => new Animated.Value(0));
-  const [sparkleAnim7] = useState(() => new Animated.Value(0));
-  const [sparkleAnim8] = useState(() => new Animated.Value(0));
+  // キラキラの位置と絵文字の設定
+  const sparkleConfigs = [
+    { emoji: "✨", style: { top: 80, left: 20 } },
+    { emoji: "⭐", style: { top: 120, right: 20 } },
+    { emoji: "💫", style: { bottom: 150, left: 30 } },
+    { emoji: "🌟", style: { bottom: 200, right: 40 } },
+    { emoji: "✨", style: { bottom: 100, left: 50 } },
+    { emoji: "🌟", style: { top: 180, left: screenWidth * 0.6 } },
+    { emoji: "💫", style: { top: 250, left: 80 } },
+    { emoji: "⭐", style: { bottom: 300, right: 60 } },
+  ];
 
   const { imageUri } = useLocalSearchParams<{
     imageUri: string;
@@ -44,47 +59,36 @@ const ViewPage: React.FC = () => {
 
   // キラキラアニメーション効果
   useEffect(() => {
-    // 異なるタイミングでキラキラするアニメーション
-    const createSparkleAnimation = (
-      animValue: Animated.Value,
-      delay: number,
-    ) => {
-      return Animated.loop(
+    // すべてのキラキラを一つのアニメーションシーケンスで管理
+    const createUnifiedSparkleAnimation = () => {
+      const sparkleSequences = sparkleAnimValues.map((animValue, index) =>
         Animated.sequence([
-          Animated.delay(delay),
-          Animated.timing(animValue, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(animValue, {
-            toValue: 0,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.delay(500),
+          Animated.delay(index * 200), // 段階的な開始遅延
+          Animated.loop(
+            Animated.sequence([
+              Animated.timing(animValue, {
+                toValue: 1,
+                duration: 1000,
+                useNativeDriver: true,
+              }),
+              Animated.timing(animValue, {
+                toValue: 0,
+                duration: 1000,
+                useNativeDriver: true,
+              }),
+              Animated.delay(500),
+            ]),
+          ),
         ]),
       );
+
+      // すべてのキラキラアニメーションを並列実行（但し一つのアニメーションとして管理）
+      return Animated.parallel(sparkleSequences);
     };
 
-    // 各キラキラを異なるタイミングで開始
-    const sparkle1Animation = createSparkleAnimation(sparkleAnim1, 0);
-    const sparkle2Animation = createSparkleAnimation(sparkleAnim2, 200);
-    const sparkle3Animation = createSparkleAnimation(sparkleAnim3, 400);
-    const sparkle4Animation = createSparkleAnimation(sparkleAnim4, 600);
-    const sparkle5Animation = createSparkleAnimation(sparkleAnim5, 800);
-    const sparkle6Animation = createSparkleAnimation(sparkleAnim6, 1000);
-    const sparkle7Animation = createSparkleAnimation(sparkleAnim7, 1200);
-    const sparkle8Animation = createSparkleAnimation(sparkleAnim8, 1400);
-
-    sparkle1Animation.start();
-    sparkle2Animation.start();
-    sparkle3Animation.start();
-    sparkle4Animation.start();
-    sparkle5Animation.start();
-    sparkle6Animation.start();
-    sparkle7Animation.start();
-    sparkle8Animation.start();
+    // 統一されたキラキラアニメーション
+    const unifiedSparkleAnimation = createUnifiedSparkleAnimation();
+    unifiedSparkleAnimation.start();
 
     // 背景のグローアニメーション
     const glowAnimation = Animated.loop(
@@ -104,27 +108,11 @@ const ViewPage: React.FC = () => {
     glowAnimation.start();
 
     return () => {
-      sparkle1Animation.stop();
-      sparkle2Animation.stop();
-      sparkle3Animation.stop();
-      sparkle4Animation.stop();
-      sparkle5Animation.stop();
-      sparkle6Animation.stop();
-      sparkle7Animation.stop();
-      sparkle8Animation.stop();
+      // 統一されたアニメーションを停止
+      unifiedSparkleAnimation.stop();
       glowAnimation.stop();
     };
-  }, [
-    sparkleAnim1,
-    sparkleAnim2,
-    sparkleAnim3,
-    sparkleAnim4,
-    sparkleAnim5,
-    sparkleAnim6,
-    sparkleAnim7,
-    sparkleAnim8,
-    glowAnim,
-  ]);
+  }, [sparkleAnimValues, glowAnim]);
 
   const { settings, activeFilters, toggleFilter } = useFilters();
 
@@ -278,113 +266,22 @@ const ViewPage: React.FC = () => {
         />
       </Animated.View>
 
-      {/* アニメーション付きキラキラ効果 */}
-      <Animated.Text
-        style={[
-          styles.sparkle,
-          {
-            top: 80,
-            left: 20,
-            opacity: sparkleAnim1,
-            transform: [{ scale: sparkleAnim1 }],
-          },
-        ]}
-      >
-        ✨
-      </Animated.Text>
-      <Animated.Text
-        style={[
-          styles.sparkle,
-          {
-            top: 120,
-            right: 20,
-            opacity: sparkleAnim2,
-            transform: [{ scale: sparkleAnim2 }],
-          },
-        ]}
-      >
-        ⭐
-      </Animated.Text>
-      <Animated.Text
-        style={[
-          styles.sparkle,
-          {
-            bottom: 150,
-            left: 30,
-            opacity: sparkleAnim3,
-            transform: [{ scale: sparkleAnim3 }],
-          },
-        ]}
-      >
-        💫
-      </Animated.Text>
-      <Animated.Text
-        style={[
-          styles.sparkle,
-          {
-            bottom: 200,
-            right: 40,
-            opacity: sparkleAnim4,
-            transform: [{ scale: sparkleAnim4 }],
-          },
-        ]}
-      >
-        🌟
-      </Animated.Text>
-      <Animated.Text
-        style={[
-          styles.sparkle,
-          {
-            bottom: 100,
-            left: 50,
-            opacity: sparkleAnim5,
-            transform: [{ scale: sparkleAnim5 }],
-          },
-        ]}
-      >
-        ✨
-      </Animated.Text>
-
-      {/* 追加のキラキラ効果でより散らした感じに */}
-      <Animated.Text
-        style={[
-          styles.sparkle,
-          {
-            top: 180,
-            left: screenWidth * 0.6,
-            opacity: sparkleAnim6,
-            transform: [{ scale: sparkleAnim6 }],
-          },
-        ]}
-      >
-        🌟
-      </Animated.Text>
-      <Animated.Text
-        style={[
-          styles.sparkle,
-          {
-            top: 250,
-            left: 80,
-            opacity: sparkleAnim7,
-            transform: [{ scale: sparkleAnim7 }],
-          },
-        ]}
-      >
-        💫
-      </Animated.Text>
-      <Animated.Text
-        style={[
-          styles.sparkle,
-          {
-            bottom: 300,
-            right: 60,
-            opacity: sparkleAnim8,
-            transform: [{ scale: sparkleAnim8 }],
-          },
-        ]}
-      >
-        ⭐
-      </Animated.Text>
+      {/* アニメーション付きキラキラ効果（共通化） */}
+      {sparkleConfigs.map((config, index) => (
+        <Animated.Text
+          key={`sparkle-${config.emoji}-${index}`}
+          style={[
+            styles.sparkle,
+            config.style,
+            {
+              opacity: sparkleAnimValues[index],
+              transform: [{ scale: sparkleAnimValues[index] }],
+            },
+          ]}
+        >
+          {config.emoji}
+        </Animated.Text>
+      ))}
 
       {/* 戻るボタン - 絶対位置で画像と重ならない位置に */}
       <View
