@@ -1,8 +1,8 @@
-import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Animated, Easing, StyleSheet, View } from "react-native";
+import * as Haptics from "expo-haptics";
 
 export default function LoadingScreen() {
   const router = useRouter();
@@ -19,15 +19,51 @@ export default function LoadingScreen() {
   const [shimmerAnim] = useState(() => new Animated.Value(0));
   const [explosionScale] = useState(() => new Animated.Value(0.5));
 
-  useEffect(() => {
-    // 最初から強い振動でインパクトを与える
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+  // ハプティックフィードバック用の関数
+  const triggerHapticFeedback = (style: Haptics.ImpactFeedbackStyle) => {
+    if (process.env.EXPO_OS === "ios" || process.env.EXPO_OS === "android") {
+      Haptics.impactAsync(style);
+    }
+  };
 
-    // 0.2秒後にもう一度強い振動
-    setTimeout(() => {
+  // より激しい連続振動
+  const triggerIntenseHaptic = () => {
+    if (process.env.EXPO_OS === "ios" || process.env.EXPO_OS === "android") {
+      // 連続的な強い振動
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    }, 200);
+      setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), 50);
+      setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 100);
+    }
+  };
 
+  // 超激しい爆発振動パターン
+  const triggerExplosiveHaptic = () => {
+    if (process.env.EXPO_OS === "ios" || process.env.EXPO_OS === "android") {
+      // 5連続爆発パターン
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 30);
+      setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), 60);
+      setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 90);
+      setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 120);
+      setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium), 150);
+    }
+  };
+
+  // マシンガン振動パターン
+  const triggerMachineGunHaptic = () => {
+    if (process.env.EXPO_OS === "ios" || process.env.EXPO_OS === "android") {
+      for (let i = 0; i < 8; i++) {
+        setTimeout(() => {
+          Haptics.impactAsync(i % 2 === 0 ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Medium);
+        }, i * 25);
+      }
+    }
+  };
+
+  useEffect(() => {
+    // 初期振動 - ローディング開始（マシンガン開始！）
+    triggerMachineGunHaptic();
+    
     // フェードイン
     Animated.timing(opacityAnim, {
       toValue: 1,
@@ -36,7 +72,7 @@ export default function LoadingScreen() {
     }).start();
 
     // スケールアニメーション（より激しく）
-    const scaleLoop = Animated.loop(
+    Animated.loop(
       Animated.sequence([
         Animated.timing(scaleAnim, {
           toValue: 1.5,
@@ -51,37 +87,7 @@ export default function LoadingScreen() {
           useNativeDriver: true,
         }),
       ]),
-    );
-    scaleLoop.start();
-
-    // パルスアニメーション（振動付き）
-    const pulseLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.3,
-          duration: 300,
-          easing: Easing.out(Easing.exp),
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 300,
-          easing: Easing.in(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    pulseLoop.start();
-
-    // より激しい定期的な振動（より早く開始、より頻繁に）
-    const vibrationInterval = setInterval(() => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    }, 800); // 0.8秒ごとに強い振動
-
-    // 追加の中程度の振動も並行して実行
-    const mediumVibrationInterval = setInterval(() => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }, 400); // 0.4秒ごとに中程度の振動
+    ).start();
 
     // 回転アニメーション（より速く）
     Animated.loop(
@@ -131,6 +137,43 @@ export default function LoadingScreen() {
       ]),
     ).start();
 
+    // パルスアニメーション（新規）
+    const pulseAnimation = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.3,
+            duration: 300,
+            easing: Easing.out(Easing.exp),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 300,
+            easing: Easing.in(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
+      ).start();
+    };
+    
+    // パルスアニメーションに同期したハプティックフィードバック（超激しく、頻繁に）
+    const hapticPulseTimer = setInterval(() => {
+      triggerMachineGunHaptic(); // マシンガン振動に変更
+    }, 200); // さらに頻繁に（200msごと）
+    
+    // 追加の中間振動でさらに激しく
+    const hapticPulseSecondaryTimer = setInterval(() => {
+      triggerHapticFeedback(Haptics.ImpactFeedbackStyle.Heavy);
+    }, 80); // 80msごとに超頻繁な振動
+    
+    // 第3の振動レイヤー追加
+    const hapticPulseTertiaryTimer = setInterval(() => {
+      triggerHapticFeedback(Haptics.ImpactFeedbackStyle.Medium);
+    }, 120); // 120msごとの中間振動
+
+    pulseAnimation();
+
     // シマーアニメーション（新規）
     Animated.loop(
       Animated.timing(shimmerAnim, {
@@ -141,46 +184,78 @@ export default function LoadingScreen() {
       }),
     ).start();
 
-    // 爆発的な拡大アニメーション（強い振動付き）
-    const explosionLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(explosionScale, {
-          toValue: 2,
-          duration: 800,
-          easing: Easing.out(Easing.exp),
-          useNativeDriver: true,
-        }),
-        Animated.timing(explosionScale, {
-          toValue: 0.5,
-          duration: 1200,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    explosionLoop.start();
+    // 爆発的な拡大アニメーション（新規）
+    const explosionAnimation = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(explosionScale, {
+            toValue: 2,
+            duration: 800,
+            easing: Easing.out(Easing.exp),
+            useNativeDriver: true,
+          }),
+          Animated.timing(explosionScale, {
+            toValue: 0.5,
+            duration: 1200,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
+      ).start();
+    };
 
-    // 爆発的な拡大に合わせて強い振動
-    const explosionVibrationInterval = setInterval(() => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    }, 2000);
+    // 爆発アニメーションに同期したハプティックフィードバック（爆発的に激しく！）
+    const hapticExplosionTimer = setInterval(() => {
+      triggerExplosiveHaptic(); // 爆発的な振動パターン
+    }, 600); // 0.6秒ごとに爆発
+    
+    // スケールアニメーションにも振動を追加
+    const hapticScaleTimer = setInterval(() => {
+      triggerIntenseHaptic(); // 激しい振動
+    }, 250); // 0.25秒ごとにスケール変化に合わせた激しい振動
+    
+    // 回転アニメーションにも振動追加（新しい次元！）
+    const hapticRotationTimer = setInterval(() => {
+      triggerHapticFeedback(Haptics.ImpactFeedbackStyle.Heavy);
+    }, 100); // 0.1秒ごとの超高速振動
+    
+    // フレア回転にも振動追加
+    const hapticFlareTimer = setInterval(() => {
+      triggerHapticFeedback(Haptics.ImpactFeedbackStyle.Medium);
+    }, 180); // 0.18秒ごとのフレア振動
+    
+    // シマーエフェクトにも振動
+    const hapticShimmerTimer = setInterval(() => {
+      triggerMachineGunHaptic();
+    }, 400); // 0.4秒ごとにマシンガン振動
 
-    // 完了時の成功振動
+    explosionAnimation();
+
     const timer = setTimeout(() => {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setTimeout(() => {
-        router.replace({
-          pathname: "/view",
-          params: { imageUri: imageUri },
-        });
-      }, 200); // 振動後に少し待つ
-    }, 1800);
+      // 完了時に究極の爆発振動フィナーレ！！！
+      triggerMachineGunHaptic();
+      setTimeout(() => triggerExplosiveHaptic(), 100);
+      setTimeout(() => triggerMachineGunHaptic(), 300);
+      setTimeout(() => triggerExplosiveHaptic(), 500);
+      setTimeout(() => triggerIntenseHaptic(), 700);
+      setTimeout(() => triggerMachineGunHaptic(), 900);
+      
+      router.replace({
+        pathname: "/view",
+        params: { imageUri: imageUri },
+      });
+    }, 2000);
 
     return () => {
       clearTimeout(timer);
-      clearInterval(vibrationInterval);
-      clearInterval(mediumVibrationInterval);
-      clearInterval(explosionVibrationInterval);
+      clearInterval(hapticPulseTimer);
+      clearInterval(hapticPulseSecondaryTimer);
+      clearInterval(hapticPulseTertiaryTimer);
+      clearInterval(hapticExplosionTimer);
+      clearInterval(hapticScaleTimer);
+      clearInterval(hapticRotationTimer);
+      clearInterval(hapticFlareTimer);
+      clearInterval(hapticShimmerTimer);
     };
   }, [
     router,
