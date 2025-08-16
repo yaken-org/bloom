@@ -305,7 +305,7 @@ export default function NeonCamera() {
 
         // TestPageに遷移
         router.push({
-          pathname: "/TestPage" as any,
+          pathname: "/TestPage",
           params: { imageUri: cropped.uri },
         });
       } catch (error) {
