@@ -53,10 +53,6 @@ const TestPage: React.FC = () => {
   const handleSelectRandomFilters = () => {
     const randomFilters = getRandomFilters();
     Object.keys(settings.states).forEach((filterType) => {
-              const shouldEnable = randomFilters.includes(filterType);
-              if (settings.states[filterType as FilterType] !== shouldEnable) {
-                toggleFilter(filterType as FilterType);
-              }
       const shouldEnable = randomFilters.includes(filterType);
       if (settings.states[filterType as FilterType] !== shouldEnable) {
         toggleFilter(filterType as FilterType);
