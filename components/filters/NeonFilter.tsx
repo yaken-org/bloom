@@ -3,33 +3,34 @@ import React, { useMemo } from "react";
 import type { FilterComponentProps } from "@/types/filters";
 
 /**
- * NeonFilter - 極端に派手な紫・青・ピンクネオン
+ * NeonFilter - 紫・青・ピンク系ネオン輝き（超濃彩度＆超ギラギラ）
  */
 const NeonFilter: React.FC<FilterComponentProps> = React.memo(
   ({ image, width, height, isBaseLayer = true, options = {} }) => {
     const { opacity = 1.0, intensity = 1.0 } = options;
 
-    // 超高彩度 + 色強化
+    // 超濃彩度マトリックス（彩度5倍、明るさ1.5倍）
     const neonMatrix = useMemo(() => {
-      const i = intensity;
+      const s = 5.0 * intensity; // 彩度
+      const b = 1.5; // 明るさ
       return [
-        1.5, 0, 1.5, 0, 0,   // 赤＋紫系強化
-        0, 1.5, 2.0, 0, 0,   // 緑＋青系
-        0, 0, 3.0, 0, 0,     // 青・ピンク強化
+        0.5*b + s, 0.0,       0.6*s, 0, 0,   // 赤補正
+        0.0,       0.5*b + s, 0.4*s, 0, 0,   // 緑補正
+        0.0,       0.2*s,     0.8*b + s, 0, 0, // 青補正
         0, 0, 0, 1, 0,
       ];
     }, [intensity]);
 
-    // 彩度50倍マトリックス
-    const saturationMatrix = useMemo(() => {
-      const s = 50; // 彩度
+    // 光源感・グロー強化マトリックス（光が飛ぶように）
+    const glowMatrix = useMemo(() => {
+      const i = intensity;
       return [
-        0.213*s + 1-1, 0.715*s, 0.072*s, 0, 0,
-        0.213*s, 0.715*s + 1-1, 0.072*s, 0, 0,
-        0.213*s, 0.715*s, 0.072*s + 1-1, 0, 0,
+        3.0*i, 0.3*i, 0.4*i, 0, 0,
+        0.2*i, 3.0*i, 0.3*i, 0, 0,
+        0.3*i, 0.2*i, 3.0*i, 0, 0,
         0, 0, 0, 1, 0,
       ];
-    }, []);
+    }, [intensity]);
 
     return (
       <Group>
@@ -37,18 +38,16 @@ const NeonFilter: React.FC<FilterComponentProps> = React.memo(
           <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />
         )}
 
-        {/* 色強化 */}
         <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity}>
           <ColorMatrix matrix={neonMatrix} />
         </Image>
 
-        {/* 彩度強化 */}
         <Image
           image={image}
           x={0} y={0} width={width} height={height} fit="cover"
-          opacity={opacity} blendMode="screen"
+          opacity={opacity*0.95} blendMode="screen"
         >
-          <ColorMatrix matrix={saturationMatrix} />
+          <ColorMatrix matrix={glowMatrix} />
         </Image>
       </Group>
     );
