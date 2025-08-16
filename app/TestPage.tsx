@@ -15,6 +15,8 @@ import {
 import FilterControls from "@/components/FilterControls";
 import FilterView, { type FilterViewRef } from "@/components/FilterView";
 import { useFilters } from "@/hooks/useFilters";
+import getRandomFilters from "@/lib/filters/genRandomFilters";
+import type { FilterType } from "@/types/filters";
 
 /**
  * TestPage - フィルターシステムの実装
@@ -44,6 +46,19 @@ const TestPage: React.FC = () => {
 
   // FilterViewの参照
   const filterViewRef = useRef<FilterViewRef>(null);
+
+  /**
+   * ランダムフィルター選択のデモハンドラー
+   */
+  const handleSelectRandomFilters = () => {
+    const randomFilters = getRandomFilters();
+    Object.keys(settings.states).forEach((filterType) => {
+      const shouldEnable = randomFilters.includes(filterType);
+      if (settings.states[filterType as FilterType] !== shouldEnable) {
+        toggleFilter(filterType as FilterType);
+      }
+    });
+  };
 
   /**
    * オーバーレイ画像選択ハンドラー
@@ -166,6 +181,15 @@ const TestPage: React.FC = () => {
             />
 
             <TouchableOpacity
+              style={styles.randomButton}
+              onPress={handleSelectRandomFilters}
+            >
+              <Text style={styles.randomButtonText}>
+                ランダムフィルター選択
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               style={styles.saveButton}
               onPress={handleSaveImage}
             >
@@ -232,6 +256,19 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   saveButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  randomButton: {
+    backgroundColor: "#6c757d",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  randomButtonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "600",
