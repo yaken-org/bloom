@@ -1,6 +1,7 @@
 import { type CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as MediaLibrary from "expo-media-library";
+import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -95,8 +96,12 @@ export default function CameraPreview() {
         // 保存
         const { status } = await MediaLibrary.requestPermissionsAsync();
         if (status === "granted") {
-          await MediaLibrary.saveToLibraryAsync(cropped.uri);
-          Alert.alert("保存完了", "写真がギャラリーに保存されました。");
+          //await MediaLibrary.saveToLibraryAsync(cropped.uri);
+          //Alert.alert("保存完了", "写真がギャラリーに保存されました。");
+          router.push({
+            pathname: "/TestPage",
+            params: { capturedImageUri: cropped.uri },
+          });
         } else {
           Alert.alert(
             "許可が必要です",
