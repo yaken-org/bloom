@@ -4,16 +4,9 @@ import {
   ColorMatrix,
   Group,
 } from '@shopify/react-native-skia';
-import type { SkImage } from '@shopify/react-native-skia';
+import type { FilterComponentProps } from '@/types/filters';
 
-interface GlitteryFilterProps {
-  image: SkImage;
-  width: number;
-  height: number;
-  isBaseLayer?: boolean;
-}
-
-const GlitteryFilter: React.FC<GlitteryFilterProps> = ({
+const GlitteryFilter: React.FC<FilterComponentProps> = ({
   image,
   width,
   height,

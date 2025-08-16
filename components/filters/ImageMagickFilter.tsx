@@ -4,16 +4,9 @@ import {
   ColorMatrix,
   Group,
 } from '@shopify/react-native-skia';
-import type { SkImage } from '@shopify/react-native-skia';
+import type { FilterComponentProps } from '@/types/filters';
 
-interface ImageMagickFilterProps {
-  image: SkImage;
-  width: number;
-  height: number;
-  isBaseLayer?: boolean;
-}
-
-const ImageMagickFilter: React.FC<ImageMagickFilterProps> = ({
+const ImageMagickFilter: React.FC<FilterComponentProps> = ({
   image,
   width,
   height,

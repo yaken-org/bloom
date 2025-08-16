@@ -1,11 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from 'expo-image-picker';
-import FilterView from '@/components/FilterView';
+import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
+import FilterView, { FilterViewRef } from '@/components/FilterView';
+import FilterControls from '@/components/FilterControls';
+import type { FilterType, FilterState } from '@/types/filters';
 
 const TestPage: React.FC = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [filterStates, setFilterStates] = useState<FilterState>({
+    imageMagick: false,
+    glittery: false,
+    overlay: false,
+  });
+  const [filterOrder, setFilterOrder] = useState<FilterType[]>(['overlay', 'imageMagick', 'glittery']);
+  const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null);
+  const filterViewRef = useRef<FilterViewRef>(null);
 
   const handleSelectImage = async () => {
     try {
@@ -37,6 +49,101 @@ const TestPage: React.FC = () => {
     }
   };
 
+  const handleSelectOverlayImage = async () => {
+    try {
+      // パーミッションをリクエスト
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'パーミッション必要',
+          'カメラロールにアクセスするには写真へのアクセス許可が必要です。'
+        );
+        return;
+      }
+
+      // 画像を選択
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setOverlayImageUrl(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert('エラー', 'オーバーレイ画像の選択に失敗しました。');
+      console.error('Overlay image picker error:', error);
+    }
+  };
+
+  const handleToggleFilter = (filterType: keyof FilterState) => {
+    setFilterStates(prev => ({
+      ...prev,
+      [filterType]: !prev[filterType]
+    }));
+  };
+
+  const handleReorderFilter = (newOrder: FilterType[]) => {
+    setFilterOrder(newOrder);
+  };
+
+  const handleSaveImage = async () => {
+    try {
+      // メディアライブラリのパーミッションをリクエスト
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'パーミッション必要',
+          '画像を保存するにはメディアライブラリへのアクセス許可が必要です。'
+        );
+        return;
+      }
+
+      // FilterViewからスナップショットを取得
+      const snapshot = filterViewRef.current?.makeImageSnapshot();
+      if (!snapshot) {
+        Alert.alert('エラー', '画像のスナップショットを取得できませんでした。');
+        return;
+      }
+
+      // スナップショットをBase64に変換
+      const base64Data = snapshot.encodeToBase64();
+      if (!base64Data) {
+        Alert.alert('エラー', '画像のエンコードに失敗しました。');
+        return;
+      }
+
+      // 一時的にファイルシステムに保存
+      const filename = `filtered_image_${Date.now()}.png`;
+      const fileUri = `${FileSystem.documentDirectory}${filename}`;
+      
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // メディアライブラリに保存
+      const asset = await MediaLibrary.createAssetAsync(fileUri);
+      await MediaLibrary.createAlbumAsync('Bloom', asset, false);
+
+      Alert.alert(
+        '保存完了',
+        'フィルター適用済みの画像を写真アルバムに保存しました。',
+        [{ text: 'OK' }]
+      );
+
+    } catch (error) {
+      console.error('Save image error:', error);
+      Alert.alert('エラー', '画像の保存に失敗しました。');
+    }
+  };
+
+  // アクティブなフィルターのリストを生成
+  const activeFilters = filterOrder.filter(filter => filterStates[filter]);
+
 
   return (
     <View style={styles.mainContainer}>
@@ -52,9 +159,32 @@ const TestPage: React.FC = () => {
       <Text style={styles.title}>複数フィルター合成システム</Text>
 
       {imageUri ? (
-        <FilterView 
-          imageUrl={imageUri}
-        />
+        <>
+          <FilterView 
+            ref={filterViewRef}
+            imageUrl={imageUri}
+            filters={activeFilters}
+            overlayImageUrl={overlayImageUrl || undefined}
+          />
+          <FilterControls
+            filterStates={filterStates}
+            filterOrder={filterOrder}
+            overlayImageUrl={overlayImageUrl}
+            onToggleFilter={handleToggleFilter}
+            onReorderFilter={handleReorderFilter}
+            onSelectOverlayImage={handleSelectOverlayImage}
+          />
+          
+          {/* 保存ボタンを追加 */}
+          <TouchableOpacity 
+            style={styles.saveButton}
+            onPress={handleSaveImage}
+          >
+            <Text style={styles.saveButtonText}>
+              画像を保存
+            </Text>
+          </TouchableOpacity>
+        </>
       ) : (
         <View style={styles.placeholderContainer}>
           <Text style={styles.placeholderText}>
@@ -123,6 +253,19 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   selectButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  saveButton: {
+    backgroundColor: '#28a745',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  saveButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
