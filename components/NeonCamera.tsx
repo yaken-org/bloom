@@ -283,7 +283,6 @@ export default function NeonCamera() {
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
       />
-
       {/* カメラビュー */}
       <CameraView
         ref={cameraRef}
@@ -467,12 +466,20 @@ export default function NeonCamera() {
 
       {/* コントロールボタン */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.flipButton}
-          onPress={() => setFacing((f) => (f === "back" ? "front" : "back"))}
-        >
-          <Text style={styles.flipButtonText}>🔄</Text>
-        </TouchableOpacity>
+        <View style={styles.sideButtons}>
+          <TouchableOpacity
+            style={styles.flipButton}
+            onPress={() => setFacing((f) => (f === "back" ? "front" : "back"))}
+          >
+            <Text style={styles.flipButtonText}>🔄</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.debugButton}
+            onPress={() => router.push("/debug" as any)}
+          >
+            <Text style={styles.debugButtonText}>🐛</Text>
+          </TouchableOpacity>
+        </View>
 
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
           <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
@@ -569,10 +576,27 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 50,
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 50,
+  },
+  sideButtons: {
+    flexDirection: "column",
+    gap: 10,
+  },
+  debugButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#ff00ff",
+  },
+  debugButtonText: {
+    fontSize: 24,
   },
   captureButton: {
     width: 80,
