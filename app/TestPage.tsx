@@ -15,8 +15,8 @@ import {
 import FilterControls from "@/components/FilterControls";
 import FilterView, { type FilterViewRef } from "@/components/FilterView";
 import { useFilters } from "@/hooks/useFilters";
-import type { FilterType } from "@/types/filters";
 import getRandomFilters from "@/lib/filters/genRandomFilters";
+import type { FilterType } from "@/types/filters";
 
 /**
  * TestPage - フィルターシステムの実装
@@ -184,7 +184,9 @@ const TestPage: React.FC = () => {
               style={styles.randomButton}
               onPress={handleSelectRandomFilters}
             >
-              <Text style={styles.randomButtonText}>ランダムフィルター選択</Text>
+              <Text style={styles.randomButtonText}>
+                ランダムフィルター選択
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
