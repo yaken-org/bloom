@@ -1,12 +1,12 @@
-import { CameraView, CameraType } from "expo-camera";
+import { type CameraType, CameraView } from "expo-camera";
 import { useRef, useState } from "react";
 import {
+  Dimensions,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Image,
-  Dimensions,
 } from "react-native";
 
 export default function CameraPreview() {
