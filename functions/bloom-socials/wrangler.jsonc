@@ -7,13 +7,19 @@
   "name": "bloom-socials",
   "main": "src/index.ts",
   "compatibility_date": "2025-08-16",
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./public"
-  },
+  // "assets": {
+  //   "binding": "ASSETS",
+  //   "directory": "./public"
+  // },
   "observability": {
     "enabled": true
-  }
+  },
+  "r2_buckets": [
+    {
+      "bucket_name": "bloom-socials",
+      "binding": "bloom_socials"
+    }
+  ]
   /**
    * Smart Placement
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
