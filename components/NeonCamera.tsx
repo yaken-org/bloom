@@ -2,6 +2,7 @@ import { type CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import * as ImageManipulator from "expo-image-manipulator";
 import { LinearGradient } from "expo-linear-gradient";
 import * as MediaLibrary from "expo-media-library";
+import { useRouter } from "expo-router";
 import React, {
   useCallback,
   useEffect,
@@ -29,6 +30,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 let particleIdCounter = 0;
 
 export default function NeonCamera() {
+  const router = useRouter();
   const cameraRef = useRef<CameraView>(null);
   const [facing, setFacing] = useState<CameraType>("back");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
@@ -285,15 +287,13 @@ export default function NeonCamera() {
         const { status } = await MediaLibrary.requestPermissionsAsync();
         if (status === "granted") {
           await MediaLibrary.saveToLibraryAsync(cropped.uri);
-          Alert.alert("保存完了", "写真がギャラリーに保存されました。");
-        } else {
-          Alert.alert(
-            "許可が必要です",
-            "写真を保存するには写真ライブラリへのアクセスが必要です。",
-          );
         }
 
-        setPhotoUri(cropped.uri);
+        // TestPageに遷移
+        router.push({
+          pathname: "/TestPage" as any,
+          params: { capturedImageUri: cropped.uri },
+        });
       } catch (error) {
         console.error("Failed to take picture:", error);
         Alert.alert(
