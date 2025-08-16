@@ -1,0 +1,18 @@
+version: "3"
+
+tasks:
+  # Pre-Commit Hook
+  precommit:enable:
+    desc: "git-hooksを有効化する"
+    cmds:
+      - chmod +x .githooks/*
+      - git config core.hooksPath .githooks/
+  precommit:disable:
+    desc: "git-hooksを無効化する"
+    cmds:
+      - git config --unset core.hooksPath
+
+  up:
+    desc: "アプリを起動する"
+    cmds:
+      - npm start
