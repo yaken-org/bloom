@@ -90,6 +90,8 @@ const ViewPage: React.FC = () => {
   };
 
   const handleShareImage = async () => {
+    let fileUri: string | null = null;
+
     try {
       // デバイスが共有機能をサポートしているかチェック
       const isAvailable = await Sharing.isAvailableAsync();
@@ -117,7 +119,7 @@ const ViewPage: React.FC = () => {
 
       // 一時ファイルを作成
       const filename = `bloom_image_${Date.now()}.png`;
-      const fileUri = `${FileSystem.documentDirectory}${filename}`;
+      fileUri = `${FileSystem.documentDirectory}${filename}`;
 
       await FileSystem.writeAsStringAsync(fileUri, base64Data, {
         encoding: FileSystem.EncodingType.Base64,
@@ -131,12 +133,19 @@ const ViewPage: React.FC = () => {
       });
 
       console.log("画像が共有されました");
-
-      // 共有後に一時ファイルを削除
-      await FileSystem.deleteAsync(fileUri, { idempotent: true });
     } catch (error) {
       console.error("Share image error:", error);
       Alert.alert("エラー", "画像の共有に失敗しました。");
+    } finally {
+      // 共有の成功/失敗に関わらず一時ファイルを削除
+      if (fileUri) {
+        try {
+          await FileSystem.deleteAsync(fileUri, { idempotent: true });
+          console.log("一時ファイルを削除しました:", fileUri);
+        } catch (deleteError) {
+          console.warn("一時ファイルの削除に失敗しました:", deleteError);
+        }
+      }
     }
   };
 
