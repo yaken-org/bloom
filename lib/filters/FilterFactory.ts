@@ -3,6 +3,13 @@ import GlitteryFilter from "@/components/filters/GlitteryFilter";
 import ImageMagickFilter from "@/components/filters/ImageMagickFilter";
 import OverlayFilter from "@/components/filters/OverlayFilter";
 import SepiaFilter from "@/components/filters/SepiaFilter";
+import DazzlingFilter from "@/components/filters/DazzlingFilter";
+import RainbowFilter from "@/components/filters/RainbowFilter";
+import NeonFilter from "@/components/filters/NeonFilter";
+import ElectricFilter from "@/components/filters/ElectricFilter";
+import PachinkoFilter from "@/components/filters/PachinkoFilter";
+import JewelFilter from "@/components/filters/JewelFilter";
+
 import type {
   FilterComponent,
   FilterConfiguration,
@@ -81,6 +88,66 @@ export class FilterFactory {
       color: "#FF9500",
       category: "blend",
       requiresAsset: true,
+    });
+
+    this.registerFilter({
+      type: "dazzling",
+      name: "ダズリング",
+      description: "高彩度で輝きのある華やかフィルター",
+      component: DazzlingFilter,
+      defaultEnabled: false,
+      color: "#FFD700",
+      category: "artistic",
+    });
+
+    this.registerFilter({
+      type: "rainbow",
+      name: "レインボー",
+      description: "虹色の彩度と明るさを強調するフィルター",
+      component: RainbowFilter,
+      defaultEnabled: false,
+      color: "#FF69B4",
+      category: "artistic",
+    });
+
+    this.registerFilter({
+      type: "neon",
+      name: "ネオン",
+      description: "鮮やかなネオンカラーの光沢を付与するフィルター",
+      component: NeonFilter,
+      defaultEnabled: false,
+      color: "#8A2BE2",
+      category: "artistic",
+    });
+
+    this.registerFilter({
+      type: "electric",
+      name: "エレクトリック",
+      description: "強烈なコントラストと光沢で電気的な印象にするフィルター",
+      component: ElectricFilter,
+      defaultEnabled: false,
+      color: "#00FF00",
+      category: "artistic",
+    });
+
+    this.registerFilter({
+      type: "pachinko",
+      name: "パチンコ",
+      description: "華やかでキラキラ感を強調したカラフルフィルター",
+      component: PachinkoFilter,
+      defaultEnabled: false,
+      color: "#FF1493",
+      category: "artistic",
+    });
+
+    this.registerFilter({
+      type: "jewel",
+      name: "ジュエル",
+      description: "宝石のような鮮やかで煌めく効果を適用",
+      component: JewelFilter,
+      defaultEnabled: false,
+      color: "#00CED1",
+      category: "artistic",
     });
   }
 
