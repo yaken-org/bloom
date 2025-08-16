@@ -2,6 +2,10 @@
   "folders": [
     {
       "path": ".."
+    },
+    {
+      "path": "../functions/bloom-socials",
+      "name": "Bloom Socials"
     }
   ],
   "settings": {
