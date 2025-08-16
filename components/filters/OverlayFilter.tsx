@@ -18,7 +18,10 @@ const OverlayFilter: React.FC<OverlayFilterProps> = React.memo(
     } = options as OverlayFilterOptions;
 
     const overlayImage = useImage(overlayImageUrl);
-
+    console.log("OverlayFilter - options:", options);
+    console.log("OverlayFilter - overlayImageUrl:", overlayImageUrl);
+    console.log("OverlayFilter - overlayImage loaded:", !!overlayImage);
+    
     return (
       <Group>
         {/* ベース画像 - ベースレイヤーの場合のみ表示 */}

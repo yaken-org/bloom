@@ -1,6 +1,15 @@
 import { filterFactory } from "@/lib/filters/FilterFactory";
 import type { FilterOptions, OverlayFilterOptions } from "@/types/filters";
 
+// フレーム画像をrequireで事前読み込み
+const FRAME_IMAGES = [
+  require("@/assets/flames/gold_frame.png"),
+  require("@/assets/flames/mirror_frame.png"),
+  require("@/assets/flames/purple_frame.png"),
+  require("@/assets/flames/red_frame.png"),
+  require("@/assets/flames/yellow_frame.png")
+];
+
 /**
  * 現在登録されているフィルターから2つをランダムに選ぶユースケース
  * @returns {[string[], FilterOptions]} ランダムに選択されたフィルター名の配列とオプション
@@ -23,20 +32,15 @@ export default function getRandomFilters(): [string[], FilterOptions] {
 
   const overlayImageUrl = chooseOverlayImageUrl();
   // オーバーレイフィルターのオプションを設定
-  const options: FilterOptions = overlayImageUrl 
-    ? { overlayImageUrl } as OverlayFilterOptions
+  const options: FilterOptions = overlayImageUrl
+    ? { overlayImageUrl, opacity: 1 } as OverlayFilterOptions
     : {};
   
   return [selectedFilters, options];
 }
 
-function chooseOverlayImageUrl(): string {
-    return fisherYatesShuffle(["/assets/flames/gold_frame.png",
-        "/assets/flames/mirror_frame.png",
-        "/assets/flames/purple_frame.png",
-        "/assets/flames/red_frame.png",
-        "/assets/flames/yellow_frame.png"
-    ])[0];
+function chooseOverlayImageUrl() {
+    return fisherYatesShuffle(FRAME_IMAGES)[0];
 }
 
 function fisherYatesShuffle<T>(array: T[]): T[] {

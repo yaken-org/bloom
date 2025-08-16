@@ -20,27 +20,42 @@ import type { FilterType } from "@/types/filters";
 const ViewPage: React.FC = () => {
   const router = useRouter();
   const [overlayImageUrl] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const { imageUri } = useLocalSearchParams<{
     imageUri: string;
   }>();
 
-  const { settings, activeFilters, toggleFilter } = useFilters();
+  const { settings, activeFilters, toggleFilter, setFilterOptions } = useFilters();
 
   // FilterViewの参照
   const filterViewRef = useRef<FilterViewRef>(null);
 
-  // ランダムフィルターを即座に適用
-  (() => {
-    const [randomFilters, options] = getRandomFilters();
-    Object.keys(settings.states).forEach((filterType) => {
-      settings.options[filterType] = { ...options };
-      const shouldEnable = randomFilters.includes(filterType);
-      if (settings.states[filterType as FilterType] !== shouldEnable) {
-        toggleFilter(filterType as FilterType);
+  // ランダムフィルターを初期化時に適用
+  React.useEffect(() => {
+    if (!isInitialized) {
+      const [randomFilters, overlayOptions] = getRandomFilters();
+      
+      console.log("ViewPage - randomFilters:", randomFilters);
+      console.log("ViewPage - overlayOptions:", overlayOptions);
+      
+      // OverlayFilterのオプションを設定
+      if (Object.keys(overlayOptions).length > 0) {
+        console.log("ViewPage - setting overlay options:", overlayOptions);
+        setFilterOptions("overlay", overlayOptions);
       }
-    });
-  })();
+      
+      // ランダムに選択されたフィルターを有効化
+      Object.keys(settings.states).forEach((filterType) => {
+        const shouldEnable = randomFilters.includes(filterType);
+        if (settings.states[filterType as FilterType] !== shouldEnable) {
+          toggleFilter(filterType as FilterType);
+        }
+      });
+      
+      setIsInitialized(true);
+    }
+  }, [isInitialized, settings.states, toggleFilter, setFilterOptions]);
 
   /**
    * 画像保存ハンドラー
@@ -179,6 +194,9 @@ const ViewPage: React.FC = () => {
               overlayImageUrl={overlayImageUrl || undefined}
               filterOptions={settings.options}
             />
+            {/* デバッグ情報を表示 */}
+            {console.log("ViewPage - render time settings.options:", settings.options)}
+            {console.log("ViewPage - render time activeFilters:", activeFilters)}
 
             <TouchableOpacity
               style={styles.saveButton}
