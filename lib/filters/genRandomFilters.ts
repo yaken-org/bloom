@@ -33,7 +33,7 @@ export default function getRandomFilters(): [string[], FilterOptions] {
   const overlayImageUrl = chooseOverlayImageUrl();
   // オーバーレイフィルターのオプションを設定
   const options: FilterOptions = overlayImageUrl
-    ? { overlayImageUrl, opacity: 1 } as OverlayFilterOptions
+    ? { overlayImageUrl, opacity: 1, blendMode: "colorDodge" } as OverlayFilterOptions
     : {};
   
   return [selectedFilters, options];
