@@ -1,50 +1,59 @@
-# Welcome to your Expo app 👋
+# Bloom
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+SPAJAM 2025 で作ったアプリケーション。（後で埋める）
 
-## Get started
+## 開発環境のセットアップ
 
-1. Install dependencies
+### 必要なもの
 
-   ```bash
-   npm install
-   ```
+各自好きな方法で以下のツールをインストールしてください。
 
-2. Start the app
+- Node.js v22.18.0
+- Taskfile(https://taskfile.dev/)
 
-   ```bash
-   npx expo start
-   ```
+### main push を防止する
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+以下のコマンドを実行して、main ブランチへの push を防止します。
 
 ```bash
-npm run reset-project
+$ task precommit:enable
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+以下のような出力が得られます。
 
-## Learn more
+```bash
+$ task precommit:enable
+task: [precommit:enable] chmod +x .githooks/*
+task: [precommit:enable] git config core.hooksPath .githooks/
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+### 依存関係をインストールする
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+$ npm install
+```
 
-## Join the community
+### 起動する
 
-Join our community of developers creating universal apps.
+```bash
+$ task up
+```
 
+もしくは
+
+```bash
+$ npm start
+```
+
+## 関連ドキュメント
+
+- [Expo](https://expo.dev)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- [Expo documentation](https://docs.expo.dev/)
+  - [guides](https://docs.expo.dev/guides/).
+  - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/)
+  - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+  - [file-based routing](https://docs.expo.dev/router/introduction).
+  - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+  - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
