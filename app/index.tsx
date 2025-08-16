@@ -3,6 +3,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 import * as MediaLibrary from "expo-media-library";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   Image,
@@ -10,7 +11,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
 } from "react-native";
 
 export default function CameraPreview() {
@@ -43,8 +43,8 @@ export default function CameraPreview() {
           const result = await requestPermission();
           if (!result.granted) {
             Alert.alert(
-              'カメラのアクセス許可が必要です',
-              'アプリの設定からカメラへのアクセスを許可してください。'
+              "カメラのアクセス許可が必要です",
+              "アプリの設定からカメラへのアクセスを許可してください。",
             );
             return;
           }
@@ -55,8 +55,8 @@ export default function CameraPreview() {
           setIsReady(true);
         }, 100);
       } catch (error) {
-        console.error('Camera initialization error:', error);
-        Alert.alert('エラー', 'カメラの初期化に失敗しました。');
+        console.error("Camera initialization error:", error);
+        Alert.alert("エラー", "カメラの初期化に失敗しました。");
       }
     };
 
@@ -108,7 +108,10 @@ export default function CameraPreview() {
         console.log("Cropped Photo URI:", cropped.uri);
       } catch (error) {
         console.error("Failed to take picture:", error);
-        Alert.alert("エラー", "写真の撮影に失敗しました。もう一度お試しください。");
+        Alert.alert(
+          "エラー",
+          "写真の撮影に失敗しました。もう一度お試しください。",
+        );
       }
     }
   };
@@ -170,8 +173,11 @@ export default function CameraPreview() {
       style={styles.camera}
       facing={facing}
       onMountError={(error) => {
-        console.error('Camera mount error:', error);
-        Alert.alert('カメラエラー', 'カメラの起動に失敗しました。アプリを再起動してください。');
+        console.error("Camera mount error:", error);
+        Alert.alert(
+          "カメラエラー",
+          "カメラの起動に失敗しました。アプリを再起動してください。",
+        );
       }}
     >
       <View style={StyleSheet.absoluteFillObject}>
