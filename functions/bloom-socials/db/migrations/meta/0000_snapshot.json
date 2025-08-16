@@ -56,12 +56,8 @@
           "name": "reactions_work_id_work_id_fk",
           "tableFrom": "reactions",
           "tableTo": "work",
-          "columnsFrom": [
-            "work_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["work_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
