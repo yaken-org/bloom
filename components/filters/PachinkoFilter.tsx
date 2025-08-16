@@ -1,33 +1,34 @@
-import { ColorMatrix, Group, Image } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
+import { Image, Group, ColorMatrix } from "@shopify/react-native-skia";
 import type { FilterComponentProps } from "@/types/filters";
 
 /**
- * PachinkoFilter - 赤・金・オレンジ系ギラギラ（最大彩度＆顔認識可能）
+ * PachinkoFilter - 赤・金・オレンジ系、玉が光るようなギラつき
  */
 const PachinkoFilter: React.FC<FilterComponentProps> = React.memo(
   ({ image, width, height, isBaseLayer = true, options = {} }) => {
     const { opacity = 1.0, intensity = 1.0 } = options;
 
-    // 最大彩度マトリックス（顔がわかる明るさ）
+    // 彩度・光量を強く、赤・金・オレンジ系に調整
     const pachinkoMatrix = useMemo(() => {
-      const s = 6.0 * intensity; // 彩度 6倍
-      const b = 2.0; // 明るさはやや高めで顔を認識可能
+      const s = 2.8 * intensity; // 彩度2.8倍
+      const b = 2.2; // 光量を高め
+      const c = 2.0; // コントラスト
       return [
-        1.2*b + s, 0.5*s, 0.0, 0, 0,   // 赤強化
-        0.1*s, 1.1*b + s, 0.2*s, 0, 0, // 緑も少し
-        0.0, 0.2*s, 1.0*b + s, 0, 0,   // 青は控えめ
+        b * c + s, 0.1 * s, 0, 0, 0, // R
+        0.05 * s, b * c + s, 0.05 * s, 0, 0, // G
+        0, 0.05 * s, b * c + s, 0, 0, // B
         0, 0, 0, 1, 0,
       ];
     }, [intensity]);
 
-    // ハイライト・グロー感強化
-    const glowMatrix = useMemo(() => {
+    // ハイライト・光のギラつき用マトリックス（虹色ハイライト）
+    const highlightMatrix = useMemo(() => {
       const i = intensity;
       return [
-        2.5*i, 0.3*i, 0.2*i, 0, 0,
-        0.2*i, 2.2*i, 0.3*i, 0, 0,
-        0.1*i, 0.2*i, 2.0*i, 0, 0,
+        1.5 * i, 0.3 * i, 0.1 * i, 0, 0,
+        0.1 * i, 1.5 * i, 0.3 * i, 0, 0,
+        0.1 * i, 0.2 * i, 1.5 * i, 0, 0,
         0, 0, 0, 1, 0,
       ];
     }, [intensity]);
@@ -38,17 +39,18 @@ const PachinkoFilter: React.FC<FilterComponentProps> = React.memo(
           <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />
         )}
 
-        {/* 最大彩度・派手赤オレンジ */}
+        {/* Pachinko彩度・光量強調 */}
         <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity}>
           <ColorMatrix matrix={pachinkoMatrix} />
         </Image>
 
-        {/* グロー・ハイライト強化 */}
+        {/* ハイライト・光のギラつき */}
         <Image
           image={image} x={0} y={0} width={width} height={height} fit="cover"
-          opacity={opacity*0.95} blendMode="screen"
+          opacity={opacity * 0.9}
+          blendMode="screen"
         >
-          <ColorMatrix matrix={glowMatrix} />
+          <ColorMatrix matrix={highlightMatrix} />
         </Image>
       </Group>
     );
