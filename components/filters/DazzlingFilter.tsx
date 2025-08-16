@@ -2,76 +2,27 @@ import { ColorMatrix, Group, Image } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
 import type { FilterComponentProps } from "@/types/filters";
 
+// 画像素材を require() で読み込む
+const whiteGradientImage = require("@/assets/filters/whiteGradient.png");
+const flareImage = require("@/assets/filters/flare.png");
+const glitterImage = require("@/assets/filters/glitter.png");
+
 /**
- * ダズリングフィルター
- * 明るさ・コントラスト・彩度を強調し、光沢感を演出
+ * Dazzling フィルター
+ * ギラギラした強い光や反射、ハイライト・グリッター効果を表現
  */
 const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
   ({ image, width, height, isBaseLayer = true, options = {} }) => {
     const { opacity = 0.8, intensity = 1.0 } = options;
 
-    // 明るさ調整
-    const brightnessMatrix = useMemo(() => {
+    // コントラスト強め、シャドウ潰し
+    const contrastMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.8 * i,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1.8 * i,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1.8 * i,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-      ];
-    }, [intensity]);
-
-    // コントラスト調整
-    const contrastMatrix = useMemo(() => {
-      const i = intensity * 2.0;
-      const t = (1 - i) * 128;
-      return [i, 0, 0, 0, t, 0, i, 0, 0, t, 0, 0, i, 0, t, 0, 0, 0, 1, 0];
-    }, [intensity]);
-
-    // 彩度調整
-    const saturateMatrix = useMemo(() => {
-      const s = 2.2 * intensity;
-      const lumR = 0.3086;
-      const lumG = 0.6094;
-      const lumB = 0.082;
-
-      return [
-        lumR * (1 - s) + s,
-        lumG * (1 - s),
-        lumB * (1 - s),
-        0,
-        0,
-        lumR * (1 - s),
-        lumG * (1 - s) + s,
-        lumB * (1 - s),
-        0,
-        0,
-        lumR * (1 - s),
-        lumG * (1 - s),
-        lumB * (1 - s) + s,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
+        1.5 * i + (1 - i), 0, 0, 0, -0.1 * i,
+        0, 1.5 * i + (1 - i), 0, 0, -0.1 * i,
+        0, 0, 1.5 * i + (1 - i), 0, -0.1 * i,
+        0, 0, 0, 1, 0,
       ];
     }, [intensity]);
 
@@ -89,21 +40,7 @@ const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
           />
         )}
 
-        {/* 明るさレイヤー */}
-        <Image
-          image={image}
-          x={0}
-          y={0}
-          width={width}
-          height={height}
-          fit="cover"
-          opacity={opacity * 0.7}
-          {...(!isBaseLayer && { blendMode: "screen" })}
-        >
-          <ColorMatrix matrix={brightnessMatrix} />
-        </Image>
-
-        {/* コントラストレイヤー */}
+        {/* コントラスト強化 */}
         <Image
           image={image}
           x={0}
@@ -117,19 +54,41 @@ const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
           <ColorMatrix matrix={contrastMatrix} />
         </Image>
 
-        {/* 彩度レイヤー */}
+        {/* 白飛びグラデーションオーバーレイ */}
         <Image
-          image={image}
+          image={whiteGradientImage}
           x={0}
           y={0}
           width={width}
           height={height}
           fit="cover"
-          opacity={opacity * 0.5}
-          {...(!isBaseLayer && { blendMode: "overlay" })}
-        >
-          <ColorMatrix matrix={saturateMatrix} />
-        </Image>
+          opacity={opacity * 0.3}
+          {...(!isBaseLayer && { blendMode: "screen" })}
+        />
+
+        {/* レンズフレア */}
+        <Image
+          image={flareImage}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          opacity={opacity * 0.4}
+          {...(!isBaseLayer && { blendMode: "screen" })}
+        />
+
+        {/* キラキラ・グリッター */}
+        <Image
+          image={glitterImage}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          opacity={opacity * 0.3}
+          {...(!isBaseLayer && { blendMode: "screen" })}
+        />
       </Group>
     );
   },
