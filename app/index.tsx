@@ -90,7 +90,7 @@ export default function CameraPreview() {
               },
             },
           ],
-          { compress: 1, format: ImageManipulator.SaveFormat.JPEG },
+          { compress: 1, format: ImageManipulator.SaveFormat.PNG },
         );
 
         // 保存
