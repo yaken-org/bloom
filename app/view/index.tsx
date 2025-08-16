@@ -1,6 +1,7 @@
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as Sharing from "expo-sharing";
 import { StatusBar } from "expo-status-bar";
 import React, { useRef, useState } from "react";
 import {
@@ -89,7 +90,63 @@ const ViewPage: React.FC = () => {
   };
 
   const handleShareImage = async () => {
-    Alert.alert("共有", "画像を共有します。");
+    let fileUri: string | null = null;
+
+    try {
+      // デバイスが共有機能をサポートしているかチェック
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert(
+          "エラー",
+          "このデバイスでは共有機能がサポートされていません。",
+        );
+        return;
+      }
+
+      // 画像のスナップショットを取得
+      const snapshot = filterViewRef.current?.makeImageSnapshot();
+      if (!snapshot) {
+        Alert.alert("エラー", "画像のスナップショットを取得できませんでした。");
+        return;
+      }
+
+      // Base64データにエンコード
+      const base64Data = snapshot.encodeToBase64();
+      if (!base64Data) {
+        Alert.alert("エラー", "画像のエンコードに失敗しました。");
+        return;
+      }
+
+      // 一時ファイルを作成
+      const filename = `bloom_image_${Date.now()}.png`;
+      fileUri = `${FileSystem.documentDirectory}${filename}`;
+
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // expo-sharingを使用して共有
+      await Sharing.shareAsync(fileUri, {
+        mimeType: "image/png",
+        dialogTitle: "Bloom - フィルター適用済み画像を共有",
+        UTI: "public.png",
+      });
+
+      console.log("画像が共有されました");
+    } catch (error) {
+      console.error("Share image error:", error);
+      Alert.alert("エラー", "画像の共有に失敗しました。");
+    } finally {
+      // 共有の成功/失敗に関わらず一時ファイルを削除
+      if (fileUri) {
+        try {
+          await FileSystem.deleteAsync(fileUri, { idempotent: true });
+          console.log("一時ファイルを削除しました:", fileUri);
+        } catch (deleteError) {
+          console.warn("一時ファイルの削除に失敗しました:", deleteError);
+        }
+      }
+    }
   };
 
   const handleGoBack = () => {
