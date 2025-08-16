@@ -93,7 +93,7 @@ const ViewPage: React.FC = () => {
   };
 
   const handleGoBack = () => {
-    router.push("/");
+    router.replace("/");
   };
 
   return (
