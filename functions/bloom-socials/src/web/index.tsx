@@ -1,23 +1,31 @@
 import { Hono } from "hono";
-import { showRoutes } from "hono/dev";
 import { HomePage } from "@/components/pages/HomePage";
-import { v1Route } from "@/web/api/feed";
-import { DefaultRendererMiddleware } from "./middleware/renderer";
+import type { DrizzleDB } from "@/db/drizzle";
+import { FeedsRoute } from "@/web/api/feed";
+import { PostsRoute } from "@/web/api/posts";
+import { DrizzleMiddleware } from "@/web/middleware/drizzle";
+import { DefaultRendererMiddleware } from "@/web/middleware/renderer";
 
 export function newApp() {
-  return new Hono<{ Bindings: CloudflareBindings }>().use(
-    DefaultRendererMiddleware,
-  );
+  const app = new Hono<{
+    Bindings: CloudflareBindings;
+    Variables: {
+      drizzle: DrizzleDB;
+    };
+  }>()
+    .use(DefaultRendererMiddleware)
+    .use(DrizzleMiddleware);
+  return app;
 }
 
 const app = newApp();
 
-app.route("/api/v1", v1Route);
+app.route("/api/v1/feed", FeedsRoute);
+app.route("/api/v1/posts", PostsRoute);
 
 app.get("/", async (c) => {
   const apiUrl = `${c.req.url.replace(/\/$/, "")}/api/v1`;
   return c.render(<HomePage apiUrl={apiUrl} />);
 });
 
-showRoutes(app);
 export default app;

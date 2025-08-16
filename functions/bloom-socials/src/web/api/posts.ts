@@ -11,24 +11,17 @@ const app = new Hono<{
   };
 }>();
 
-// 記事を取得
 app.get("/", async (c) => {
   const db = c.var.drizzle;
-  const page = Number(c.req.query("page")) || 1;
 
-  const result = await db
-    .select()
-    .from(posts)
-    .orderBy(desc(posts.createdAt))
-    .limit(10)
-    .offset((page - 1) * 10);
-
-  return c.json({
-    images: result,
+  const result = await db.query.posts.findMany({
+    orderBy: desc(posts.createdAt),
+    limit: 10,
   });
+
+  return c.json({ posts: result });
 });
 
-// 画像を投稿する
 app.post("/", async (c) => {
   const db = c.var.drizzle;
 
@@ -43,11 +36,10 @@ app.post("/", async (c) => {
       return c.json({ error: "Invalid image" }, 400);
     }
 
-    const id = nanoid();
-
     // 本当はバイナリを見て拡張子を決定したいが簡単のためにファイル名から取得
     const fileExtension = file.name.split(".").pop() || "jpg";
 
+    const id = nanoid();
     const image = await c.env.bloom_socials.put(
       `${id}.${fileExtension}`,
       file.stream(),
@@ -79,8 +71,35 @@ app.post("/", async (c) => {
 
 app.get("/:id", async (c) => {
   const { id } = c.req.param();
+  const db = c.var.drizzle;
 
-  const image = await c.env.bloom_socials.get(id);
+  const post = await db.query.posts.findFirst({
+    where: eq(posts.id, id),
+    with: {
+      reactions: true,
+    },
+  });
+
+  if (!post) {
+    return c.json({ error: "Post not found" }, 404);
+  }
+
+  return c.json({ post });
+});
+
+app.get("/:id/image", async (c) => {
+  const { id } = c.req.param();
+  const db = c.var.drizzle;
+
+  const post = await db.query.posts.findFirst({
+    where: eq(posts.id, id),
+  });
+
+  if (!post) {
+    return c.json({ error: "Post not found" }, 404);
+  }
+
+  const image = await c.env.bloom_socials.get(post.imageId);
 
   if (!image) {
     return c.notFound();
@@ -92,14 +111,4 @@ app.get("/:id", async (c) => {
   });
 });
 
-app.delete("/:id", async (c) => {
-  const { id } = c.req.param();
-  const db = c.var.drizzle;
-
-  await c.env.bloom_socials.delete(id);
-  await db.delete(posts).where(eq(posts.imageId, id)).returning();
-
-  return c.json({ success: true });
-});
-
-export const FeedsRoute = app;
+export const PostsRoute = app;
