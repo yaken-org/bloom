@@ -1,6 +1,9 @@
 import { type CameraType, CameraView } from "expo-camera";
+import * as ImageManipulator from "expo-image-manipulator";
+import * as MediaLibrary from "expo-media-library";
 import { useMemo, useRef, useState } from "react";
 import {
+  Alert,
   Dimensions,
   Image,
   StyleSheet,
@@ -20,14 +23,47 @@ export default function CameraPreview() {
     const squareSize = Math.min(screenWidth, screenHeight) * 0.95;
     const squareTop = (screenHeight - squareSize) / 2;
     const squareLeft = (screenWidth - squareSize) / 2;
-    return { screenWidth, screenHeight, squareSize, squareTop, squareLeft };
+    return { squareSize, squareTop, squareLeft };
   }, []);
 
   const takePicture = async () => {
     if (cameraRef.current) {
+      // 撮影
       const photo = await cameraRef.current.takePictureAsync();
-      setPhotoUri(photo.uri);
-      console.log("Photo URI:", photo.uri);
+      console.log("Original Photo URI:", photo.uri);
+
+      // 正方形にトリミング
+      const { width, height } = photo;
+      const cropSize = Math.min(width, height);
+      const cropped = await ImageManipulator.manipulateAsync(
+        photo.uri,
+        [
+          {
+            crop: {
+              originX: (width - cropSize) / 2,
+              originY: (height - cropSize) / 2,
+              width: cropSize,
+              height: cropSize,
+            },
+          },
+        ],
+        { compress: 1, format: ImageManipulator.SaveFormat.JPEG },
+      );
+
+      // 保存
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status === "granted") {
+        await MediaLibrary.saveToLibraryAsync(cropped.uri);
+        Alert.alert("Saved!", "Photo saved to your gallery.");
+      } else {
+        Alert.alert(
+          "Permission denied",
+          "Cannot save photo without permission.",
+        );
+      }
+
+      setPhotoUri(cropped.uri);
+      console.log("Cropped Photo URI:", cropped.uri);
     }
   };
 
@@ -46,7 +82,12 @@ export default function CameraPreview() {
   }
 
   return (
-    <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
+    <CameraView
+      ref={cameraRef}
+      style={styles.camera}
+      facing={facing}
+      ratio="1:1"
+    >
       <View style={StyleSheet.absoluteFillObject}>
         {/* 上 */}
         <View
