@@ -10,27 +10,36 @@ import type { FilterComponentProps } from '@/types/filters';
  * ブルーフィルター
  * 写真にクールで青みがかった効果を適用
  */
-const BlueFilter: React.FC<FilterComponentProps> = ({
+const BlueFilter: React.FC<FilterComponentProps> = React.memo(({
   image,
   width,
   height,
   isBaseLayer = true,
+  options = {},
 }) => {
-  // ブルートーン強調のカラーマトリックス
-  const blueEnhanceMatrix = useMemo(() => [
-    0.8, 0.1, 0.1, 0, 0,     // 赤を抑制
-    0.0, 0.9, 0.1, 0, 0,     // 緑を少し抑制
-    0.0, 0.2, 1.4, 0, 0.1,   // 青を強調
-    0, 0, 0, 1, 0,
-  ], []);
+  const { opacity = 0.7, intensity = 1.0 } = options;
+  
+  // ブルートーン強調のカラーマトリックス（強度に応じて調整）
+  const blueEnhanceMatrix = useMemo(() => {
+    const i = intensity;
+    return [
+      0.8 * i + (1 - i), 0.1 * i, 0.1 * i, 0, 0,     // 赤を抑制
+      0.0 * i, 0.9 * i + (1 - i), 0.1 * i, 0, 0,     // 緑を少し抑制
+      0.0 * i, 0.2 * i, 1.4 * i + (1 - i), 0, 0.1 * i,   // 青を強調
+      0, 0, 0, 1, 0,
+    ];
+  }, [intensity]);
 
   // 彩度とコントラストの調整
-  const coolToneMatrix = useMemo(() => [
-    1.1, 0.0, 0.0, 0, -0.02,
-    0.0, 1.0, 0.1, 0, 0.0,
-    0.1, 0.1, 1.3, 0, 0.05,
-    0, 0, 0, 1, 0,
-  ], []);
+  const coolToneMatrix = useMemo(() => {
+    const i = intensity;
+    return [
+      1.1 * i + (1 - i), 0.0, 0.0, 0, -0.02 * i,
+      0.0, 1.0 * i + (1 - i), 0.1 * i, 0, 0.0,
+      0.1 * i, 0.1 * i, 1.3 * i + (1 - i), 0, 0.05 * i,
+      0, 0, 0, 1, 0,
+    ];
+  }, [intensity]);
 
   return (
     <Group>
@@ -54,7 +63,7 @@ const BlueFilter: React.FC<FilterComponentProps> = ({
         width={width}
         height={height}
         fit="cover"
-        opacity={0.7}
+        opacity={opacity * 0.7}
         {...(!isBaseLayer && { blendMode: 'multiply' })}
       >
         <ColorMatrix matrix={blueEnhanceMatrix} />
@@ -68,13 +77,15 @@ const BlueFilter: React.FC<FilterComponentProps> = ({
         width={width}
         height={height}
         fit="cover"
-        opacity={0.5}
+        opacity={opacity * 0.5}
         {...(!isBaseLayer && { blendMode: 'overlay' })}
       >
         <ColorMatrix matrix={coolToneMatrix} />
       </Image>
     </Group>
   );
-};
+});
+
+BlueFilter.displayName = 'BlueFilter';
 
 export default BlueFilter;

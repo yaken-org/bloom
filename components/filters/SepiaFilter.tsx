@@ -10,19 +10,25 @@ import type { FilterComponentProps } from '@/types/filters';
  * セピアフィルター
  * 写真にビンテージな茶色がかった効果を適用
  */
-const SepiaFilter: React.FC<FilterComponentProps> = ({
+const SepiaFilter: React.FC<FilterComponentProps> = React.memo(({
   image,
   width,
   height,
   isBaseLayer = true,
+  options = {},
 }) => {
-  // セピア効果のカラーマトリックス
-  const sepiaMatrix = useMemo(() => [
-    0.393, 0.769, 0.189, 0, 0,
-    0.349, 0.686, 0.168, 0, 0,
-    0.272, 0.534, 0.131, 0, 0,
-    0, 0, 0, 1, 0,
-  ], []);
+  const { opacity = 0.8, intensity = 1.0 } = options;
+  
+  // セピア効果のカラーマトリックス（強度に応じて調整）
+  const sepiaMatrix = useMemo(() => {
+    const i = intensity;
+    return [
+      0.393 * i + (1 - i), 0.769 * i, 0.189 * i, 0, 0,
+      0.349 * i, 0.686 * i + (1 - i), 0.168 * i, 0, 0,
+      0.272 * i, 0.534 * i, 0.131 * i + (1 - i), 0, 0,
+      0, 0, 0, 1, 0,
+    ];
+  }, [intensity]);
 
   return (
     <Group>
@@ -46,13 +52,15 @@ const SepiaFilter: React.FC<FilterComponentProps> = ({
         width={width}
         height={height}
         fit="cover"
-        opacity={0.8}
+        opacity={opacity}
         {...(!isBaseLayer && { blendMode: 'overlay' })}
       >
         <ColorMatrix matrix={sepiaMatrix} />
       </Image>
     </Group>
   );
-};
+});
+
+SepiaFilter.displayName = 'SepiaFilter';
 
 export default SepiaFilter;

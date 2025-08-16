@@ -1,72 +1,69 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, StyleSheet, Text, Switch, TouchableOpacity } from 'react-native';
-import type { FilterType, FilterState } from '@/types/filters';
+import type { FilterType, FilterSettings, FilterOptions } from '@/types/filters';
 import { filterFactory } from '@/lib/filters/FilterFactory';
 
 interface FilterControlsProps {
-  filterStates: FilterState;
-  filterOrder: FilterType[];
+  settings: FilterSettings;
+  activeFilters: FilterType[];
+  hasActiveFilters: boolean;
   overlayImageUrl?: string | null;
   onToggleFilter: (filterType: FilterType) => void;
   onReorderFilter: (newOrder: FilterType[]) => void;
   onSelectOverlayImage?: () => void;
-  onSetFilterOptions?: (filterType: FilterType, options: Record<string, any>) => void;
-  getFilterOptions?: (filterType: FilterType) => Record<string, any>;
+  onSetFilterOptions?: (filterType: FilterType, options: Partial<FilterOptions>) => void;
+  onGetFilterOptions?: (filterType: FilterType) => FilterOptions;
 }
 
 /**
  * 拡張可能なフィルターコントロールコンポーネント
  * FilterFactoryから動的にフィルター情報を取得して表示
  */
-const FilterControls: React.FC<FilterControlsProps> = ({
-  filterStates,
-  filterOrder,
+const FilterControls: React.FC<FilterControlsProps> = React.memo(({
+  settings,
+  activeFilters,
+  hasActiveFilters,
   overlayImageUrl,
   onToggleFilter,
   onReorderFilter,
   onSelectOverlayImage,
   onSetFilterOptions,
-  getFilterOptions,
+  onGetFilterOptions,
 }) => {
   const allConfigs = filterFactory.getAllFilterConfigs();
-  const hasAnyFilterEnabled = Object.values(filterStates).some(state => state);
 
-  const moveFilterUp = (index: number) => {
+  const moveFilterUp = useCallback((index: number) => {
     if (index > 0) {
-      const newOrder = [...filterOrder];
+      const newOrder = [...settings.order];
       [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]];
       onReorderFilter(newOrder);
     }
-  };
+  }, [settings.order, onReorderFilter]);
 
-  const moveFilterDown = (index: number) => {
-    if (index < filterOrder.length - 1) {
-      const newOrder = [...filterOrder];
+  const moveFilterDown = useCallback((index: number) => {
+    if (index < settings.order.length - 1) {
+      const newOrder = [...settings.order];
       [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
       onReorderFilter(newOrder);
     }
-  };
+  }, [settings.order, onReorderFilter]);
 
-  const handleToggleAll = (value: boolean) => {
+  const handleToggleAll = useCallback((value: boolean) => {
     if (!value) {
       // 全て無効化
       allConfigs.forEach(config => {
-        if (filterStates[config.type]) {
+        if (settings.states[config.type]) {
           onToggleFilter(config.type);
         }
       });
     } else {
       // 最初のフィルターを有効化（後方互換性のため）
       const firstFilter = allConfigs.find(config => config.type === 'imageMagick') || allConfigs[0];
-      if (firstFilter && !filterStates[firstFilter.type]) {
+      if (firstFilter && !settings.states[firstFilter.type]) {
         onToggleFilter(firstFilter.type);
       }
     }
-  };
-
-  const getActiveFilters = () => {
-    return filterOrder.filter(filterType => filterStates[filterType]);
-  };
+  }, [allConfigs, settings.states, onToggleFilter]);
 
   // シンプルなスライダーコンポーネント
   const SimpleSlider: React.FC<{
@@ -75,7 +72,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
     minimumValue?: number;
     maximumValue?: number;
     step?: number;
-  }> = ({ value, onValueChange, minimumValue = 0, maximumValue = 1, step = 0.1 }) => {
+  }> = React.memo(({ value, onValueChange, minimumValue = 0, maximumValue = 1, step = 0.1 }) => {
     const handlePress = (event: any) => {
       const { locationX } = event.nativeEvent;
       const sliderWidth = 200;
@@ -99,17 +96,19 @@ const FilterControls: React.FC<FilterControlsProps> = ({
         </TouchableOpacity>
       </View>
     );
-  };
+  });
+  
+  SimpleSlider.displayName = 'SimpleSlider';
 
   return (
     <View style={styles.container}>
       <View style={styles.controls}>
         <Text style={styles.controlLabel}>フィルター全体の適用:</Text>
         <Switch
-          value={hasAnyFilterEnabled}
+          value={hasActiveFilters}
           onValueChange={handleToggleAll}
           trackColor={{ false: '#ccc', true: '#007AFF' }}
-          thumbColor={hasAnyFilterEnabled ? '#fff' : '#f4f3f4'}
+          thumbColor={hasActiveFilters ? '#fff' : '#f4f3f4'}
         />
       </View>
 
@@ -120,23 +119,23 @@ const FilterControls: React.FC<FilterControlsProps> = ({
           <View key={config.type} style={styles.filterToggleRow}>
             <Text style={styles.filterToggleLabel}>{config.name}</Text>
             <Switch
-              value={filterStates[config.type] || false}
+              value={settings.states[config.type] || false}
               onValueChange={() => onToggleFilter(config.type)}
               trackColor={{ false: '#ccc', true: config.color }}
-              thumbColor={filterStates[config.type] ? '#fff' : '#f4f3f4'}
+              thumbColor={settings.states[config.type] ? '#fff' : '#f4f3f4'}
             />
           </View>
         ))}
       </View>
 
       {/* フィルター順序の設定 */}
-      {hasAnyFilterEnabled && (
+      {hasActiveFilters && (
         <>
           <Text style={styles.sectionTitle}>フィルターの適用順序</Text>
           
           <View style={styles.orderContainer}>
-            {filterOrder.map((filterType, index) => {
-              const isActive = filterStates[filterType];
+            {settings.order.map((filterType, index) => {
+              const isActive = settings.states[filterType];
               const config = filterFactory.getFilterConfig(filterType);
               
               if (!config) return null;
@@ -177,14 +176,14 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                     <TouchableOpacity
                       style={[
                         styles.orderButton,
-                        index === filterOrder.length - 1 && styles.orderButtonDisabled
+                        index === settings.order.length - 1 && styles.orderButtonDisabled
                       ]}
                       onPress={() => moveFilterDown(index)}
-                      disabled={index === filterOrder.length - 1}
+                      disabled={index === settings.order.length - 1}
                     >
                       <Text style={[
                         styles.orderButtonText,
-                        index === filterOrder.length - 1 && styles.orderButtonTextDisabled
+                        index === settings.order.length - 1 && styles.orderButtonTextDisabled
                       ]}>↓</Text>
                     </TouchableOpacity>
                   </View>
@@ -196,7 +195,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
       )}
 
       {/* オーバーレイ画像の選択 */}
-      {filterStates['overlay'] && onSelectOverlayImage && (
+      {settings.states['overlay'] && onSelectOverlayImage && (
         <>
           <Text style={styles.sectionTitle}>オーバーレイ画像</Text>
           <View style={styles.overlayImageSection}>
@@ -216,7 +215,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             <View style={styles.overlayIntensitySection}>
               <Text style={styles.intensityLabel}>オーバーレイの強度:</Text>
               <SimpleSlider
-                value={getFilterOptions?.('overlay')?.opacity ?? 0.5}
+                value={onGetFilterOptions?.('overlay')?.opacity ?? 0.5}
                 onValueChange={(value) => {
                   onSetFilterOptions?.('overlay', { opacity: value });
                 }}
@@ -225,7 +224,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                 step={0.1}
               />
               <Text style={styles.intensityValue}>
-                {Math.round((getFilterOptions?.('overlay')?.opacity ?? 0.5) * 100)}%
+                {Math.round((onGetFilterOptions?.('overlay')?.opacity ?? 0.5) * 100)}%
               </Text>
             </View>
           </View>
@@ -235,11 +234,10 @@ const FilterControls: React.FC<FilterControlsProps> = ({
       <View style={styles.effectsInfo}>
         <Text style={styles.effectsTitle}>適用中の効果:</Text>
         <Text style={styles.effectsText}>
-          {!hasAnyFilterEnabled ? (
+          {!hasActiveFilters ? (
             'フィルターが適用されていません'
           ) : (
             (() => {
-              const activeFilters = getActiveFilters();
               return activeFilters.map(filterType => {
                 const config = filterFactory.getFilterConfig(filterType);
                 return config ? `• ${config.description}` : '';
@@ -248,22 +246,20 @@ const FilterControls: React.FC<FilterControlsProps> = ({
           )}
         </Text>
         
-        {hasAnyFilterEnabled && (() => {
-          const activeFilters = getActiveFilters();
-          
-          return (
-            <Text style={styles.layerOrderInfo}>
-              ※ フィルターは「{activeFilters.map(filterType => {
-                const config = filterFactory.getFilterConfig(filterType);
-                return config?.name || filterType;
-              }).join(' → ')}」の順で重ねて適用されます
-            </Text>
-          );
-        })()}
+        {hasActiveFilters && (
+          <Text style={styles.layerOrderInfo}>
+            ※ フィルターは「{activeFilters.map(filterType => {
+              const config = filterFactory.getFilterConfig(filterType);
+              return config?.name || filterType;
+            }).join(' → ')}」の順で重ねて適用されます
+          </Text>
+        )}
       </View>
     </View>
   );
-};
+});
+
+FilterControls.displayName = 'FilterControls';
 
 const styles = StyleSheet.create({
   container: {

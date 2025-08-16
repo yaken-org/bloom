@@ -2,6 +2,8 @@ import type { FilterType, FilterConfiguration, FilterComponent } from '@/types/f
 import ImageMagickFilter from '@/components/filters/ImageMagickFilter';
 import GlitteryFilter from '@/components/filters/GlitteryFilter';
 import OverlayFilter from '@/components/filters/OverlayFilter';
+import SepiaFilter from '@/components/filters/SepiaFilter';
+import BlueFilter from '@/components/filters/BlueFilter';
 
 /**
  * フィルターファクトリークラス
@@ -26,6 +28,26 @@ export class FilterFactory {
    * デフォルトフィルターを初期化
    */
   private initializeDefaultFilters(): void {
+    this.registerFilter({
+      type: 'sepia',
+      name: 'セピア',
+      description: 'ビンテージな茶色がかったセピアトーン効果',
+      component: SepiaFilter,
+      defaultEnabled: false,
+      color: '#8B4513',
+      category: 'artistic'
+    });
+
+    this.registerFilter({
+      type: 'blue',
+      name: 'ブルー',
+      description: 'クールで青みがかったトーン効果',
+      component: BlueFilter,
+      defaultEnabled: false,
+      color: '#4169E1',
+      category: 'artistic'
+    });
+
     this.registerFilter({
       type: 'imageMagick',
       name: 'ImageMagick風',
@@ -124,7 +146,7 @@ export class FilterFactory {
     const availableTypes = this.getAvailableFilterTypes();
     
     // 優先順序を定義（存在するもののみ使用）
-    const priorityOrder: FilterType[] = ['overlay', 'imageMagick', 'glittery', 'sepia', 'blue'];
+    const priorityOrder: FilterType[] = ['sepia', 'blue', 'overlay', 'imageMagick', 'glittery'];
     
     // 優先順序に従って並べた後、残りを追加
     const orderedTypes: FilterType[] = [];

@@ -4,17 +4,25 @@ import {
   Group,
   useImage,
 } from '@shopify/react-native-skia';
-import type { OverlayFilterProps } from '@/types/filters';
+import type { FilterComponentProps, OverlayFilterOptions } from '@/types/filters';
 
-const OverlayFilter: React.FC<OverlayFilterProps> = ({
+interface OverlayFilterProps extends FilterComponentProps {
+  options?: OverlayFilterOptions;
+}
+
+const OverlayFilter: React.FC<OverlayFilterProps> = React.memo(({
   image,
   width,
   height,
-  overlayImageUrl,
-  blendMode = 'multiply',
-  opacity = 0.5,
   isBaseLayer = true,
+  options = {},
 }) => {
+  const { 
+    overlayImageUrl, 
+    blendMode = 'multiply', 
+    opacity = 0.5 
+  } = options as OverlayFilterOptions;
+  
   const overlayImage = useImage(overlayImageUrl);
 
   return (
@@ -46,6 +54,8 @@ const OverlayFilter: React.FC<OverlayFilterProps> = ({
       )}
     </Group>
   );
-};
+});
+
+OverlayFilter.displayName = 'OverlayFilter';
 
 export default OverlayFilter;

@@ -1,23 +1,47 @@
 import type { SkImage } from '@shopify/react-native-skia';
 import type { ComponentType } from 'react';
 
-// 基本的なフィルタータイプ（拡張可能）
-export type FilterType = string;
+// フィルタータイプの定義（型安全性向上）
+export type FilterType = 
+  | 'sepia'
+  | 'blue' 
+  | 'overlay'
+  | 'glittery'
+  | 'imageMagick'
+  | string; // 拡張性のためstringも許可
 
-// 廃止予定のタイプ（後方互換性のため）
-export type OverlayType = 'vintage' | 'grunge' | 'light' | 'texture';
+// ブレンドモードの定義
+export type BlendMode = 'multiply' | 'overlay' | 'screen' | 'colorDodge' | 'lighten';
 
-// フィルター状態を動的に管理するための型
+// フィルターカテゴリー
+export type FilterCategory = 'enhancement' | 'artistic' | 'blend' | 'effect';
+
+// フィルター状態の管理
 export type FilterState = Record<FilterType, boolean>;
 
-// 従来の設定（後方互換性のため）
-export interface FilterConfig {
-  type: FilterType;
-  enabled: boolean;
-  options?: {
-    overlayType?: OverlayType;
-  };
+// フィルターオプションの基本型
+export interface BaseFilterOptions {
+  opacity?: number;
+  intensity?: number;
 }
+
+// オーバーレイフィルター用オプション
+export interface OverlayFilterOptions extends BaseFilterOptions {
+  blendMode?: BlendMode;
+  overlayImageUrl?: string;
+}
+
+// グリッターフィルター用オプション
+export interface GlitteryFilterOptions extends BaseFilterOptions {
+  particleCount?: number;
+  sparkleIntensity?: number;
+}
+
+// フィルターオプションのユニオン型
+export type FilterOptions = 
+  | BaseFilterOptions 
+  | OverlayFilterOptions 
+  | GlitteryFilterOptions;
 
 // フィルターコンポーネントの基本Props
 export interface FilterComponentProps {
@@ -25,17 +49,11 @@ export interface FilterComponentProps {
   width: number;
   height: number;
   isBaseLayer?: boolean;
-}
-
-// オーバーレイフィルター専用のProps
-export interface OverlayFilterProps extends FilterComponentProps {
-  overlayImageUrl?: string;
-  blendMode?: 'multiply' | 'overlay' | 'screen' | 'colorDodge' | 'lighten';
-  opacity?: number;
+  options?: FilterOptions;
 }
 
 // フィルターコンポーネントの型
-export type FilterComponent = ComponentType<FilterComponentProps | OverlayFilterProps>;
+export type FilterComponent = ComponentType<FilterComponentProps>;
 
 // フィルター設定の完全な型定義
 export interface FilterConfiguration {
@@ -45,12 +63,9 @@ export interface FilterConfiguration {
   component: FilterComponent;
   defaultEnabled: boolean;
   color: string;
-  category: 'enhancement' | 'artistic' | 'blend' | 'effect';
+  category: FilterCategory;
   requiresAsset?: boolean;
-  options?: {
-    blendMode?: 'multiply' | 'overlay' | 'screen' | 'colorDodge' | 'lighten';
-    opacity?: number;
-  };
+  defaultOptions?: FilterOptions;
 }
 
 // フィルターインスタンスの設定
@@ -58,5 +73,22 @@ export interface FilterInstance {
   type: FilterType;
   enabled: boolean;
   order: number;
-  options?: Record<string, any>;
+  options: FilterOptions;
+}
+
+// フィルター設定の統合インターface
+export interface FilterSettings {
+  states: FilterState;
+  order: FilterType[];
+  options: Record<FilterType, FilterOptions>;
+}
+
+// 廃止予定のタイプ（後方互換性のため）
+export type OverlayType = 'vintage' | 'grunge' | 'light' | 'texture';
+export interface FilterConfig {
+  type: FilterType;
+  enabled: boolean;
+  options?: {
+    overlayType?: OverlayType;
+  };
 }

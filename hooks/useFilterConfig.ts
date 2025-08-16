@@ -5,9 +5,8 @@
  * 新しい実装では hooks/useFilters.ts を使用することを推奨します。
  * 
  * 移行ガイド:
- * - useFilterState() → useFilters()
+ * - useFilterConfig() → useFilters()
  * - より統合されたAPIと改善されたパフォーマンス
- * - 統一されたオプション管理システム
  */
 
-export { useFilters as useFilterState } from './useFilters';
+export { useFilters as useFilterConfig } from './useFilters';

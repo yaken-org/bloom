@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from 'expo-image-picker';
@@ -6,41 +6,40 @@ import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import FilterView, { FilterViewRef } from '@/components/FilterView';
 import FilterControls from '@/components/FilterControls';
-import { useFilterState } from '@/hooks/useFilterState';
+import { useFilters } from '@/hooks/useFilters';
+import { useLocalSearchParams } from 'expo-router';
 
 /**
- * TestPage - 新しいフィルターシステムのリファレンス実装
+ * TestPage - フィルターシステムの実装
  * 
- * このコンポーネントは、新しいフィルターアーキテクチャの使用方法を示すリファレンスとして機能します。
- * 
- * 主な特徴:
- * - FilterFactory による動的フィルター管理
- * - useFilterState フックによる状態管理の簡素化
- * - 拡張可能なアーキテクチャ
- * - 後方互換性の維持
- * 
- * 使用例:
+ * 主な機能:
  * 1. 画像選択
- * 2. フィルターの動的適用
+ * 2. フィルターの適用
  * 3. フィルター順序の変更
  * 4. 画像保存
  */
 const TestPage: React.FC = () => {
-  // 画像関連の状態
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null);
+
+  const { capturedImageUri } = useLocalSearchParams<{ capturedImageUri: string }>();
   
-  // フィルター状態をカスタムフックで管理
+  // useEffectを使用して副作用を適切に処理
+  useEffect(() => {
+    if (capturedImageUri) {
+      setImageUri(capturedImageUri);
+    }
+  }, [capturedImageUri]);
+  
   const {
-    filterStates,
-    filterOrder,
+    settings,
     activeFilters,
+    hasActiveFilters,
     toggleFilter,
-    setFilterOrder,
+    reorderFilters,
     setFilterOptions,
     getFilterOptions,
-    getAllFilterOptions,
-  } = useFilterState();
+  } = useFilters();
   
   // FilterViewの参照
   const filterViewRef = useRef<FilterViewRef>(null);
@@ -100,6 +99,8 @@ const TestPage: React.FC = () => {
 
       if (!result.canceled && result.assets[0]) {
         setOverlayImageUrl(result.assets[0].uri);
+        // オーバーレイ画像URLをフィルターオプションに設定
+        setFilterOptions('overlay', { overlayImageUrl: result.assets[0].uri });
       }
     } catch (error) {
       Alert.alert('エラー', 'オーバーレイ画像の選択に失敗しました。');
@@ -167,32 +168,31 @@ const TestPage: React.FC = () => {
       >
         <StatusBar style="auto" />
       
-        <Text style={styles.title}>拡張可能フィルターシステム</Text>
+        <Text style={styles.title}>フィルターシステム</Text>
         <Text style={styles.subtitle}>
-          動的フィルター管理とプラグアブル設計
+          フィルター管理とパフォーマンス最適化
         </Text>
 
         {imageUri ? (
           <>
-            {/* 新しいFilterViewを使用 */}
             <FilterView 
               ref={filterViewRef}
               imageUrl={imageUri}
               filters={activeFilters}
               overlayImageUrl={overlayImageUrl || undefined}
-              filterOptions={getAllFilterOptions()}
+              filterOptions={settings.options}
             />
             
-            {/* 新しいFilterControlsを使用 */}
             <FilterControls
-              filterStates={filterStates}
-              filterOrder={filterOrder}
+              settings={settings}
+              activeFilters={activeFilters}
+              hasActiveFilters={hasActiveFilters}
               overlayImageUrl={overlayImageUrl}
               onToggleFilter={toggleFilter}
-              onReorderFilter={setFilterOrder}
+              onReorderFilter={reorderFilters}
               onSelectOverlayImage={handleSelectOverlayImage}
               onSetFilterOptions={setFilterOptions}
-              getFilterOptions={getFilterOptions}
+              onGetFilterOptions={getFilterOptions}
             />
           
             <TouchableOpacity 
@@ -221,17 +221,6 @@ const TestPage: React.FC = () => {
           </Text>
         </TouchableOpacity>
 
-        {/* 実装情報セクション */}
-        <View style={styles.implementationInfo}>
-          <Text style={styles.implementationTitle}>実装のポイント</Text>
-          <Text style={styles.implementationText}>
-            {`• FilterFactory: フィルターの登録と動的管理
-• FilterStateManager: フィルター状態の一元管理  
-• FilterRenderer: 動的フィルター適用エンジン
-• useFilterState: フィルター状態管理フック
-• 新フィルター追加は FilterFactory.registerFilter() のみ`}
-          </Text>
-        </View>
       </ScrollView>
     </View>
   );
@@ -305,29 +294,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
-  },
-  implementationInfo: {
-    marginTop: 30,
-    padding: 15,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    width: '100%',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  implementationTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#333',
-  },
-  implementationText: {
-    fontSize: 12,
-    color: '#555',
-    lineHeight: 18,
   },
 });
 

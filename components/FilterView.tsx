@@ -2,7 +2,7 @@ import React, { forwardRef, useImperativeHandle } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
 import { Canvas, useImage, SkImage, useCanvasRef } from '@shopify/react-native-skia';
 import FilterRenderer from '@/components/FilterRenderer';
-import type { FilterType } from '@/types/filters';
+import type { FilterType, FilterOptions } from '@/types/filters';
 
 interface FilterViewProps {
   imageUrl: string;
@@ -10,7 +10,7 @@ interface FilterViewProps {
   overlayImageUrl?: string;
   width?: number;
   height?: number;
-  filterOptions?: Record<FilterType, Record<string, any>>;
+  filterOptions?: Record<FilterType, FilterOptions>;
 }
 
 export interface FilterViewRef {
@@ -21,7 +21,7 @@ export interface FilterViewRef {
  * フィルター適用済みの画像を表示するメインビューコンポーネント
  * FilterRendererを使用して動的にフィルターを適用
  */
-const FilterView = forwardRef<FilterViewRef, FilterViewProps>(({ 
+const FilterView = React.memo(forwardRef<FilterViewRef, FilterViewProps>(({ 
   imageUrl, 
   filters, 
   overlayImageUrl,
@@ -39,7 +39,7 @@ const FilterView = forwardRef<FilterViewRef, FilterViewProps>(({
       }
       return null;
     }
-  }));
+  }), [canvasRef]);
 
   if (!image) {
     return (
@@ -66,7 +66,7 @@ const FilterView = forwardRef<FilterViewRef, FilterViewProps>(({
       </View>
     </View>
   );
-});
+}));
 
 FilterView.displayName = 'FilterView';
 
