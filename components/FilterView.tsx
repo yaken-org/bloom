@@ -11,6 +11,8 @@ interface FilterState {
   overlay: boolean;
 }
 
+type FilterType = 'overlay' | 'imageMagick' | 'glittery';
+
 interface FilterViewProps {
   imageUrl: string;
   onFilterApplied?: () => void;
@@ -24,6 +26,7 @@ const FilterView: React.FC<FilterViewProps> = ({ imageUrl, onFilterApplied }) =>
   });
   const [overlayType, setOverlayType] = useState<'vintage' | 'grunge' | 'light' | 'texture'>('vintage');
   const [isLoading, setIsLoading] = useState(true);
+  const [filterOrder, setFilterOrder] = useState<FilterType[]>(['overlay', 'imageMagick', 'glittery']);
   const image = useImage(imageUrl);
 
   useEffect(() => {
@@ -51,6 +54,63 @@ const FilterView: React.FC<FilterViewProps> = ({ imageUrl, onFilterApplied }) =>
 
   const hasAnyFilterEnabled = Object.values(filterStates).some(state => state);
 
+  const moveFilterUp = (index: number) => {
+    if (index > 0) {
+      const newOrder = [...filterOrder];
+      [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]];
+      setFilterOrder(newOrder);
+    }
+  };
+
+  const moveFilterDown = (index: number) => {
+    if (index < filterOrder.length - 1) {
+      const newOrder = [...filterOrder];
+      [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+      setFilterOrder(newOrder);
+    }
+  };
+
+  const renderFilter = (filterType: FilterType, isFirst: boolean) => {
+    const isActive = filterStates[filterType];
+    if (!isActive || !image) return null;
+
+    switch (filterType) {
+      case 'overlay':
+        return (
+          <OverlayFilter
+            key="overlay"
+            image={image}
+            width={canvasWidth}
+            height={canvasHeight}
+            templateType={overlayType}
+            isBaseLayer={isFirst}
+          />
+        );
+      case 'imageMagick':
+        return (
+          <ImageMagickFilter
+            key="imageMagick"
+            image={image}
+            width={canvasWidth}
+            height={canvasHeight}
+            isBaseLayer={isFirst}
+          />
+        );
+      case 'glittery':
+        return (
+          <GlitteryFilter
+            key="glittery"
+            image={image}
+            width={canvasWidth}
+            height={canvasHeight}
+            isBaseLayer={isFirst}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   if (isLoading || !image) {
     return (
       <View style={styles.loadingContainer}>
@@ -66,7 +126,7 @@ const FilterView: React.FC<FilterViewProps> = ({ imageUrl, onFilterApplied }) =>
         <Canvas style={{ width: canvasWidth, height: canvasHeight }}>
           <Group>
             {/* フィルターが無効な場合はベース画像のみ表示 */}
-            {!hasAnyFilterEnabled && (
+            {!hasAnyFilterEnabled && image && (
               <Image
                 image={image}
                 x={0}
@@ -77,53 +137,17 @@ const FilterView: React.FC<FilterViewProps> = ({ imageUrl, onFilterApplied }) =>
               />
             )}
             
-            {/* フィルターの連鎖適用 */}
-            {hasAnyFilterEnabled && (
-              <>
-                {/* 1. オーバーレイフィルターが有効な場合（ベース画像込み） */}
-                {filterStates.overlay && (
-                  <OverlayFilter
-                    image={image}
-                    width={canvasWidth}
-                    height={canvasHeight}
-                    templateType={overlayType}
-                    isBaseLayer={true}
-                  />
-                )}
-                
-                {/* 2. オーバーレイが無効で、ImageMagickまたはGlitteryが有効な場合のベース画像 */}
-                {!filterStates.overlay && (filterStates.imageMagick || filterStates.glittery) && (
-                  <Image
-                    image={image}
-                    x={0}
-                    y={0}
-                    width={canvasWidth}
-                    height={canvasHeight}
-                    fit="cover"
-                  />
-                )}
-                
-                {/* 3. ImageMagickフィルターの追加効果（オーバーレイの上に重ねる場合は追加効果のみ） */}
-                {filterStates.imageMagick && (
-                  <ImageMagickFilter
-                    image={image}
-                    width={canvasWidth}
-                    height={canvasHeight}
-                    isBaseLayer={!filterStates.overlay}
-                  />
-                )}
-                
-                {/* 4. Glitteryフィルターの追加効果（他のフィルターの上に重ねる場合は追加効果のみ） */}
-                {filterStates.glittery && (
-                  <GlitteryFilter
-                    image={image}
-                    width={canvasWidth}
-                    height={canvasHeight}
-                    isBaseLayer={!filterStates.overlay && !filterStates.imageMagick}
-                  />
-                )}
-              </>
-            )}
+            {/* フィルターを順序通りに適用 */}
+            {hasAnyFilterEnabled && (() => {
+              const activeFilters = filterOrder.filter(filter => filterStates[filter]);
+              let needsBaseImage = true;
+              
+              return activeFilters.map((filterType, index) => {
+                const isFirst = needsBaseImage;
+                if (isFirst) needsBaseImage = false;
+                return renderFilter(filterType, isFirst);
+              });
+            })()}
           </Group>
         </Canvas>
       </View>
@@ -186,6 +210,74 @@ const FilterView: React.FC<FilterViewProps> = ({ imageUrl, onFilterApplied }) =>
           />
         </View>
       </View>
+
+      {/* フィルター順序の設定 */}
+      {hasAnyFilterEnabled && (
+        <>
+          <Text style={styles.sectionTitle}>フィルターの適用順序</Text>
+          
+          <View style={styles.orderContainer}>
+            {filterOrder.map((filterType, index) => {
+              const isActive = filterStates[filterType];
+              const filterNames = {
+                overlay: 'オーバーレイ',
+                imageMagick: 'ImageMagick風',
+                glittery: 'ギラギラ'
+              };
+              
+              return (
+                <View key={filterType} style={[
+                  styles.orderItem,
+                  !isActive && styles.orderItemInactive
+                ]}>
+                  <View style={styles.orderItemLeft}>
+                    <Text style={styles.orderNumber}>{index + 1}</Text>
+                    <Text style={[
+                      styles.orderItemText,
+                      !isActive && styles.orderItemTextInactive
+                    ]}>
+                      {filterNames[filterType]}
+                    </Text>
+                    {!isActive && (
+                      <Text style={styles.inactiveLabel}>(無効)</Text>
+                    )}
+                  </View>
+                  
+                  <View style={styles.orderControls}>
+                    <TouchableOpacity
+                      style={[
+                        styles.orderButton,
+                        index === 0 && styles.orderButtonDisabled
+                      ]}
+                      onPress={() => moveFilterUp(index)}
+                      disabled={index === 0}
+                    >
+                      <Text style={[
+                        styles.orderButtonText,
+                        index === 0 && styles.orderButtonTextDisabled
+                      ]}>↑</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity
+                      style={[
+                        styles.orderButton,
+                        index === filterOrder.length - 1 && styles.orderButtonDisabled
+                      ]}
+                      onPress={() => moveFilterDown(index)}
+                      disabled={index === filterOrder.length - 1}
+                    >
+                      <Text style={[
+                        styles.orderButtonText,
+                        index === filterOrder.length - 1 && styles.orderButtonTextDisabled
+                      ]}>↓</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </>
+      )}
 
       {/* オーバーレイフィルターのサブ選択 */}
       {filterStates.overlay && (
@@ -258,19 +350,33 @@ const FilterView: React.FC<FilterViewProps> = ({ imageUrl, onFilterApplied }) =>
           {!hasAnyFilterEnabled ? (
             'フィルターが適用されていません'
           ) : (
-            <>
-              {filterStates.overlay && `• オーバーレイ効果 (${overlayType})\n`}
-              {filterStates.imageMagick && '• ImageMagick風の効果 (エッジ検出、色反転、彩度強化等)\n'}
-              {filterStates.glittery && '• ギラギラフィルター (超高彩度、メタリック効果等)\n'}
-            </>
+            (() => {
+              const activeFilters = filterOrder.filter(filter => filterStates[filter]);
+              const filterNames = {
+                overlay: `オーバーレイ効果 (${overlayType})`,
+                imageMagick: 'ImageMagick風の効果 (エッジ検出、色反転、彩度強化等)',
+                glittery: 'ギラギラフィルター (超高彩度、メタリック効果等)'
+              };
+              
+              return activeFilters.map(filter => `• ${filterNames[filter]}`).join('\n') + '\n';
+            })()
           )}
         </Text>
         
-        {hasAnyFilterEnabled && (
-          <Text style={styles.layerOrderInfo}>
-            ※ フィルターは「オーバーレイ → ImageMagick風 → ギラギラ」の順で重ねて適用されます
-          </Text>
-        )}
+        {hasAnyFilterEnabled && (() => {
+          const activeFilters = filterOrder.filter(filter => filterStates[filter]);
+          const filterNames = {
+            overlay: 'オーバーレイ',
+            imageMagick: 'ImageMagick風',
+            glittery: 'ギラギラ'
+          };
+          
+          return (
+            <Text style={styles.layerOrderInfo}>
+              ※ フィルターは「{activeFilters.map(filter => filterNames[filter]).join(' → ')}」の順で重ねて適用されます
+            </Text>
+          );
+        })()}
       </View>
     </View>
   );
@@ -406,6 +512,84 @@ const styles = StyleSheet.create({
   },
   overlayButtonTextActive: {
     color: 'white',
+  },
+  orderContainer: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 15,
+    width: 300,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    marginBottom: 15,
+  },
+  orderItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  orderItemInactive: {
+    opacity: 0.5,
+  },
+  orderItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  orderNumber: {
+    width: 24,
+    height: 24,
+    backgroundColor: '#007AFF',
+    color: 'white',
+    textAlign: 'center',
+    lineHeight: 24,
+    borderRadius: 12,
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginRight: 10,
+  },
+  orderItemText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+    flex: 1,
+  },
+  orderItemTextInactive: {
+    color: '#999',
+  },
+  inactiveLabel: {
+    fontSize: 12,
+    color: '#999',
+    fontStyle: 'italic',
+    marginLeft: 8,
+  },
+  orderControls: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  orderButton: {
+    width: 32,
+    height: 32,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  orderButtonDisabled: {
+    backgroundColor: '#f8f8f8',
+  },
+  orderButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#007AFF',
+  },
+  orderButtonTextDisabled: {
+    color: '#ccc',
   },
 });
 
