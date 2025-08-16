@@ -89,6 +89,7 @@ FilterView.displayName = "FilterView";
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
+    top: 40,
   },
   loadingContainer: {
     justifyContent: "center",
