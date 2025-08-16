@@ -84,7 +84,7 @@ export class FilterStateManager {
   public setFilterEnabled(filterType: FilterType, enabled: boolean): void {
     this.refreshAvailableFilters();
     
-    if (this.settings.states.hasOwnProperty(filterType)) {
+    if (Object.prototype.hasOwnProperty.call(this.settings.states, filterType)) {
       this.settings.states[filterType] = enabled;
     }
   }
