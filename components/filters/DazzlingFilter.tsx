@@ -3,29 +3,31 @@ import React, { useMemo } from "react";
 import type { FilterComponentProps } from "@/types/filters";
 
 /**
- * DazzlingFilter
+ * DazzlingFilter - 超派手ギラギラ版
  * ゴールド・白系の眩しい光を中心に派手ギラギラ
  */
 const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
   ({ image, width, height, isBaseLayer = true, options = {} }) => {
-    const { opacity = 0.9, intensity = 1.0 } = options;
+    const { opacity = 1.0, intensity = 1.0 } = options;
 
-    const goldMatrix = useMemo(() => {
+    // RGB強調＋ゴールド・白ハイライト
+    const dazzlingMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.3 * i + (1 - i), 0.2 * i, 0, 0, 0.05 * i,
-        0.1 * i, 1.2 * i + (1 - i), 0.1 * i, 0, 0.05 * i,
-        0, 0.1 * i, 1.4 * i + (1 - i), 0, 0.05 * i,
+        1.8*i, 0.3*i, 0.1*i, 0, 0.1*i,
+        0.2*i, 1.7*i, 0.2*i, 0, 0.1*i,
+        0.1*i, 0.2*i, 2.0*i, 0, 0.1*i,
         0, 0, 0, 1, 0,
       ];
     }, [intensity]);
 
-    const contrastMatrix = useMemo(() => {
+    // コントラスト・光の広がり用
+    const glowMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.5 * i + (1 - i), 0, 0, 0, -0.05 * i,
-        0, 1.4 * i + (1 - i), 0, 0, -0.05 * i,
-        0, 0, 1.6 * i + (1 - i), 0, -0.05 * i,
+        2.0*i, 0.2*i, 0.1*i, 0, 0,
+        0.2*i, 2.0*i, 0.2*i, 0, 0,
+        0.1*i, 0.2*i, 2.0*i, 0, 0,
         0, 0, 0, 1, 0,
       ];
     }, [intensity]);
@@ -37,20 +39,15 @@ const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
         )}
 
         <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity}>
-          <ColorMatrix matrix={goldMatrix} />
+          <ColorMatrix matrix={dazzlingMatrix} />
         </Image>
 
         <Image
           image={image}
-          x={0}
-          y={0}
-          width={width}
-          height={height}
-          fit="cover"
-          opacity={opacity * 0.7}
-          blendMode="screen"
+          x={0} y={0} width={width} height={height} fit="cover"
+          opacity={opacity*0.8} blendMode="screen"
         >
-          <ColorMatrix matrix={contrastMatrix} />
+          <ColorMatrix matrix={glowMatrix} />
         </Image>
       </Group>
     );
