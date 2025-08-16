@@ -3,13 +3,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 import { LinearGradient } from "expo-linear-gradient";
 import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -17,17 +11,12 @@ import {
   Dimensions,
   Easing,
   Image,
-  PanResponder,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-
-let particleIdCounter = 0;
 
 export default function NeonCamera() {
   const router = useRouter();
@@ -37,18 +26,6 @@ export default function NeonCamera() {
   const [permission, requestPermission] = useCameraPermissions();
   const [isReady, setIsReady] = useState(false);
   const [strobeActive, setStrobeActive] = useState(false);
-
-  interface Particle {
-    id: number;
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    color: string;
-    opacity: number;
-  }
-
-  const [particles, setParticles] = useState<Particle[]>([]);
 
   // アニメーション値
   const [pulseAnim] = useState(() => new Animated.Value(1));
@@ -66,69 +43,6 @@ export default function NeonCamera() {
     const squareLeft = (screenWidth - squareSize) / 2;
     return { squareSize, squareTop, squareLeft };
   }, []);
-
-  // 爆発エフェクト作成
-  const createBurstEffect = useCallback((x: number, y: number) => {
-    console.log("Creating burst effect at:", x, y);
-    const newParticles: Particle[] = [];
-    const colors = [
-      "#ff00ff",
-      "#00ffff",
-      "#ffff00",
-      "#00ff00",
-      "#ff0080",
-      "#ff4080",
-      "#8040ff",
-    ];
-
-    // パーティクル数を削減（20→12）
-    for (let i = 0; i < 12; i++) {
-      const angle = (Math.PI * 2 * i) / 12;
-      const velocity = Math.random() * 6 + 2; // 速度も少し下げる
-
-      newParticles.push({
-        id: ++particleIdCounter,
-        x,
-        y,
-        vx: Math.cos(angle) * velocity,
-        vy: Math.sin(angle) * velocity,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        opacity: 1,
-      });
-    }
-
-    console.log("Created particles:", newParticles.length);
-    setParticles((prev) => [...prev, ...newParticles]);
-
-    // パーティクルの削除時間を短縮（2000→1500ms）
-    setTimeout(() => {
-      setParticles((prev) =>
-        prev.filter((p) => !newParticles.some((np) => np.id === p.id)),
-      );
-    }, 1500);
-  }, []);
-
-  // パンレスポンダー（タッチ追跡用）
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => false, // moveイベントを無効化
-        onPanResponderGrant: (evt) => {
-          const { pageX, pageY } = evt.nativeEvent;
-          console.log("Touch detected at:", pageX, pageY);
-          createBurstEffect(pageX, pageY);
-        },
-        // onPanResponderMoveを削除してmove中のエフェクト生成を停止
-        onPanResponderRelease: () => {
-          console.log("Touch released");
-        },
-        onPanResponderTerminate: () => {
-          console.log("Touch terminated");
-        },
-      }),
-    [createBurstEffect],
-  );
 
   // カメラのパーミッションと初期化を管理
   useEffect(() => {
@@ -207,48 +121,6 @@ export default function NeonCamera() {
     floatingAnimation(floatingAnim3, 2000);
     floatingAnimation(floatingAnim4, 3000);
   }, [floatingAnim1, floatingAnim2, floatingAnim3, floatingAnim4, pulseAnim]);
-
-  // パーティクル定期生成
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const x = Math.random() * screenWidth;
-      const particle = {
-        id: ++particleIdCounter,
-        x,
-        y: screenHeight,
-        vx: (Math.random() - 0.5) * 2,
-        vy: -Math.random() * 5 - 3,
-        color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-        opacity: 1,
-      };
-
-      setParticles((prev) => [...prev, particle]);
-
-      // パーティクルを一定時間後に削除
-      setTimeout(() => {
-        setParticles((prev) => prev.filter((p) => p.id !== particle.id));
-      }, 3000); // 4000→3000msに短縮
-    }, 800); // 500→800msに頻度を下げる
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // パーティクル位置更新
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setParticles((prev) =>
-        prev.map((p) => ({
-          ...p,
-          x: p.x + p.vx,
-          y: p.y + p.vy,
-          vy: p.vy + 0.1,
-          opacity: Math.max(0, p.opacity - 0.01), // フェードアウト
-        })),
-      );
-    }, 16);
-
-    return () => clearInterval(interval);
-  }, []);
 
   // ストロボエフェクト
   useEffect(() => {
@@ -513,7 +385,6 @@ export default function NeonCamera() {
             StyleSheet.absoluteFillObject,
             { bottom: 150 }, // ボタンエリアを避ける
           ]}
-          {...panResponder.panHandlers}
         />
       </View>
 
@@ -593,22 +464,6 @@ export default function NeonCamera() {
       >
         ⚡
       </Animated.Text>
-
-      {/* パーティクル */}
-      {particles.map((particle) => (
-        <View
-          key={particle.id}
-          style={[
-            styles.particle,
-            {
-              left: particle.x,
-              top: particle.y,
-              backgroundColor: particle.color,
-              opacity: particle.opacity,
-            },
-          ]}
-        />
-      ))}
 
       {/* コントロールボタン */}
       <View style={styles.buttonContainer}>
@@ -709,12 +564,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     fontSize: 36,
     opacity: 0.7,
-  },
-  particle: {
-    position: "absolute",
-    width: 4,
-    height: 4,
-    borderRadius: 2,
   },
   buttonContainer: {
     position: "absolute",
