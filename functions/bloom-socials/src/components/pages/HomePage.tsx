@@ -15,11 +15,11 @@ interface HomePageProps {
 export const HomePage: FC<HomePageProps> = ({ posts }) => {
   // postsデータを既に持っているので、Promise.resolveでラップ
   const feedData: FeedData = {
-    posts: posts.map(post => ({
+    posts: posts.map((post) => ({
       ...post,
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString(),
-    }))
+    })),
   };
   const feedPromise = Promise.resolve(feedData);
 

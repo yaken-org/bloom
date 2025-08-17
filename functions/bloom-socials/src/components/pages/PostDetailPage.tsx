@@ -18,7 +18,7 @@ export const PostDetailPage: FC<PostDetailPageProps> = ({ post }) => {
       ...post,
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString(),
-    }
+    },
   };
   const postPromise = Promise.resolve(postData);
 
