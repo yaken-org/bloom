@@ -28,3 +28,9 @@ tasks:
     dir: ./functions/bloom-socials
     cmds:
       - npx -y wrangler@latest d1 migrations apply bloom-socials --local
+
+  db:migrate:remote:
+    desc: "データベースのマイグレーションを実行する"
+    dir: ./functions/bloom-socials
+    cmds:
+      - npx -y wrangler@latest d1 migrations apply bloom-socials --remote
