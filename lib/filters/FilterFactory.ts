@@ -1,4 +1,5 @@
 import BlueFilter from "@/components/filters/BlueFilter";
+import DarkFilter from "@/components/filters/DarkFilter";
 import DazzlingFilter from "@/components/filters/DazzlingFilter";
 import ElectricFilter from "@/components/filters/ElectricFilter";
 import GlitteryFilter from "@/components/filters/GlitteryFilter";
@@ -8,7 +9,6 @@ import NeonFilter from "@/components/filters/NeonFilter";
 import OverlayFilter from "@/components/filters/OverlayFilter";
 import PachinkoFilter from "@/components/filters/PachinkoFilter";
 import SepiaFilter from "@/components/filters/SepiaFilter";
-import DarkFilter from "@/components/filters/DarkFilter";
 
 import type {
   FilterComponent,
@@ -109,7 +109,6 @@ export class FilterFactory {
       color: "#222222", // ダークな色
       category: "artistic",
     });
-
 
     this.registerFilter({
       type: "neon",

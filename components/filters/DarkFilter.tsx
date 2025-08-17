@@ -1,22 +1,23 @@
+import { ColorMatrix, Group, Image } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
-import { Image, Group, ColorMatrix } from "@shopify/react-native-skia";
 import type { FilterComponentProps } from "@/types/filters";
 
 /**
- * DarkFilter - 写真全体を暗めに落とした落ち着いた色味
+ * DarkFilter - 黒っぽく落ち着いた暗めフィルター
  */
 const DarkFilter: React.FC<FilterComponentProps> = React.memo(
   ({ image, width, height, isBaseLayer = true, options = {} }) => {
-    const { opacity = 0.8, intensity = 1.0 } = options;
+    const { opacity = 0.85, intensity = 1.0 } = options;
 
-    // 彩度・光量・コントラストの設定
+    // 彩度・光量・コントラストを黒っぽく調整
     const darkMatrix = useMemo(() => {
-      const s = 0.8 * intensity; // 彩度控えめ
-      const b = 0.4; // 光量暗め
+      const s = 0.6 * intensity; // 彩度控えめ
+      const b = 0.25;             // 光量をさらに暗く
+      const contrast = 0.9;       // コントラスト微調整
       return [
-        b + s, 0.02 * s, 0.02 * s, 0, 0,
-        0.02 * s, b + s, 0.02 * s, 0, 0,
-        0.02 * s, 0.02 * s, b + s, 0, 0,
+        (b + s) * contrast, 0.01 * s, 0.01 * s, 0, 0,
+        0.01 * s, (b + s) * contrast, 0.01 * s, 0, 0,
+        0.01 * s, 0.01 * s, (b + s) * contrast, 0, 0,
         0, 0, 0, 1, 0,
       ];
     }, [intensity]);
@@ -24,15 +25,30 @@ const DarkFilter: React.FC<FilterComponentProps> = React.memo(
     return (
       <Group>
         {isBaseLayer && (
-          <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />
+          <Image
+            image={image}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fit="cover"
+          />
         )}
 
-        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity}>
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          opacity={opacity}
+        >
           <ColorMatrix matrix={darkMatrix} />
         </Image>
       </Group>
     );
-  }
+  },
 );
 
 DarkFilter.displayName = "DarkFilter";

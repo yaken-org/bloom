@@ -1,5 +1,5 @@
+import { ColorMatrix, Group, Image } from "@shopify/react-native-skia";
 import React, { useMemo } from "react";
-import { Image, Group, ColorMatrix } from "@shopify/react-native-skia";
 import type { FilterComponentProps } from "@/types/filters";
 
 /**
@@ -15,10 +15,26 @@ const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
       const s = 1.9 * intensity; // 彩度
       const b = 0.75; // 光量抑えめ
       return [
-        b + s, 0.05 * s, 0, 0, 0, // R
-        0.02 * s, b + s, 0.02 * s, 0, 0, // G
-        0, 0.02 * s, b + s, 0, 0, // B
-        0, 0, 0, 1, 0,
+        b + s,
+        0.05 * s,
+        0,
+        0,
+        0, // R
+        0.02 * s,
+        b + s,
+        0.02 * s,
+        0,
+        0, // G
+        0,
+        0.02 * s,
+        b + s,
+        0,
+        0, // B
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 
@@ -26,27 +42,63 @@ const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
     const highlightMatrix = useMemo(() => {
       const i = intensity;
       return [
-        1.02 * i, 0.1 * i, 0.05 * i, 0, 0,
-        0.05 * i, 1.02 * i, 0.1 * i, 0, 0,
-        0.05 * i, 0.1 * i, 1.02 * i, 0, 0,
-        0, 0, 0, 1, 0,
+        1.02 * i,
+        0.1 * i,
+        0.05 * i,
+        0,
+        0,
+        0.05 * i,
+        1.02 * i,
+        0.1 * i,
+        0,
+        0,
+        0.05 * i,
+        0.1 * i,
+        1.02 * i,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 
     return (
       <Group>
         {isBaseLayer && (
-          <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />
+          <Image
+            image={image}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fit="cover"
+          />
         )}
 
         {/* Dazzling彩度・光量強調 */}
-        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity}>
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          opacity={opacity}
+        >
           <ColorMatrix matrix={dazzlingMatrix} />
         </Image>
 
         {/* ハイライト（ギラつき） */}
         <Image
-          image={image} x={0} y={0} width={width} height={height} fit="cover"
+          image={image}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
           opacity={opacity * 0.6}
           blendMode="screen"
         >
@@ -54,7 +106,7 @@ const DazzlingFilter: React.FC<FilterComponentProps> = React.memo(
         </Image>
       </Group>
     );
-  }
+  },
 );
 
 DazzlingFilter.displayName = "DazzlingFilter";

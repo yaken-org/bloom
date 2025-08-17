@@ -12,22 +12,55 @@ const ElectricFilter: React.FC<FilterComponentProps> = React.memo(
     const electricMatrix = useMemo(() => {
       const i = s;
       return [
-        b + 0.8 * i, 0.6 * i, 0.2 * i, 0, 0, // R
-        0.3 * i, b + 1.4 * i, 0.3 * i, 0, 0, // G
-        0.1 * i, 0.5 * i, b + 1.5 * i, 0, 0, // B
-        0, 0, 0, 1, 0,
+        b + 0.8 * i,
+        0.6 * i,
+        0.2 * i,
+        0,
+        0, // R
+        0.3 * i,
+        b + 1.4 * i,
+        0.3 * i,
+        0,
+        0, // G
+        0.1 * i,
+        0.5 * i,
+        b + 1.5 * i,
+        0,
+        0, // B
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [s, b]);
 
     return (
       <Group>
-        {isBaseLayer && <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />}
-        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity}>
+        {isBaseLayer && (
+          <Image
+            image={image}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fit="cover"
+          />
+        )}
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          opacity={opacity}
+        >
           <ColorMatrix matrix={electricMatrix} />
         </Image>
       </Group>
     );
-  }
+  },
 );
 
 ElectricFilter.displayName = "ElectricFilter";

@@ -12,29 +12,60 @@ const NeonFilter: React.FC<FilterComponentProps> = React.memo(
 
     // 光量・彩度を変数化
     const s = intensity; // 彩度スケーリング
-    const b = 0.7;       // 基本光量
+    const b = 0.7; // 基本光量
 
     const neonMatrix = useMemo(() => {
       const i = s;
       return [
-        b + 1.3 * i, 0.2 * i, 0.6 * i, 0, 0, // ピンク系
-        0.2 * i, b + 0.8 * i, 0.3 * i, 0, 0, // 緑少なめ
-        0.4 * i, 0.3 * i, b + 1.5 * i, 0, 0, // 青・紫強調
-        0, 0, 0, 1, 0,
+        b + 1.3 * i,
+        0.2 * i,
+        0.6 * i,
+        0,
+        0, // ピンク系
+        0.2 * i,
+        b + 0.8 * i,
+        0.3 * i,
+        0,
+        0, // 緑少なめ
+        0.4 * i,
+        0.3 * i,
+        b + 1.5 * i,
+        0,
+        0, // 青・紫強調
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [s, b]);
 
     return (
       <Group>
         {isBaseLayer && (
-          <Image image={image} x={0} y={0} width={width} height={height} fit="cover" />
+          <Image
+            image={image}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fit="cover"
+          />
         )}
-        <Image image={image} x={0} y={0} width={width} height={height} fit="cover" opacity={opacity}>
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+          opacity={opacity}
+        >
           <ColorMatrix matrix={neonMatrix} />
         </Image>
       </Group>
     );
-  }
+  },
 );
 
 NeonFilter.displayName = "NeonFilter";
