@@ -1,12 +1,10 @@
 import type { FC } from "hono/jsx";
 import { formatDate } from "@/util/datetime";
-import { formatFileSize } from "@/util/file";
 
 export interface FeedItem {
-  key: string;
-  name: string;
-  uploaded: string;
-  size: number;
+  id: string;
+  authorName: string;
+  createdAt: string;
 }
 
 export const FeedPost: FC<{ item: FeedItem }> = ({ item }) => {
@@ -31,15 +29,15 @@ export const FeedPost: FC<{ item: FeedItem }> = ({ item }) => {
               marginBottom: "8px",
             }}
           >
-            <span style={{ fontWeight: "bold" }}>User</span>
+            <span style={{ fontWeight: "bold" }}>{item.authorName}</span>
             <span style={{ color: "#666", fontSize: "14px" }}>
-              {formatDate(item.uploaded)}
+              {formatDate(item.createdAt)}
             </span>
           </div>
           <div style={{ marginBottom: "12px" }}>
             <img
-              src={`/api/v1/feed/${item.key}`}
-              alt={`投稿画像 ${item.name}`}
+              src={`/api/v1/posts/${item.id}/image`}
+              alt={`投稿画像`}
               style={{
                 maxWidth: "100%",
                 height: "auto",
@@ -56,10 +54,7 @@ export const FeedPost: FC<{ item: FeedItem }> = ({ item }) => {
               color: "#666",
               fontSize: "12px",
             }}
-          >
-            <span>ファイル名: {item.name}</span>
-            <span>サイズ: {formatFileSize(item.size)}</span>
-          </div>
+          ></div>
         </div>
       </div>
     </article>

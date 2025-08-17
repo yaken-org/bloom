@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import { HomePage } from "@/components/pages/HomePage";
 import type { DrizzleDB } from "@/db/drizzle";
-import { FeedsRoute } from "@/web/api/feed";
 import { PostsRoute } from "@/web/api/posts";
 import { DrizzleMiddleware } from "@/web/middleware/drizzle";
 import { DefaultRendererMiddleware } from "@/web/middleware/renderer";
@@ -20,7 +19,6 @@ export function newApp() {
 
 const app = newApp();
 
-app.route("/api/v1/feed", FeedsRoute);
 app.route("/api/v1/posts", PostsRoute);
 
 app.get("/", async (c) => {

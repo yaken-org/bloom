@@ -7,11 +7,11 @@ interface HomePageProps {
 }
 
 export const HomePage: FC<HomePageProps> = ({ apiUrl }) => {
-  const feedPromise = fetch(`${apiUrl}/feed`)
+  const feedPromise = fetch(`${apiUrl}/posts`)
     .then((res) => res.json() as Promise<FeedData>)
     .catch((error): FeedData => {
       console.error("Error fetching feed:", error);
-      return { images: { objects: [], truncated: false } };
+      return { posts: [] };
     });
 
   return <FeedTimeline feedPromise={feedPromise} />;
