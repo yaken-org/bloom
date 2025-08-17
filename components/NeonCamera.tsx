@@ -29,7 +29,7 @@ export default function NeonCamera() {
   const [pulseAnim] = useState(() => new Animated.Value(1));
   const [strobeOpacity] = useState(() => new Animated.Value(0));
   const [glowAnim] = useState(() => new Animated.Value(0));
-  
+
   // フレーム回転用のアニメーション値
   const [outerRotation] = useState(() => new Animated.Value(0));
   const [innerRotation] = useState(() => new Animated.Value(0));
@@ -208,7 +208,14 @@ export default function NeonCamera() {
     return () => {
       starAnimation.stop();
     };
-  }, [pulseAnim, glowAnim, outerRotation, innerRotation, sparkleAnimValues, floatAnimValues]);
+  }, [
+    pulseAnim,
+    glowAnim,
+    outerRotation,
+    innerRotation,
+    sparkleAnimValues,
+    floatAnimValues,
+  ]);
 
   // ストロボエフェクト
   useEffect(() => {
@@ -327,10 +334,7 @@ export default function NeonCamera() {
         <Text style={styles.permissionText}>
           カメラへのアクセス許可が必要です
         </Text>
-        <TouchableOpacity
-          style={styles.neonButton}
-          onPress={requestPermission}
-        >
+        <TouchableOpacity style={styles.neonButton} onPress={requestPermission}>
           <View style={styles.neonButtonInner}>
             <Text style={styles.neonButtonText}>許可する</Text>
           </View>
@@ -510,14 +514,14 @@ export default function NeonCamera() {
                   {
                     rotate: outerRotation.interpolate({
                       inputRange: [0, 1],
-                      outputRange: ['0deg', '360deg'],
+                      outputRange: ["0deg", "360deg"],
                     }),
                   },
                 ],
               },
             ]}
           />
-          
+
           {/* 内の円（左回り5秒） */}
           <Animated.View
             style={[
@@ -530,7 +534,7 @@ export default function NeonCamera() {
                   {
                     rotate: innerRotation.interpolate({
                       inputRange: [0, 1],
-                      outputRange: ['0deg', '-360deg'], // 左回り
+                      outputRange: ["0deg", "-360deg"], // 左回り
                     }),
                   },
                 ],
@@ -551,7 +555,7 @@ export default function NeonCamera() {
               <Text style={styles.flipButtonText}>🔄</Text>
             </View>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.hiddenDebugStar}
             onPress={() => router.push("/debug")}
@@ -631,15 +635,15 @@ const styles = StyleSheet.create({
   },
   neonFrame: {
     position: "absolute",
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   outerCircle: {
-    position: 'absolute',
+    position: "absolute",
     borderWidth: 3,
-    borderColor: '#ff00ff',
-    borderStyle: 'dashed',
-    backgroundColor: 'transparent',
+    borderColor: "#ff00ff",
+    borderStyle: "dashed",
+    backgroundColor: "transparent",
     shadowColor: "#ff00ff",
     shadowOffset: {
       width: 0,
@@ -650,11 +654,11 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   innerCircle: {
-    position: 'absolute',
+    position: "absolute",
     borderWidth: 2,
-    borderColor: '#00ffff',
-    borderStyle: 'dashed',
-    backgroundColor: 'transparent',
+    borderColor: "#00ffff",
+    borderStyle: "dashed",
+    backgroundColor: "transparent",
     shadowColor: "#00ffff",
     shadowOffset: {
       width: 0,
@@ -742,8 +746,8 @@ const styles = StyleSheet.create({
     elevation: 10,
     width: 50,
     height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   neonButtonInner: {
     backgroundColor: "#000",
@@ -783,8 +787,8 @@ const styles = StyleSheet.create({
   hiddenDebugStar: {
     width: 24,
     height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   debugStarShape: {
     width: 20,

@@ -316,7 +316,7 @@ const ViewPage: React.FC = () => {
       {/* アニメーション付き紫ネオン星エフェクト - 写真エリアを避けて配置 */}
       {starConfigs.map((config, index) => (
         <Animated.View
-        //biome-ignore lint/suspicious/noArrayindex: <unknown id>
+          //biome-ignore lint/suspicious/noArrayindex: <unknown id>
           key={`star-${index}`}
           style={[
             styles.neonStar,
