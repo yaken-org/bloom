@@ -10,12 +10,12 @@ const FRAME_IMAGES = [
   //require("@/assets/flames/red_frame.png"),
   //require("@/assets/flames/yellow_frame.png"),
   //require("@/assets/flames/wabi_orange.png"),
-  //   require("@/assets/flames/gira_green.png"),
-  //   require("@/assets/flames/gira_purple.png"),
-  //   require("@/assets/flames/gira_blue.png"),
-  //   require("@/assets/flames/gira_red.png"),
-  //   require("@/assets/flames/gira_yellow.png"),
-  //   require("@/assets/flames/mirror_orange.png"),
+  require("@/assets/flames/gira_green.png"),
+  require("@/assets/flames/gira_purple.png"),
+  require("@/assets/flames/gira_blue.png"),
+  require("@/assets/flames/gira_red.png"),
+  require("@/assets/flames/gira_yellow.png"),
+  require("@/assets/flames/mirror_orange.png"),
   require("@/assets/flames/gira_photo.png"),
 ];
 
