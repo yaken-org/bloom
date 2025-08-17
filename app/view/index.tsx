@@ -10,7 +10,6 @@ import {
   Alert,
   Animated,
   Dimensions,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -26,72 +25,103 @@ const ViewPage: React.FC = () => {
   const [overlayImageUrl] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const screenWidth = Dimensions.get("window").width;
+  const _screenHeight = Dimensions.get("window").height;
 
   // キラキラアニメーション用（共通化）
   const sparkleAnimValues = useMemo(
-    () => [
-      new Animated.Value(0),
-      new Animated.Value(0),
-      new Animated.Value(0),
-      new Animated.Value(0),
-      new Animated.Value(0),
-      new Animated.Value(0),
-      new Animated.Value(0),
-      new Animated.Value(0),
-    ],
+    () => Array.from({ length: 18 }, () => new Animated.Value(0)),
     [],
   );
   const [glowAnim] = useState(() => new Animated.Value(0));
 
-  // キラキラの位置と絵文字の設定
-  const sparkleConfigs = [
-    { emoji: "✨", style: { top: 80, left: 20 } },
-    { emoji: "⭐", style: { top: 120, right: 20 } },
-    { emoji: "💫", style: { bottom: 150, left: 30 } },
-    { emoji: "🌟", style: { bottom: 200, right: 40 } },
-    { emoji: "✨", style: { bottom: 100, left: 50 } },
-    { emoji: "🌟", style: { top: 180, left: screenWidth * 0.6 } },
-    { emoji: "💫", style: { top: 250, left: 80 } },
-    { emoji: "⭐", style: { bottom: 300, right: 60 } },
+  // 星の位置設定（写真エリアを完全に避けて配置）
+  const starConfigs = [
+    // 上段（戻るボタンエリア周辺）
+    { style: { top: 70, left: 15 }, size: 20 }, // 上部左（戻るボタンの下）
+    { style: { top: 70, right: 15 }, size: 20 }, // 上部右
+    { style: { top: 100, left: screenWidth * 0.12 }, size: 18 }, // 上部左寄り
+    { style: { top: 100, right: screenWidth * 0.12 }, size: 18 }, // 上部右寄り
+    { style: { top: 130, left: screenWidth * 0.05 }, size: 16 }, // 上部左端
+    { style: { top: 130, right: screenWidth * 0.05 }, size: 16 }, // 上部右端
+
+    // 下段（ボタンエリア周辺）- 大幅に増やしてばらつかせる
+    { style: { bottom: 40, left: 10 }, size: 28 }, // 大きめ
+    { style: { bottom: 45, right: 15 }, size: 24 }, // 中くらい
+    { style: { bottom: 70, left: screenWidth * 0.06 }, size: 32 }, // 特大
+    { style: { bottom: 65, right: screenWidth * 0.08 }, size: 20 }, // 普通
+    { style: { bottom: 90, left: screenWidth * 0.12 }, size: 26 }, // 大きめ
+    { style: { bottom: 85, right: screenWidth * 0.15 }, size: 18 }, // 小さめ
+    { style: { bottom: 110, left: screenWidth * 0.18 }, size: 22 }, // 中くらい
+    { style: { bottom: 105, right: screenWidth * 0.2 }, size: 30 }, // 大きめ
+    { style: { bottom: 130, left: screenWidth * 0.25 }, size: 16 }, // 小さめ
+    { style: { bottom: 125, right: screenWidth * 0.22 }, size: 24 }, // 中くらい
+    { style: { bottom: 55, left: screenWidth * 0.35 }, size: 20 }, // 中央寄り
+    { style: { bottom: 80, right: screenWidth * 0.32 }, size: 34 }, // 超特大
   ];
   const [hasPublished, setHasPublished] = useState(false);
+
+  // ふわふわ浮かぶアニメーション用
+  const floatAnimValues = useMemo(
+    () => Array.from({ length: 18 }, () => new Animated.Value(0)),
+    [],
+  );
 
   const { imageUri } = useLocalSearchParams<{
     imageUri: string;
   }>();
 
-  // キラキラアニメーション効果
+  // 星のアニメーション効果
   useEffect(() => {
-    // すべてのキラキラを一つのアニメーションシーケンスで管理
-    const createUnifiedSparkleAnimation = () => {
-      const sparkleSequences = sparkleAnimValues.map((animValue, index) =>
+    // すべての星を一つのアニメーションシーケンスで管理
+    const createUnifiedStarAnimation = () => {
+      const starScaleSequences = sparkleAnimValues.map((animValue, index) =>
         Animated.sequence([
-          Animated.delay(index * 200), // 段階的な開始遅延
+          Animated.delay(index * 300), // 段階的な開始遅延
           Animated.loop(
             Animated.sequence([
               Animated.timing(animValue, {
                 toValue: 1,
-                duration: 1000,
+                duration: 1500,
                 useNativeDriver: true,
               }),
               Animated.timing(animValue, {
-                toValue: 0,
-                duration: 1000,
+                toValue: 0.3,
+                duration: 1500,
                 useNativeDriver: true,
               }),
-              Animated.delay(500),
             ]),
           ),
         ]),
       );
 
-      // すべてのキラキラアニメーションを並列実行（但し一つのアニメーションとして管理）
-      return Animated.parallel(sparkleSequences);
+      // ふわふわ浮かぶアニメーション
+      const floatSequences = floatAnimValues.map((animValue, index) =>
+        Animated.sequence([
+          Animated.delay(index * 200),
+          Animated.loop(
+            Animated.sequence([
+              Animated.timing(animValue, {
+                toValue: 1,
+                duration: 2000 + index * 200, // 各星で微妙に異なる周期
+                useNativeDriver: true,
+              }),
+              Animated.timing(animValue, {
+                toValue: 0,
+                duration: 2000 + index * 200,
+                useNativeDriver: true,
+              }),
+            ]),
+          ),
+        ]),
+      );
+
+      // すべてのアニメーションを並列実行
+      return Animated.parallel([...starScaleSequences, ...floatSequences]);
     };
 
-    // 統一されたキラキラアニメーション
-    const unifiedSparkleAnimation = createUnifiedSparkleAnimation();
-    unifiedSparkleAnimation.start();
+    // 統一された星アニメーション
+    const unifiedStarAnimation = createUnifiedStarAnimation();
+    unifiedStarAnimation.start();
 
     // 背景のグローアニメーション
     const glowAnimation = Animated.loop(
@@ -112,10 +142,10 @@ const ViewPage: React.FC = () => {
 
     return () => {
       // 統一されたアニメーションを停止
-      unifiedSparkleAnimation.stop();
+      unifiedStarAnimation.stop();
       glowAnimation.stop();
     };
-  }, [sparkleAnimValues, glowAnim]);
+  }, [sparkleAnimValues, floatAnimValues, glowAnim]);
 
   const { settings, activeFilters, toggleFilter, setFilterOptions } =
     useFilters();
@@ -367,126 +397,93 @@ const ViewPage: React.FC = () => {
         />
       </Animated.View>
 
-      {/* アニメーション付きキラキラ効果（共通化） */}
-      {sparkleConfigs.map((config, index) => (
-        <Animated.Text
-          key={`sparkle-${config.emoji}-${index}`}
+      {/* アニメーション付き紫ネオン星エフェクト - 写真エリアを避けて配置 */}
+      {starConfigs.map((config, index) => (
+        <Animated.View
+        //biome-ignore lint/suspicious/noArrayindex: <unknown id>
+          key={`star-${index}`}
           style={[
-            styles.sparkle,
+            styles.neonStar,
             config.style,
             {
-              opacity: sparkleAnimValues[index],
-              transform: [{ scale: sparkleAnimValues[index] }],
+              width: config.size || 20,
+              height: config.size || 20,
+              opacity: sparkleAnimValues[index].interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.3, 1],
+              }),
+              transform: [
+                {
+                  scale: sparkleAnimValues[index].interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.4, 1.3],
+                  }),
+                },
+                {
+                  translateY: floatAnimValues[index].interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -15],
+                  }),
+                },
+              ],
             },
           ]}
         >
-          {config.emoji}
-        </Animated.Text>
+          <View
+            style={[
+              styles.starShape,
+              {
+                width: config.size || 20,
+                height: config.size || 20,
+              },
+            ]}
+          />
+        </Animated.View>
       ))}
 
-      {/* 戻るボタン - 絶対位置で画像と重ならない位置に */}
-      <View
-        style={{
-          position: "absolute",
-          top: 50,
-          left: 20,
-          zIndex: 100,
-        }}
-      >
-        <TouchableOpacity
-          style={[styles.backButton, styles.glowButton]}
-          onPress={handleGoBack}
-        >
-          <LinearGradient
-            colors={["#667eea", "#764ba2"]}
-            style={styles.buttonGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <Text style={styles.backButtonText}>✨ ← カメラに戻る ✨</Text>
-          </LinearGradient>
+      {/* 戻るボタン - 紫ネオンスタイル */}
+      <View style={styles.backButtonContainer}>
+        <TouchableOpacity style={styles.neonButton} onPress={handleGoBack}>
+          <View style={styles.neonButtonInner}>
+            <Text style={styles.neonButtonText}>← BACK</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        style={styles.scrollContainer}
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-        bounces={true}
-        contentInsetAdjustmentBehavior="automatic"
-        contentInset={{ top: 0 }} // iOS用の追加マージン
-      >
+      <View style={styles.contentContainer}>
         <StatusBar style="light" />
 
         {imageUri ? (
           <>
-            <FilterView
-              ref={filterViewRef}
-              imageUrl={imageUri}
-              filters={activeFilters}
-              overlayImageUrl={overlayImageUrl || undefined}
-              filterOptions={settings.options}
-            />
-
-            {/* ギラギラタイトル - 写真の下に配置 */}
-            <View
-              style={{
-                marginTop: 50, // 写真との間隔をさらに増やす
-                marginBottom: 30,
-              }}
-            >
-              <LinearGradient
-                colors={["#FF6B9D", "#4ECDC4", "#45B7D1"]}
-                style={styles.titleGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              >
-                <Text style={styles.glowTitle}>✨ BLOOM CAMERA ✨</Text>
-              </LinearGradient>
+            {/* 写真表示エリア - 中央に配置 */}
+            <View style={styles.imageContainer}>
+              <FilterView
+                ref={filterViewRef}
+                imageUrl={imageUri}
+                filters={activeFilters}
+                overlayImageUrl={overlayImageUrl || undefined}
+                filterOptions={settings.options}
+              />
             </View>
 
-            {/* ボタンを縦並びに配置 */}
-            <View
-              style={{
-                marginTop: 30,
-                width: "100%",
-                paddingHorizontal: 20,
-              }}
-            >
+            {/* ボタンエリア - 写真の下に明確に分離 */}
+            <View style={styles.buttonContainer}>
               <TouchableOpacity
-                style={[styles.saveButton, styles.glowButton]}
+                style={styles.neonButton}
                 onPress={handleSaveImage}
               >
-                <LinearGradient
-                  colors={["#FF6B9D", "#C44569"]}
-                  style={styles.buttonGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={styles.saveButtonText}>✨ 画像を保存 ✨</Text>
-                </LinearGradient>
+                <View style={styles.neonButtonInner}>
+                  <Text style={styles.neonButtonText}>SAVE</Text>
+                </View>
               </TouchableOpacity>
-            </View>
 
-            <View
-              style={{
-                marginTop: 15,
-                width: "100%",
-                paddingHorizontal: 20,
-              }}
-            >
               <TouchableOpacity
-                style={[styles.shareButton, styles.glowButton]}
+                style={[styles.neonButton, styles.shareButton]}
                 onPress={handleShareImage}
               >
-                <LinearGradient
-                  colors={["#4ECDC4", "#44A08D"]}
-                  style={styles.buttonGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={styles.shareButtonText}>🌟 共有 🌟</Text>
-                </LinearGradient>
+                <View style={styles.neonButtonInner}>
+                  <Text style={styles.neonButtonText}>SHARE</Text>
+                </View>
               </TouchableOpacity>
             </View>
 
@@ -510,7 +507,7 @@ const ViewPage: React.FC = () => {
             <Text style={styles.placeholderText}>画像が渡されませんでした</Text>
           </View>
         )}
-      </ScrollView>
+      </View>
     </View>
   );
 };
@@ -520,24 +517,90 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000", // カメラと同じ黒色に変更
   },
-  scrollContainer: {
+  contentContainer: {
     flex: 1,
-  },
-  container: {
     alignItems: "center",
     justifyContent: "flex-start",
     padding: 20,
-    paddingTop: 120, // 戻るボタンとの重なりを避けるためさらに増やす
-    paddingBottom: 40,
+    paddingTop: 120, // 戻るボタンとの重なりを避ける
   },
-  backButton: {
-    borderRadius: 20,
-    overflow: "hidden", // グラデーション用
+  // 戻るボタンの位置を固定
+  backButtonContainer: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    zIndex: 100,
   },
-  backButtonText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "600",
+  // 写真表示エリア
+  imageContainer: {
+    marginBottom: 50, // 写真とボタンの間により大きなスペース
+    shadowColor: "#fff",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  // ボタンエリア - 写真の下に配置
+  buttonContainer: {
+    alignItems: "center",
+    gap: 20, // ボタン間のスペースを広げる
+    paddingTop: 10, // 上部にパディング追加
+  },
+  // 紫ネオン星のスタイル
+  neonStar: {
+    position: "absolute",
+    zIndex: 5,
+  },
+  starShape: {
+    backgroundColor: "#ff00ff",
+    transform: [{ rotate: "45deg" }],
+    shadowColor: "#ff00ff",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 12,
+  },
+  // 紫ネオンボタンスタイル
+  neonButton: {
+    backgroundColor: "#000",
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: "#ff00ff",
+    padding: 2,
+    shadowColor: "#ff00ff",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  neonButtonInner: {
+    backgroundColor: "#000",
+    borderRadius: 28,
+    paddingHorizontal: 25,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  neonButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    letterSpacing: 2,
+    textShadowColor: "#ff00ff",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 5,
+  },
+  shareButton: {
+    marginTop: 15,
   },
   title: {
     fontSize: 24,
@@ -554,43 +617,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   selectButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  saveButton: {
-    borderRadius: 8,
-    overflow: "hidden", // グラデーション用
-  },
-  saveButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  shareButton: {
-    borderRadius: 8,
-    overflow: "hidden", // グラデーション用
-  },
-  shareButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  publishButton: {
-    backgroundColor: "#FF6B6B",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  publishButtonDisabled: {
-    backgroundColor: "#999999",
-    opacity: 0.7,
-  },
-  publishButtonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "600",
@@ -624,40 +650,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#ccc", // 明るいグレーに変更
     textAlign: "center",
-  },
-  glowButton: {
-    shadowColor: "#FF6B9D",
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.6, // 少し抑えめに
-    shadowRadius: 8, // 少し小さく
-    elevation: 8, // Android用
-    zIndex: 50, // 適切なレイヤー
-  },
-  buttonGradient: {
-    paddingHorizontal: 20, // 元のサイズに戻す
-    paddingVertical: 12, // 元のサイズに戻す
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  titleGradient: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  glowTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "#fff",
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-    letterSpacing: 2,
   },
   // 静的なギラギラ効果用スタイル
   glowBackground: {
