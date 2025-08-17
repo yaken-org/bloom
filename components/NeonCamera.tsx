@@ -15,7 +15,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Svg, { Circle } from "react-native-svg";
 
 export default function NeonCamera() {
   const router = useRouter();
@@ -142,7 +141,7 @@ export default function NeonCamera() {
     Animated.loop(
       Animated.timing(outerRotation, {
         toValue: 1,
-        duration: 4000,
+        duration: 9000,
         easing: Easing.linear,
         useNativeDriver: true,
       }),
@@ -152,7 +151,7 @@ export default function NeonCamera() {
     Animated.loop(
       Animated.timing(innerRotation, {
         toValue: 1,
-        duration: 5000,
+        duration: 10000,
         easing: Easing.linear,
         useNativeDriver: true,
       }),
@@ -363,7 +362,7 @@ export default function NeonCamera() {
         style={StyleSheet.absoluteFillObject}
       />
 
-      {/* アニメーション付きギラギラ背景エフェクト */}
+      {/* アニメーション付きキラキラ背景エフェクト */}
       <Animated.View
         style={[
           styles.glowBackground,
@@ -499,10 +498,14 @@ export default function NeonCamera() {
             },
           ]}
         >
-          <Svg width={squareSize} height={squareSize} style={styles.svgFrame}>
-            {/* 外の円（右回り4秒） */}
-            <Animated.View
-              style={{
+          {/* 外の円（右回り4秒） */}
+          <Animated.View
+            style={[
+              styles.outerCircle,
+              {
+                width: squareSize - 20,
+                height: squareSize - 20,
+                borderRadius: (squareSize - 20) / 2,
                 transform: [
                   {
                     rotate: outerRotation.interpolate({
@@ -511,21 +514,18 @@ export default function NeonCamera() {
                     }),
                   },
                 ],
-              }}
-            >
-              <Circle
-                cx={squareSize / 2}
-                cy={squareSize / 2}
-                r={squareSize / 2 - 10}
-                stroke="#ff00ff"
-                strokeWidth={3}
-                fill="transparent"
-                strokeDasharray="10 5"
-              />
-            </Animated.View>
-            {/* 内の円（左回り5秒） */}
-            <Animated.View
-              style={{
+              },
+            ]}
+          />
+          
+          {/* 内の円（左回り5秒） */}
+          <Animated.View
+            style={[
+              styles.innerCircle,
+              {
+                width: squareSize - 40,
+                height: squareSize - 40,
+                borderRadius: (squareSize - 40) / 2,
                 transform: [
                   {
                     rotate: innerRotation.interpolate({
@@ -534,19 +534,9 @@ export default function NeonCamera() {
                     }),
                   },
                 ],
-              }}
-            >
-              <Circle
-                cx={squareSize / 2}
-                cy={squareSize / 2}
-                r={squareSize / 2 - 20}
-                stroke="#00ffff"
-                strokeWidth={2}
-                fill="transparent"
-                strokeDasharray="5 10"
-              />
-            </Animated.View>
-          </Svg>
+              },
+            ]}
+          />
         </View>
       </View>
 
@@ -641,9 +631,38 @@ const styles = StyleSheet.create({
   },
   neonFrame: {
     position: "absolute",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  svgFrame: {
-    position: "absolute",
+  outerCircle: {
+    position: 'absolute',
+    borderWidth: 3,
+    borderColor: '#ff00ff',
+    borderStyle: 'dashed',
+    backgroundColor: 'transparent',
+    shadowColor: "#ff00ff",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  innerCircle: {
+    position: 'absolute',
+    borderWidth: 2,
+    borderColor: '#00ffff',
+    borderStyle: 'dashed',
+    backgroundColor: 'transparent',
+    shadowColor: "#00ffff",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
+    elevation: 8,
   },
   buttonContainer: {
     position: "absolute",
@@ -781,7 +800,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
-  // ギラギラ背景エフェクト
+  // キラキラ背景エフェクト
   glowBackground: {
     position: "absolute",
     top: -100,
