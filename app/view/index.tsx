@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import FilterView, { type FilterViewRef } from "@/components/FilterView";
 import { useFilters } from "@/hooks/useFilters";
-import getRandomFilters from "@/lib/filters/genRandomFilters";
+import getRandomFilters from "@/lib/filters/getRandomFilters";
 import type { FilterType } from "@/types/filters";
 
 const ViewPage: React.FC = () => {

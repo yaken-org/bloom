@@ -1,6 +1,11 @@
 import { filterFactory } from "@/lib/filters/FilterFactory";
 import type { FilterOptions, OverlayFilterOptions } from "@/types/filters";
 
+// ギラギラ系のフィルタータイプ
+const FILTERS = ["dazzling", "neon", "pachinko", "jewel", "rainbow", "blue", "sepia", "electric", "glitch"];
+import DarkFilter from "@/components/filters/DarkFilter";
+
+
 // フレーム画像をrequireで事前読み込み
 const FRAME_IMAGES = [
   //require("@/assets/flames/gold_frame.png"),
@@ -23,24 +28,20 @@ const FRAME_IMAGES = [
  * 現在登録されているフィルターから2つをランダムに選ぶユースケース
  * @returns {[string[], FilterOptions]} ランダムに選択されたフィルター名の配列とオプション
  */
-export default function getRandomFilters(): [string[], FilterOptions] {
-  // 登録されている全フィルターのタイプを取得
-  const availableFilters = filterFactory.getAvailableFilterTypes();
+export default function getRandomGlitteryFilters(): [string[], FilterOptions] {
+  const availableGlittery = FILTERS.filter(f => filterFactory.hasFilter(f));
 
-  // フィルターが2つ未満の場合は利用可能な全てを返す
-  if (availableFilters.length <= 2) {
-    return [availableFilters, {}];
-  }
+  if (availableGlittery.length === 0) return [[], {}];
 
-  // ランダムに2つ選択
-  const shuffled = fisherYatesShuffle(availableFilters);
-  const selectedFilters = shuffled.slice(0, 2);
+  // ランダムに2〜3個選択
+  const shuffled = fisherYatesShuffle(availableGlittery);
+  const count = Math.min(3, shuffled.length); // 最大3つ
+  const selectedFilters = shuffled.slice(0, count);
 
-  // オーバーレイフィルターを追加
-  selectedFilters.splice(0, 0, "overlay");
+  // オーバーレイフィルターを必ず追加
+  selectedFilters.unshift("overlay");
 
   const overlayImageUrl = chooseOverlayImageUrl();
-  // オーバーレイフィルターのオプションを設定
   const options: FilterOptions = overlayImageUrl
     ? ({
         overlayImageUrl,
