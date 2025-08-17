@@ -2,9 +2,9 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Animated, Easing, StyleSheet, View, Dimensions } from "react-native";
+import { Animated, Dimensions, Easing, StyleSheet, View } from "react-native";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 export default function LoadingScreen() {
   const router = useRouter();
@@ -324,7 +324,7 @@ export default function LoadingScreen() {
   const scaleFactorWidth = Math.min(screenWidth / 393, 1); // iPhone 15 Proの幅を基準
   const scaleFactorHeight = Math.min(screenHeight / 852, 1); // iPhone 15 Proの高さを基準
   const scaleFactor = Math.min(scaleFactorWidth, scaleFactorHeight);
-  
+
   // フォントサイズを動的に計算（画面幅に基づいて最大サイズを決定）
   const maxFontSize = Math.min(screenWidth / 14, 28); // 画面幅の1/14、最大28px（2行に確実に収まるように調整）
   const responsiveFontSize = Math.max(maxFontSize * scaleFactor, 14); // 最小14px
@@ -537,7 +537,9 @@ export default function LoadingScreen() {
         </View>
 
         {/* ローディングテキスト */}
-        <Animated.View style={[styles.textContainer, { transform: [{ scale: pulseAnim }] }]}>
+        <Animated.View
+          style={[styles.textContainer, { transform: [{ scale: pulseAnim }] }]}
+        >
           <Animated.Text
             style={[
               styles.loadingText,
