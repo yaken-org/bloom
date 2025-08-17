@@ -75,9 +75,6 @@ app.get("/:id", async (c) => {
 
   const post = await db.query.posts.findFirst({
     where: eq(posts.id, id),
-    with: {
-      reactions: true,
-    },
   });
 
   if (!post) {
