@@ -12,13 +12,29 @@ const DarkFilter: React.FC<FilterComponentProps> = React.memo(
     // 彩度・光量・コントラストを黒っぽく調整
     const darkMatrix = useMemo(() => {
       const s = 0.6 * intensity; // 彩度控えめ
-      const b = 0.25;             // 光量をさらに暗く
-      const contrast = 0.9;       // コントラスト微調整
+      const b = 0.25; // 光量をさらに暗く
+      const contrast = 0.9; // コントラスト微調整
       return [
-        (b + s) * contrast, 0.01 * s, 0.01 * s, 0, 0,
-        0.01 * s, (b + s) * contrast, 0.01 * s, 0, 0,
-        0.01 * s, 0.01 * s, (b + s) * contrast, 0, 0,
-        0, 0, 0, 1, 0,
+        (b + s) * contrast,
+        0.01 * s,
+        0.01 * s,
+        0,
+        0,
+        0.01 * s,
+        (b + s) * contrast,
+        0.01 * s,
+        0,
+        0,
+        0.01 * s,
+        0.01 * s,
+        (b + s) * contrast,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
       ];
     }, [intensity]);
 

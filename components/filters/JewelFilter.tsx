@@ -7,33 +7,33 @@ const JewelFilter: React.FC<FilterComponentProps> = React.memo(
     const { opacity = 0.8, intensity = 1.0 } = options;
 
     const s = intensity;
-    const b = 0.7;
 
     const jewelMatrix = useMemo(() => {
-      const i = s;
-      return [
-        b + 1.2 * i,
-        0.4 * i,
-        0.5 * i,
-        0,
-        0,
-        0.3 * i,
-        b + 1.3 * i,
-        0.4 * i,
-        0,
-        0,
-        0.4 * i,
-        0.3 * i,
-        b + 1.4 * i,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-      ];
-    }, [s, b]);
+        const b = 0.7;
+        const i = s;
+        return [
+            b + 1.2 * i,
+            0.4 * i,
+            0.5 * i,
+            0,
+            0,
+            0.3 * i,
+            b + 1.3 * i,
+            0.4 * i,
+            0,
+            0,
+            0.4 * i,
+            0.3 * i,
+            b + 1.4 * i,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+        ];
+    }, [s]);
 
     return (
       <Group>
