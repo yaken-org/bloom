@@ -19,6 +19,14 @@
       "bucket_name": "bloom-socials",
       "binding": "bloom_socials"
     }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bloom-socials",
+      "database_id": "921adb1d-7b7d-4add-b7df-414acb5bbdc8",
+      "migrations_dir": "./db/migrations"
+    }
   ]
   /**
    * Smart Placement

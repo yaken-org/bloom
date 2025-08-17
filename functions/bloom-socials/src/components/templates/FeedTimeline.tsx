@@ -10,7 +10,14 @@ interface FeedTimelineProps {
 
 export const FeedTimeline: FC<FeedTimelineProps> = ({ feedPromise }) => {
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
+    <div
+      style={{
+        maxWidth: "600px",
+        margin: "0 auto",
+        padding: "20px",
+        width: "100%",
+      }}
+    >
       <header
         style={{
           borderBottom: "1px solid #e0e0e0",
@@ -18,7 +25,13 @@ export const FeedTimeline: FC<FeedTimelineProps> = ({ feedPromise }) => {
           marginBottom: "16px",
         }}
       >
-        <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: "0" }}>
+        <h1
+          style={{
+            fontSize: "clamp(20px, 5vw, 24px)",
+            fontWeight: "bold",
+            margin: "0",
+          }}
+        >
           フィード
         </h1>
       </header>

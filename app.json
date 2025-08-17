@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "bloom",
+    "name": "GILANTIC PHOTO",
     "slug": "bloom",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -13,7 +13,8 @@
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to save filtered images.",
         "NSPhotoLibraryAddUsageDescription": "This app needs permission to save filtered images to your photo library."
-      }
+      },
+      "bundleIdentifier": "org.yaken.bloom"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,8 +25,13 @@
       "permissions": [
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
-        "READ_MEDIA_IMAGES"
-      ]
+        "READ_MEDIA_IMAGES",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "package": "com.anonymous.bloom"
     },
     "web": {
       "bundler": "metro",

@@ -65,6 +65,16 @@ Workspace設定を用意しているのでそれを使うと設定が共有で�
 $ code .vscode/bloom.code-workspace
 ```
 
+### iOSで実機デバッグする方法
+1. XcodeとAppleDeveloperAccountを用意します
+2. `npx expo prebuild`
+3. `npx pod-install`
+4. `cd ios && pod install`
+5. `ios/bloom.xcworkspace`をXcodeで開き、Teamを自分のAppleIDにする
+6. iPhoneをデベロッパーモードで繋ぐ
+7. Cmd+Rしてひたすら待つ
+8. 完成
+
 ## 関連ドキュメント
 
 - [Expo](https://expo.dev)

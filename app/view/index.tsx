@@ -1,5 +1,6 @@
 import * as FileSystem from "expo-file-system";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Linking from "expo-linking";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
@@ -57,6 +58,7 @@ const ViewPage: React.FC = () => {
     { style: { bottom: 55, left: screenWidth * 0.35 }, size: 20 }, // 中央寄り
     { style: { bottom: 80, right: screenWidth * 0.32 }, size: 34 }, // 超特大
   ];
+  const [hasPublished, setHasPublished] = useState(false);
 
   // ふわふわ浮かぶアニメーション用
   const floatAnimValues = useMemo(
@@ -285,6 +287,88 @@ const ViewPage: React.FC = () => {
     }
   };
 
+  const handlePublishToHub = async () => {
+    // すでに投稿済みの場合は何もしない
+    if (hasPublished) {
+      Alert.alert(
+        "すでに投稿済み",
+        "この画像はすでに投稿されています。新しい写真を撮影してから投稿してください。",
+      );
+      return;
+    }
+
+    try {
+      // 画像のスナップショットを取得
+      const snapshot = filterViewRef.current?.makeImageSnapshot();
+      if (!snapshot) {
+        Alert.alert("エラー", "画像のスナップショットを取得できませんでした。");
+        return;
+      }
+
+      // Base64データにエンコード
+      const base64Data = snapshot.encodeToBase64();
+      if (!base64Data) {
+        Alert.alert("エラー", "画像のエンコードに失敗しました。");
+        return;
+      }
+
+      // 一時ファイルに保存
+      const filename = `bloom_${Date.now()}.png`;
+      const fileUri = `${FileSystem.documentDirectory}${filename}`;
+
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // FormDataを作成（React Native用の形式）
+      const formData = new FormData();
+      formData.append("image", {
+        uri: fileUri,
+        type: "image/png",
+        name: filename,
+        // biome-ignore lint/suspicious/noExplicitAny: React Native だと型が異なる？
+      } as any);
+
+      // GILANTIC PHOTO's Hubに投稿
+      const response = await fetch("https://gilantic.km3.dev/api/v1/posts", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // 一時ファイルを削除
+      await FileSystem.deleteAsync(fileUri, { idempotent: true });
+
+      // 投稿済みフラグを設定
+      setHasPublished(true);
+
+      Alert.alert("公開完了", "画像をGILANTIC PHOTO's Hubに公開しました！", [
+        {
+          text: "投稿を見る",
+          onPress: async () => {
+            const url = `https://gilantic.km3.dev/post/${result.id}`;
+            await Linking.openURL(url);
+          },
+        },
+        {
+          text: "閉じる",
+          style: "cancel",
+        },
+      ]);
+    } catch (error) {
+      console.error("Publish to hub error:", error);
+      Alert.alert("エラー", "GILANTIC PHOTO's Hubへの公開に失敗しました。");
+    }
+  };
+
   const handleGoBack = () => {
     router.replace("/");
   };
@@ -402,6 +486,21 @@ const ViewPage: React.FC = () => {
                 </View>
               </TouchableOpacity>
             </View>
+
+            <TouchableOpacity
+              style={[
+                styles.publishButton,
+                hasPublished && styles.publishButtonDisabled,
+              ]}
+              onPress={handlePublishToHub}
+              disabled={hasPublished}
+            >
+              <Text style={styles.publishButtonText}>
+                {hasPublished
+                  ? "投稿済み - 新しい写真を撮影してください"
+                  : "GILANTIC PHOTO's Hubに公開"}
+              </Text>
+            </TouchableOpacity>
           </>
         ) : (
           <View style={styles.placeholderContainer}>
