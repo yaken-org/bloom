@@ -2,9 +2,9 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Animated, Dimensions, Easing, StyleSheet, View } from "react-native";
+import { Animated, Easing, StyleSheet, View, Dimensions } from "react-native";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function LoadingScreen() {
   const router = useRouter();
@@ -324,6 +324,10 @@ export default function LoadingScreen() {
   const scaleFactorWidth = Math.min(screenWidth / 393, 1); // iPhone 15 Proの幅を基準
   const scaleFactorHeight = Math.min(screenHeight / 852, 1); // iPhone 15 Proの高さを基準
   const scaleFactor = Math.min(scaleFactorWidth, scaleFactorHeight);
+  
+  // フォントサイズを動的に計算（画面幅に基づいて最大サイズを決定）
+  const maxFontSize = Math.min(screenWidth / 14, 28); // 画面幅の1/14、最大28px（2行に確実に収まるように調整）
+  const responsiveFontSize = Math.max(maxFontSize * scaleFactor, 14); // 最小14px
 
   return (
     <View style={styles.container}>
@@ -533,14 +537,14 @@ export default function LoadingScreen() {
         </View>
 
         {/* ローディングテキスト */}
-        <Animated.View
-          style={[styles.textContainer, { transform: [{ scale: pulseAnim }] }]}
-        >
+        <Animated.View style={[styles.textContainer, { transform: [{ scale: pulseAnim }] }]}>
           <Animated.Text
             style={[
               styles.loadingText,
               {
                 color: textColor,
+                fontSize: responsiveFontSize,
+                lineHeight: responsiveFontSize * 1.4,
               },
             ]}
           >
@@ -551,10 +555,12 @@ export default function LoadingScreen() {
               styles.loadingText,
               {
                 color: textColor,
+                fontSize: responsiveFontSize,
+                lineHeight: responsiveFontSize * 1.4,
               },
             ]}
           >
-            ぎらつきを考えています...
+            ぎらつきを考えています
           </Animated.Text>
         </Animated.View>
       </Animated.View>
@@ -659,12 +665,10 @@ const styles = StyleSheet.create({
     maxWidth: screenWidth - 40,
   },
   loadingText: {
-    fontSize: 16,
     fontWeight: "900",
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 20,
     letterSpacing: 1,
     textAlign: "center",
-    lineHeight: 24,
   },
 });
