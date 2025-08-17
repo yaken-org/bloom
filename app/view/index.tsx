@@ -9,7 +9,6 @@ import {
   Alert,
   Animated,
   Dimensions,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -25,7 +24,7 @@ const ViewPage: React.FC = () => {
   const [overlayImageUrl] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const screenWidth = Dimensions.get("window").width;
-  const screenHeight = Dimensions.get("window").height;
+  const _screenHeight = Dimensions.get("window").height;
 
   // キラキラアニメーション用（共通化）
   const sparkleAnimValues = useMemo(
@@ -43,7 +42,7 @@ const ViewPage: React.FC = () => {
     { style: { top: 100, right: screenWidth * 0.12 }, size: 18 }, // 上部右寄り
     { style: { top: 130, left: screenWidth * 0.05 }, size: 16 }, // 上部左端
     { style: { top: 130, right: screenWidth * 0.05 }, size: 16 }, // 上部右端
-    
+
     // 下段（ボタンエリア周辺）- 大幅に増やしてばらつかせる
     { style: { bottom: 40, left: 10 }, size: 28 }, // 大きめ
     { style: { bottom: 45, right: 15 }, size: 24 }, // 中くらい
@@ -52,7 +51,7 @@ const ViewPage: React.FC = () => {
     { style: { bottom: 90, left: screenWidth * 0.12 }, size: 26 }, // 大きめ
     { style: { bottom: 85, right: screenWidth * 0.15 }, size: 18 }, // 小さめ
     { style: { bottom: 110, left: screenWidth * 0.18 }, size: 22 }, // 中くらい
-    { style: { bottom: 105, right: screenWidth * 0.20 }, size: 30 }, // 大きめ
+    { style: { bottom: 105, right: screenWidth * 0.2 }, size: 30 }, // 大きめ
     { style: { bottom: 130, left: screenWidth * 0.25 }, size: 16 }, // 小さめ
     { style: { bottom: 125, right: screenWidth * 0.22 }, size: 24 }, // 中くらい
     { style: { bottom: 55, left: screenWidth * 0.35 }, size: 20 }, // 中央寄り
@@ -101,12 +100,12 @@ const ViewPage: React.FC = () => {
             Animated.sequence([
               Animated.timing(animValue, {
                 toValue: 1,
-                duration: 2000 + (index * 200), // 各星で微妙に異なる周期
+                duration: 2000 + index * 200, // 各星で微妙に異なる周期
                 useNativeDriver: true,
               }),
               Animated.timing(animValue, {
                 toValue: 0,
-                duration: 2000 + (index * 200),
+                duration: 2000 + index * 200,
                 useNativeDriver: true,
               }),
             ]),
@@ -115,10 +114,7 @@ const ViewPage: React.FC = () => {
       );
 
       // すべてのアニメーションを並列実行
-      return Animated.parallel([
-        ...starScaleSequences,
-        ...floatSequences,
-      ]);
+      return Animated.parallel([...starScaleSequences, ...floatSequences]);
     };
 
     // 統一された星アニメーション
@@ -320,6 +316,7 @@ const ViewPage: React.FC = () => {
       {/* アニメーション付き紫ネオン星エフェクト - 写真エリアを避けて配置 */}
       {starConfigs.map((config, index) => (
         <Animated.View
+        //biome-ignore lint/suspicious/noArrayindex: <unknown id>
           key={`star-${index}`}
           style={[
             styles.neonStar,
@@ -332,11 +329,11 @@ const ViewPage: React.FC = () => {
                 outputRange: [0.3, 1],
               }),
               transform: [
-                { 
+                {
                   scale: sparkleAnimValues[index].interpolate({
                     inputRange: [0, 1],
                     outputRange: [0.4, 1.3],
-                  })
+                  }),
                 },
                 {
                   translateY: floatAnimValues[index].interpolate({
@@ -348,22 +345,21 @@ const ViewPage: React.FC = () => {
             },
           ]}
         >
-          <View style={[
-            styles.starShape,
-            {
-              width: config.size || 20,
-              height: config.size || 20,
-            }
-          ]} />
+          <View
+            style={[
+              styles.starShape,
+              {
+                width: config.size || 20,
+                height: config.size || 20,
+              },
+            ]}
+          />
         </Animated.View>
       ))}
 
       {/* 戻るボタン - 紫ネオンスタイル */}
       <View style={styles.backButtonContainer}>
-        <TouchableOpacity
-          style={styles.neonButton}
-          onPress={handleGoBack}
-        >
+        <TouchableOpacity style={styles.neonButton} onPress={handleGoBack}>
           <View style={styles.neonButtonInner}>
             <Text style={styles.neonButtonText}>← BACK</Text>
           </View>
@@ -439,7 +435,7 @@ const styles = StyleSheet.create({
   // 写真表示エリア
   imageContainer: {
     marginBottom: 50, // 写真とボタンの間により大きなスペース
-    shadowColor: '#fff',
+    shadowColor: "#fff",
     shadowOffset: {
       width: 0,
       height: 0,
@@ -450,7 +446,7 @@ const styles = StyleSheet.create({
   },
   // ボタンエリア - 写真の下に配置
   buttonContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 20, // ボタン間のスペースを広げる
     paddingTop: 10, // 上部にパディング追加
   },
@@ -460,9 +456,9 @@ const styles = StyleSheet.create({
     zIndex: 5,
   },
   starShape: {
-    backgroundColor: '#ff00ff',
-    transform: [{ rotate: '45deg' }],
-    shadowColor: '#ff00ff',
+    backgroundColor: "#ff00ff",
+    transform: [{ rotate: "45deg" }],
+    shadowColor: "#ff00ff",
     shadowOffset: {
       width: 0,
       height: 0,
@@ -473,12 +469,12 @@ const styles = StyleSheet.create({
   },
   // 紫ネオンボタンスタイル
   neonButton: {
-    backgroundColor: '#000',
+    backgroundColor: "#000",
     borderRadius: 30,
     borderWidth: 1,
-    borderColor: '#ff00ff',
+    borderColor: "#ff00ff",
     padding: 2,
-    shadowColor: '#ff00ff',
+    shadowColor: "#ff00ff",
     shadowOffset: {
       width: 0,
       height: 0,
@@ -488,19 +484,19 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   neonButtonInner: {
-    backgroundColor: '#000',
+    backgroundColor: "#000",
     borderRadius: 28,
     paddingHorizontal: 25,
     paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   neonButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     letterSpacing: 2,
-    textShadowColor: '#ff00ff',
+    textShadowColor: "#ff00ff",
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 5,
   },
