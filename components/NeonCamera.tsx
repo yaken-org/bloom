@@ -10,13 +10,11 @@ import {
   Animated,
   Dimensions,
   Easing,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import Svg, { Circle } from "react-native-svg";
 
 export default function NeonCamera() {
   const router = useRouter();
@@ -29,11 +27,22 @@ export default function NeonCamera() {
 
   // アニメーション値
   const [pulseAnim] = useState(() => new Animated.Value(1));
-  const [floatingAnim1] = useState(() => new Animated.Value(0));
-  const [floatingAnim2] = useState(() => new Animated.Value(0));
-  const [floatingAnim3] = useState(() => new Animated.Value(0));
-  const [floatingAnim4] = useState(() => new Animated.Value(0));
   const [strobeOpacity] = useState(() => new Animated.Value(0));
+  const [glowAnim] = useState(() => new Animated.Value(0));
+
+  // フレーム回転用のアニメーション値
+  const [outerRotation] = useState(() => new Animated.Value(0));
+  const [innerRotation] = useState(() => new Animated.Value(0));
+
+  // 浮遊星エフェクト用
+  const sparkleAnimValues = useMemo(
+    () => Array.from({ length: 12 }, () => new Animated.Value(0)),
+    [],
+  );
+  const floatAnimValues = useMemo(
+    () => Array.from({ length: 12 }, () => new Animated.Value(0)),
+    [],
+  );
 
   const { squareSize, squareTop, squareLeft } = useMemo(() => {
     const screenWidth = Dimensions.get("window").width;
@@ -43,6 +52,22 @@ export default function NeonCamera() {
     const squareLeft = (screenWidth - squareSize) / 2;
     return { squareSize, squareTop, squareLeft };
   }, []);
+
+  // 星の位置設定
+  const starConfigs = [
+    { style: { top: 80, left: 20 }, size: 20 },
+    { style: { top: 80, right: 20 }, size: 18 },
+    { style: { top: 120, left: 40 }, size: 16 },
+    { style: { top: 120, right: 40 }, size: 22 },
+    { style: { bottom: 80, left: 20 }, size: 24 },
+    { style: { bottom: 80, right: 20 }, size: 18 },
+    { style: { bottom: 120, left: 40 }, size: 20 },
+    { style: { bottom: 120, right: 40 }, size: 26 },
+    { style: { bottom: 160, left: 60 }, size: 16 },
+    { style: { bottom: 160, right: 60 }, size: 22 },
+    { style: { bottom: 200, left: 80 }, size: 18 },
+    { style: { bottom: 200, right: 80 }, size: 20 },
+  ];
 
   // カメラのパーミッションと初期化を管理
   useEffect(() => {
@@ -95,32 +120,102 @@ export default function NeonCamera() {
       ]),
     ).start();
 
-    // 浮遊アニメーション
-    const floatingAnimation = (anim: Animated.Value, delay: number) => {
-      Animated.loop(
+    // 背景のグローアニメーション
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 1,
+          duration: 3000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0,
+          duration: 3000,
+          useNativeDriver: false,
+        }),
+      ]),
+    ).start();
+
+    // フレーム回転アニメーション
+    // 外の円は右回りに4秒
+    Animated.loop(
+      Animated.timing(outerRotation, {
+        toValue: 1,
+        duration: 9000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    ).start();
+
+    // 内の円は左回りに5秒
+    Animated.loop(
+      Animated.timing(innerRotation, {
+        toValue: 1,
+        duration: 10000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    ).start();
+
+    // 星の浮遊アニメーション
+    const createStarAnimations = () => {
+      const starScaleSequences = sparkleAnimValues.map((animValue, index) =>
         Animated.sequence([
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 3000,
-            delay,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-          Animated.timing(anim, {
-            toValue: 0,
-            duration: 3000,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
+          Animated.delay(index * 200),
+          Animated.loop(
+            Animated.sequence([
+              Animated.timing(animValue, {
+                toValue: 1,
+                duration: 1500,
+                useNativeDriver: true,
+              }),
+              Animated.timing(animValue, {
+                toValue: 0.3,
+                duration: 1500,
+                useNativeDriver: true,
+              }),
+            ]),
+          ),
         ]),
-      ).start();
+      );
+
+      const floatSequences = floatAnimValues.map((animValue, index) =>
+        Animated.sequence([
+          Animated.delay(index * 150),
+          Animated.loop(
+            Animated.sequence([
+              Animated.timing(animValue, {
+                toValue: 1,
+                duration: 2000 + index * 100,
+                useNativeDriver: true,
+              }),
+              Animated.timing(animValue, {
+                toValue: 0,
+                duration: 2000 + index * 100,
+                useNativeDriver: true,
+              }),
+            ]),
+          ),
+        ]),
+      );
+
+      return Animated.parallel([...starScaleSequences, ...floatSequences]);
     };
 
-    floatingAnimation(floatingAnim1, 0);
-    floatingAnimation(floatingAnim2, 1000);
-    floatingAnimation(floatingAnim3, 2000);
-    floatingAnimation(floatingAnim4, 3000);
-  }, [floatingAnim1, floatingAnim2, floatingAnim3, floatingAnim4, pulseAnim]);
+    const starAnimation = createStarAnimations();
+    starAnimation.start();
+
+    return () => {
+      starAnimation.stop();
+    };
+  }, [
+    pulseAnim,
+    glowAnim,
+    outerRotation,
+    innerRotation,
+    sparkleAnimValues,
+    floatAnimValues,
+  ]);
 
   // ストロボエフェクト
   useEffect(() => {
@@ -202,19 +297,14 @@ export default function NeonCamera() {
         />
 
         <View style={styles.previewContainer}>
-          <Image source={{ uri: photoUri }} style={styles.previewImage} />
+          <View style={styles.previewImage} />
           <TouchableOpacity
-            style={styles.retakeButton}
+            style={styles.neonButton}
             onPress={() => setPhotoUri(null)}
           >
-            <LinearGradient
-              colors={["#ff00ff", "#00ffff"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.gradientButton}
-            >
-              <Text style={styles.retakeButtonText}>RETAKE</Text>
-            </LinearGradient>
+            <View style={styles.neonButtonInner}>
+              <Text style={styles.neonButtonText}>RETAKE</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -244,18 +334,10 @@ export default function NeonCamera() {
         <Text style={styles.permissionText}>
           カメラへのアクセス許可が必要です
         </Text>
-        <TouchableOpacity
-          style={styles.permissionButton}
-          onPress={requestPermission}
-        >
-          <LinearGradient
-            colors={["#ff00ff", "#00ffff"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.gradientButton}
-          >
-            <Text style={styles.permissionButtonText}>許可する</Text>
-          </LinearGradient>
+        <TouchableOpacity style={styles.neonButton} onPress={requestPermission}>
+          <View style={styles.neonButtonInner}>
+            <Text style={styles.neonButtonText}>許可する</Text>
+          </View>
         </TouchableOpacity>
       </View>
     );
@@ -283,6 +365,70 @@ export default function NeonCamera() {
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
       />
+
+      {/* アニメーション付きキラキラ背景エフェクト */}
+      <Animated.View
+        style={[
+          styles.glowBackground,
+          {
+            opacity: glowAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.1, 0.25],
+            }),
+          },
+        ]}
+      >
+        <LinearGradient
+          colors={["#FF6B9D", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7"]}
+          style={styles.rainbowGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+      </Animated.View>
+
+      {/* アニメーション付き紫ネオン星エフェクト */}
+      {starConfigs.map((config, index) => (
+        <Animated.View
+          key={`star-${index}`}
+          style={[
+            styles.neonStar,
+            config.style,
+            {
+              width: config.size || 20,
+              height: config.size || 20,
+              opacity: sparkleAnimValues[index].interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.3, 1],
+              }),
+              transform: [
+                {
+                  scale: sparkleAnimValues[index].interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.4, 1.3],
+                  }),
+                },
+                {
+                  translateY: floatAnimValues[index].interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -15],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.starShape,
+              {
+                width: config.size || 20,
+                height: config.size || 20,
+              },
+            ]}
+          />
+        </Animated.View>
+      ))}
+
       {/* カメラビュー */}
       <CameraView
         ref={cameraRef}
@@ -356,128 +502,65 @@ export default function NeonCamera() {
             },
           ]}
         >
-          <Svg width={squareSize} height={squareSize} style={styles.svgFrame}>
-            <Circle
-              cx={squareSize / 2}
-              cy={squareSize / 2}
-              r={squareSize / 2 - 10}
-              stroke="#ff00ff"
-              strokeWidth={3}
-              fill="transparent"
-              strokeDasharray="10 5"
-            />
-            <Circle
-              cx={squareSize / 2}
-              cy={squareSize / 2}
-              r={squareSize / 2 - 20}
-              stroke="#00ffff"
-              strokeWidth={2}
-              fill="transparent"
-              strokeDasharray="5 10"
-            />
-          </Svg>
+          {/* 外の円（右回り4秒） */}
+          <Animated.View
+            style={[
+              styles.outerCircle,
+              {
+                width: squareSize - 20,
+                height: squareSize - 20,
+                borderRadius: (squareSize - 20) / 2,
+                transform: [
+                  {
+                    rotate: outerRotation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ["0deg", "360deg"],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          />
+
+          {/* 内の円（左回り5秒） */}
+          <Animated.View
+            style={[
+              styles.innerCircle,
+              {
+                width: squareSize - 40,
+                height: squareSize - 40,
+                borderRadius: (squareSize - 40) / 2,
+                transform: [
+                  {
+                    rotate: innerRotation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ["0deg", "-360deg"], // 左回り
+                    }),
+                  },
+                ],
+              },
+            ]}
+          />
         </View>
-
-        {/* タッチ検出用の透明レイヤー（ボタンエリアを除く） */}
-        <View
-          style={[
-            StyleSheet.absoluteFillObject,
-            { bottom: 150 }, // ボタンエリアを避ける
-          ]}
-        />
       </View>
-
-      {/* 浮遊する絵文字 */}
-      <Animated.Text
-        style={[
-          styles.floatingEmoji,
-          { top: "10%", left: "10%" },
-          {
-            transform: [
-              {
-                translateY: floatingAnim1.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, -30],
-                }),
-              },
-            ],
-          },
-        ]}
-      >
-        ✨
-      </Animated.Text>
-
-      <Animated.Text
-        style={[
-          styles.floatingEmoji,
-          { top: "15%", right: "10%" },
-          {
-            transform: [
-              {
-                translateY: floatingAnim2.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, -30],
-                }),
-              },
-            ],
-          },
-        ]}
-      >
-        💎
-      </Animated.Text>
-
-      <Animated.Text
-        style={[
-          styles.floatingEmoji,
-          { bottom: "20%", left: "10%" },
-          {
-            transform: [
-              {
-                translateY: floatingAnim3.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, -30],
-                }),
-              },
-            ],
-          },
-        ]}
-      >
-        🌟
-      </Animated.Text>
-
-      <Animated.Text
-        style={[
-          styles.floatingEmoji,
-          { bottom: "20%", right: "10%" },
-          {
-            transform: [
-              {
-                translateY: floatingAnim4.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, -30],
-                }),
-              },
-            ],
-          },
-        ]}
-      >
-        ⚡
-      </Animated.Text>
 
       {/* コントロールボタン */}
       <View style={styles.buttonContainer}>
         <View style={styles.sideButtons}>
           <TouchableOpacity
-            style={styles.flipButton}
+            style={styles.neonButton}
             onPress={() => setFacing((f) => (f === "back" ? "front" : "back"))}
           >
-            <Text style={styles.flipButtonText}>🔄</Text>
+            <View style={styles.neonButtonInner}>
+              <Text style={styles.flipButtonText}>🔄</Text>
+            </View>
           </TouchableOpacity>
+
           <TouchableOpacity
-            style={styles.debugButton}
+            style={styles.hiddenDebugStar}
             onPress={() => router.push("/debug")}
           >
-            <Text style={styles.debugButtonText}>🐛</Text>
+            <View style={styles.debugStarShape} />
           </TouchableOpacity>
         </View>
 
@@ -495,10 +578,12 @@ export default function NeonCamera() {
         </Animated.View>
 
         <TouchableOpacity
-          style={styles.effectButton}
+          style={styles.neonButton}
           onPress={() => setStrobeActive(!strobeActive)}
         >
-          <Text style={styles.effectButtonText}>⚡</Text>
+          <View style={styles.neonButtonInner}>
+            <Text style={styles.effectButtonText}>⚡</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -548,29 +633,40 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontWeight: "600",
   },
-  permissionButton: {
-    borderRadius: 25,
-    overflow: "hidden",
-  },
-  gradientButton: {
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-  },
-  permissionButtonText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   neonFrame: {
     position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  svgFrame: {
+  outerCircle: {
     position: "absolute",
+    borderWidth: 3,
+    borderColor: "#ff00ff",
+    borderStyle: "dashed",
+    backgroundColor: "transparent",
+    shadowColor: "#ff00ff",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    elevation: 10,
   },
-  floatingEmoji: {
+  innerCircle: {
     position: "absolute",
-    fontSize: 36,
-    opacity: 0.7,
+    borderWidth: 2,
+    borderColor: "#00ffff",
+    borderStyle: "dashed",
+    backgroundColor: "transparent",
+    shadowColor: "#00ffff",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
+    elevation: 8,
   },
   buttonContainer: {
     position: "absolute",
@@ -584,19 +680,6 @@ const styles = StyleSheet.create({
   sideButtons: {
     flexDirection: "column",
     gap: 10,
-  },
-  debugButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#ff00ff",
-  },
-  debugButtonText: {
-    fontSize: 24,
   },
   captureButton: {
     width: 80,
@@ -617,27 +700,13 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
   },
-  flipButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   flipButtonText: {
-    fontSize: 24,
-  },
-  effectButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
+    fontSize: 20,
+    color: "#fff",
   },
   effectButtonText: {
-    fontSize: 24,
+    fontSize: 20,
+    color: "#fff",
   },
   strobeEffect: {
     position: "absolute",
@@ -658,17 +727,96 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 3,
     borderColor: "#00ffff",
+    backgroundColor: "#333",
   },
-  retakeButton: {
-    marginTop: 30,
-    borderRadius: 25,
-    overflow: "hidden",
+  // 紫ネオンボタンスタイル
+  neonButton: {
+    backgroundColor: "#000",
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: "#ff00ff",
+    padding: 2,
+    shadowColor: "#ff00ff",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 10,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  retakeButtonText: {
-    color: "#000",
-    fontSize: 18,
+  neonButtonInner: {
+    backgroundColor: "#000",
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 46,
+    height: 46,
+  },
+  neonButtonText: {
+    color: "#fff",
+    fontSize: 16,
     fontWeight: "bold",
-    paddingHorizontal: 40,
-    paddingVertical: 15,
+    letterSpacing: 2,
+    textShadowColor: "#ff00ff",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 5,
+  },
+  // 紫ネオン星エフェクト
+  neonStar: {
+    position: "absolute",
+    zIndex: 5,
+  },
+  starShape: {
+    backgroundColor: "#ff00ff",
+    transform: [{ rotate: "45deg" }],
+    shadowColor: "#ff00ff",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 12,
+  },
+  // 隠されたデバッグ星
+  hiddenDebugStar: {
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  debugStarShape: {
+    width: 20,
+    height: 20,
+    backgroundColor: "#ff00ff",
+    transform: [{ rotate: "45deg" }],
+    shadowColor: "#ff00ff",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  // キラキラ背景エフェクト
+  glowBackground: {
+    position: "absolute",
+    top: -100,
+    left: -100,
+    width: 500,
+    height: 500,
+    borderRadius: 250,
+    opacity: 0.15,
+    zIndex: -10,
+  },
+  rainbowGradient: {
+    flex: 1,
+    borderRadius: 250,
   },
 });
