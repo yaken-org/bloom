@@ -33,27 +33,28 @@ const PostContent: FC<{ data: PostDetailData }> = ({ data }) => {
 
   return (
     <article style={{ padding: "16px 0" }}>
-      <div style={{ display: "flex", gap: "12px" }}>
+      <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
         <div
           style={{
-            width: "48px",
-            height: "48px",
+            width: "40px",
+            height: "40px",
             borderRadius: "50%",
             background: "#ddd",
             flexShrink: "0",
           }}
         />
-        <div style={{ flex: "1" }}>
+        <div style={{ flex: "1", minWidth: "0" }}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: "8px",
               marginBottom: "8px",
+              flexWrap: "wrap",
             }}
           >
             <span style={{ fontWeight: "bold" }}>{post.authorName}</span>
-            <span style={{ color: "#666", fontSize: "14px" }}>
+            <span style={{ color: "#666", fontSize: "12px" }}>
               {formatDate(post.createdAt)}
             </span>
           </div>
@@ -62,9 +63,11 @@ const PostContent: FC<{ data: PostDetailData }> = ({ data }) => {
               src={`/api/v1/posts/${post.id}/image`}
               alt="投稿画像"
               style={{
+                width: "100%",
                 maxWidth: "100%",
                 height: "auto",
                 borderRadius: "12px",
+                objectFit: "cover",
               }}
             />
           </div>
@@ -84,9 +87,23 @@ const PostDetailContent: FC<{ postPromise: Promise<PostDetailData> }> = async ({
 export const PostDetail: FC<PostDetailProps> = ({ postPromise }) => {
   return (
     <BaseLayout>
-      <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
+      <div
+        style={{
+          maxWidth: "600px",
+          margin: "0 auto",
+          padding: "20px",
+          width: "100%",
+        }}
+      >
         <div style={{ marginBottom: "20px" }}>
-          <a href="/" style={{ color: "#1da1f2", textDecoration: "none" }}>
+          <a
+            href="/"
+            style={{
+              color: "#1da1f2",
+              textDecoration: "none",
+              fontSize: "14px",
+            }}
+          >
             ← ホームに戻る
           </a>
         </div>
