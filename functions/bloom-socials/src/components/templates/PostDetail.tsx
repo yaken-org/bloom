@@ -74,7 +74,9 @@ const PostContent: FC<{ data: PostDetailData }> = ({ data }) => {
   );
 };
 
-const PostDetailContent: FC<{ postPromise: Promise<PostDetailData> }> = async ({ postPromise }) => {
+const PostDetailContent: FC<{ postPromise: Promise<PostDetailData> }> = async ({
+  postPromise,
+}) => {
   const data = await postPromise;
   return <PostContent data={data} />;
 };
