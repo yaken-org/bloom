@@ -51,7 +51,7 @@ const TestPage: React.FC = () => {
    * ランダムフィルター選択のデモハンドラー
    */
   const handleSelectRandomFilters = () => {
-    const [randomFilterTypes, randomOptions] = getRandomFilters(); // ← 配列だけ取り出す
+    const [randomFilterTypes, _randomOptions] = getRandomFilters(); // ← 配列だけ取り出す
 
     Object.keys(settings.states).forEach((filterType) => {
       const shouldEnable = randomFilterTypes.includes(filterType); // ← 配列に対して includes

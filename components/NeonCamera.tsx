@@ -387,47 +387,51 @@ export default function NeonCamera() {
       </Animated.View>
 
       {/* アニメーション付き紫ネオン星エフェクト */}
-      {starConfigs.map((config, index) => (
-        <Animated.View
-          key={`star-${index}`}
-          style={[
-            styles.neonStar,
-            config.style,
-            {
-              width: config.size || 20,
-              height: config.size || 20,
-              opacity: sparkleAnimValues[index].interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.3, 1],
-              }),
-              transform: [
-                {
-                  scale: sparkleAnimValues[index].interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.4, 1.3],
-                  }),
-                },
-                {
-                  translateY: floatAnimValues[index].interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -15],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
-          <View
+      {starConfigs.map((config, index) => {
+        // 位置情報とサイズから一意のkeyを生成
+        const positionKey = `${config.style.top || config.style.bottom}-${config.style.left || config.style.right}-${config.size}`;
+        return (
+          <Animated.View
+            key={`star-${positionKey}`}
             style={[
-              styles.starShape,
+              styles.neonStar,
+              config.style,
               {
                 width: config.size || 20,
                 height: config.size || 20,
+                opacity: sparkleAnimValues[index].interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.3, 1],
+                }),
+                transform: [
+                  {
+                    scale: sparkleAnimValues[index].interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.4, 1.3],
+                    }),
+                  },
+                  {
+                    translateY: floatAnimValues[index].interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -15],
+                    }),
+                  },
+                ],
               },
             ]}
-          />
-        </Animated.View>
-      ))}
+          >
+            <View
+              style={[
+                styles.starShape,
+                {
+                  width: config.size || 20,
+                  height: config.size || 20,
+                },
+              ]}
+            />
+          </Animated.View>
+        );
+      })}
 
       {/* カメラビュー */}
       <CameraView
