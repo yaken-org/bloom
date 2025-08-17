@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import FilterView, { type FilterViewRef } from "@/components/FilterView";
 import { useFilters } from "@/hooks/useFilters";
-import getRandomFilters from "@/lib/filters/genRandomFilters";
+import getRandomFilters from "@/lib/filters/getRandomFilters";
 import type { FilterType } from "@/types/filters";
 
 const ViewPage: React.FC = () => {
@@ -400,7 +400,7 @@ const ViewPage: React.FC = () => {
       {/* アニメーション付き紫ネオン星エフェクト - 写真エリアを避けて配置 */}
       {starConfigs.map((config, index) => (
         <Animated.View
-        //biome-ignore lint/suspicious/noArrayindex: <unknown id>
+          //biome-ignore lint/suspicious/noArrayindex: <unknown id>
           key={`star-${index}`}
           style={[
             styles.neonStar,
@@ -496,23 +496,23 @@ const ViewPage: React.FC = () => {
                 onPress={handlePublishToHub}
                 disabled={hasPublished}
               >
-                <View style={[
-                  styles.neonButtonInner,
-                  hasPublished && styles.publishButtonInnerDisabled
-                ]}>
-                  <Text style={[
-                    styles.neonButtonText,
-                    styles.publishButtonText,
-                    hasPublished && styles.publishButtonTextDisabled
-                  ]}>
-                    {hasPublished
-                      ? "投稿済み"
-                      : "GILANTIC HUB"}
+                <View
+                  style={[
+                    styles.neonButtonInner,
+                    hasPublished && styles.publishButtonInnerDisabled,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.neonButtonText,
+                      styles.publishButtonText,
+                      hasPublished && styles.publishButtonTextDisabled,
+                    ]}
+                  >
+                    {hasPublished ? "投稿済み" : "GILANTIC HUB"}
                   </Text>
                   {!hasPublished && (
-                    <Text style={styles.publishButtonSubText}>
-                      に公開
-                    </Text>
+                    <Text style={styles.publishButtonSubText}>に公開</Text>
                   )}
                 </View>
               </TouchableOpacity>
@@ -564,7 +564,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 15, // ボタン間のスペース
     paddingTop: 10, // 上部にパディング追加
-    width: '100%',
+    width: "100%",
   },
   // 紫ネオン星のスタイル
   neonStar: {
@@ -629,7 +629,7 @@ const styles = StyleSheet.create({
   },
   publishButtonText: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
   },
   publishButtonSubText: {
     color: "#fff",
