@@ -2,7 +2,9 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Animated, Easing, StyleSheet, View } from "react-native";
+import { Animated, Easing, StyleSheet, View, Dimensions } from "react-native";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function LoadingScreen() {
   const router = useRouter();
@@ -318,6 +320,11 @@ export default function LoadingScreen() {
     outputRange: [0, 1, 0],
   });
 
+  // 画面サイズに基づくスケールファクター
+  const scaleFactorWidth = Math.min(screenWidth / 393, 1); // iPhone 15 Proの幅を基準
+  const scaleFactorHeight = Math.min(screenHeight / 852, 1); // iPhone 15 Proの高さを基準
+  const scaleFactor = Math.min(scaleFactorWidth, scaleFactorHeight);
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -332,6 +339,7 @@ export default function LoadingScreen() {
           styles.loadingContainer,
           {
             opacity: opacityAnim,
+            transform: [{ scale: scaleFactor }],
           },
         ]}
       >
@@ -525,7 +533,7 @@ export default function LoadingScreen() {
         </View>
 
         {/* ローディングテキスト */}
-        <Animated.View style={[{ transform: [{ scale: pulseAnim }] }]}>
+        <Animated.View style={[styles.textContainer, { transform: [{ scale: pulseAnim }] }]}>
           <Animated.Text
             style={[
               styles.loadingText,
@@ -534,7 +542,17 @@ export default function LoadingScreen() {
               },
             ]}
           >
-            あなたにぴったりのぎらつきを考えています...
+            あなたにぴったりの
+          </Animated.Text>
+          <Animated.Text
+            style={[
+              styles.loadingText,
+              {
+                color: textColor,
+              },
+            ]}
+          >
+            ぎらつきを考えています...
           </Animated.Text>
         </Animated.View>
       </Animated.View>
@@ -633,11 +651,18 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  textContainer: {
+    alignItems: "center",
+    paddingHorizontal: 20,
+    maxWidth: screenWidth - 40,
+  },
   loadingText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "900",
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 20,
     letterSpacing: 1,
+    textAlign: "center",
+    lineHeight: 24,
   },
 });
