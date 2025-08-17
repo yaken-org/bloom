@@ -1,23 +1,54 @@
+import { desc } from "drizzle-orm";
 import { Hono } from "hono";
-import { showRoutes } from "hono/dev";
 import { HomePage } from "@/components/pages/HomePage";
-import { v1Route } from "@/web/api/feed";
-import { DefaultRendererMiddleware } from "./middleware/renderer";
+import { PostDetailPage } from "@/components/pages/PostDetailPage";
+import type { DrizzleDB } from "@/db/drizzle";
+import { posts } from "@/db/schema";
+import { PostsRoute } from "@/web/api/posts";
+import { DrizzleMiddleware } from "@/web/middleware/drizzle";
+import { DefaultRendererMiddleware } from "@/web/middleware/renderer";
 
 export function newApp() {
-  return new Hono<{ Bindings: CloudflareBindings }>().use(
-    DefaultRendererMiddleware,
-  );
+  const app = new Hono<{
+    Bindings: CloudflareBindings;
+    Variables: {
+      drizzle: DrizzleDB;
+    };
+  }>()
+    .use(DefaultRendererMiddleware)
+    .use(DrizzleMiddleware);
+  return app;
 }
 
 const app = newApp();
 
-app.route("/api/v1", v1Route);
+app.route("/api/v1/posts", PostsRoute);
 
 app.get("/", async (c) => {
-  const apiUrl = `${c.req.url.replace(/\/$/, "")}/api/v1`;
-  return c.render(<HomePage apiUrl={apiUrl} />);
+  const db = c.var.drizzle;
+
+  const result = await db.query.posts.findMany({
+    orderBy: desc(posts.createdAt),
+    limit: 10,
+  });
+
+  return c.render(<HomePage posts={result} />);
 });
 
-showRoutes(app);
+app.get("/post/:id", async (c) => {
+  const postId = c.req.param("id");
+  const db = c.var.drizzle;
+
+  // 投稿データを取得
+  const post = await db.query.posts.findFirst({
+    where: (posts, { eq }) => eq(posts.id, postId),
+  });
+
+  if (!post) {
+    return c.notFound();
+  }
+
+  return c.render(<PostDetailPage post={post} />);
+});
+
 export default app;

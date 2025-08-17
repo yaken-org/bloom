@@ -4,7 +4,7 @@ export async function uploadImage(filename: string, blob: Blob) {
   const formData = new FormData();
   formData.append("image", blob, filename);
 
-  const response = await fetch(`${SERVER_URL}/api/v1/feed`, {
+  const response = await fetch(`${SERVER_URL}/api/v1/posts`, {
     method: "POST",
     body: formData,
   });
