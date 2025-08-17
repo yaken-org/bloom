@@ -1,5 +1,6 @@
 import * as FileSystem from "expo-file-system";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Linking from "expo-linking";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
@@ -16,7 +17,6 @@ import {
   View,
 } from "react-native";
 import FilterView, { type FilterViewRef } from "@/components/FilterView";
-import { WebViewModal } from "@/components/WebViewModal";
 import { useFilters } from "@/hooks/useFilters";
 import getRandomFilters from "@/lib/filters/genRandomFilters";
 import type { FilterType } from "@/types/filters";
@@ -54,8 +54,7 @@ const ViewPage: React.FC = () => {
     { emoji: "💫", style: { top: 250, left: 80 } },
     { emoji: "⭐", style: { bottom: 300, right: 60 } },
   ];
-  const [webViewModalVisible, setWebViewModalVisible] = useState(false);
-  const [postUrl, setPostUrl] = useState<string>("");
+  const [hasPublished, setHasPublished] = useState(false);
 
   const { imageUri } = useLocalSearchParams<{
     imageUri: string;
@@ -259,6 +258,15 @@ const ViewPage: React.FC = () => {
   };
 
   const handlePublishToHub = async () => {
+    // すでに投稿済みの場合は何もしない
+    if (hasPublished) {
+      Alert.alert(
+        "すでに投稿済み",
+        "この画像はすでに投稿されています。新しい写真を撮影してから投稿してください。",
+      );
+      return;
+    }
+
     try {
       // 画像のスナップショットを取得
       const snapshot = filterViewRef.current?.makeImageSnapshot();
@@ -309,13 +317,15 @@ const ViewPage: React.FC = () => {
       // 一時ファイルを削除
       await FileSystem.deleteAsync(fileUri, { idempotent: true });
 
+      // 投稿済みフラグを設定
+      setHasPublished(true);
+
       Alert.alert("公開完了", "画像をGILANTIC PHOTO's Hubに公開しました！", [
         {
           text: "投稿を見る",
-          onPress: () => {
+          onPress: async () => {
             const url = `https://gilantic.km3.dev/post/${result.id}`;
-            setPostUrl(url);
-            setWebViewModalVisible(true);
+            await Linking.openURL(url);
           },
         },
         {
@@ -481,11 +491,17 @@ const ViewPage: React.FC = () => {
             </View>
 
             <TouchableOpacity
-              style={styles.publishButton}
+              style={[
+                styles.publishButton,
+                hasPublished && styles.publishButtonDisabled,
+              ]}
               onPress={handlePublishToHub}
+              disabled={hasPublished}
             >
               <Text style={styles.publishButtonText}>
-                GILANTIC PHOTO&apos;s Hubに公開
+                {hasPublished
+                  ? "投稿済み - 新しい写真を撮影してください"
+                  : "GILANTIC PHOTO's Hubに公開"}
               </Text>
             </TouchableOpacity>
           </>
@@ -495,15 +511,6 @@ const ViewPage: React.FC = () => {
           </View>
         )}
       </ScrollView>
-      <WebViewModal
-        visible={webViewModalVisible}
-        url={postUrl}
-        onClose={() => {
-          setWebViewModalVisible(false);
-          // モーダルを閉じたらカメラページに戻る
-          router.replace("/");
-        }}
-      />
     </View>
   );
 };
@@ -578,6 +585,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 10,
+  },
+  publishButtonDisabled: {
+    backgroundColor: "#999999",
+    opacity: 0.7,
   },
   publishButtonText: {
     color: "white",
