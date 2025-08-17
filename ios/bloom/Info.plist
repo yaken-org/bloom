@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>bloom</string>
-          <string>com.anonymous.bloom</string>
+          <string>org.yaken.bloom</string>
         </array>
       </dict>
     </array>
