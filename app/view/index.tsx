@@ -24,6 +24,7 @@ const ViewPage: React.FC = () => {
   const router = useRouter();
   const [overlayImageUrl] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [hasPublished, setHasPublished] = useState(false);
   const screenWidth = Dimensions.get("window").width;
   const _screenHeight = Dimensions.get("window").height;
 
@@ -58,7 +59,6 @@ const ViewPage: React.FC = () => {
     { style: { bottom: 55, left: screenWidth * 0.35 }, size: 20 }, // 中央寄り
     { style: { bottom: 80, right: screenWidth * 0.32 }, size: 34 }, // 超特大
   ];
-  const [hasPublished, setHasPublished] = useState(false);
 
   // ふわふわ浮かぶアニメーション用
   const floatAnimValues = useMemo(
@@ -384,7 +384,7 @@ const ViewPage: React.FC = () => {
             height: screenWidth * 1.5,
             opacity: glowAnim.interpolate({
               inputRange: [0, 1],
-              outputRange: [0.1, 0.25], // より控えめな範囲
+              outputRange: [0.1, 0.25], // より控えな範囲
             }),
           },
         ]}
@@ -400,7 +400,7 @@ const ViewPage: React.FC = () => {
       {/* アニメーション付き紫ネオン星エフェクト - 写真エリアを避けて配置 */}
       {starConfigs.map((config, index) => (
         <Animated.View
-          //biome-ignore lint/suspicious/noArrayindex: <unknown id>
+        //biome-ignore lint/suspicious/noArrayindex: <unknown id>
           key={`star-${index}`}
           style={[
             styles.neonStar,
@@ -485,22 +485,38 @@ const ViewPage: React.FC = () => {
                   <Text style={styles.neonButtonText}>SHARE</Text>
                 </View>
               </TouchableOpacity>
-            </View>
 
-            <TouchableOpacity
-              style={[
-                styles.publishButton,
-                hasPublished && styles.publishButtonDisabled,
-              ]}
-              onPress={handlePublishToHub}
-              disabled={hasPublished}
-            >
-              <Text style={styles.publishButtonText}>
-                {hasPublished
-                  ? "投稿済み - 新しい写真を撮影してください"
-                  : "GILANTIC PHOTO's Hubに公開"}
-              </Text>
-            </TouchableOpacity>
+              {/* GILANTIC PHOTO's Hub投稿ボタン - 紫ネオンスタイルで統一 */}
+              <TouchableOpacity
+                style={[
+                  styles.neonButton,
+                  styles.publishButton,
+                  hasPublished && styles.publishButtonDisabled,
+                ]}
+                onPress={handlePublishToHub}
+                disabled={hasPublished}
+              >
+                <View style={[
+                  styles.neonButtonInner,
+                  hasPublished && styles.publishButtonInnerDisabled
+                ]}>
+                  <Text style={[
+                    styles.neonButtonText,
+                    styles.publishButtonText,
+                    hasPublished && styles.publishButtonTextDisabled
+                  ]}>
+                    {hasPublished
+                      ? "投稿済み"
+                      : "GILANTIC HUB"}
+                  </Text>
+                  {!hasPublished && (
+                    <Text style={styles.publishButtonSubText}>
+                      に公開
+                    </Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
           </>
         ) : (
           <View style={styles.placeholderContainer}>
@@ -533,7 +549,7 @@ const styles = StyleSheet.create({
   },
   // 写真表示エリア
   imageContainer: {
-    marginBottom: 50, // 写真とボタンの間により大きなスペース
+    marginBottom: 40, // ボタンエリアとのスペースを調整
     shadowColor: "#fff",
     shadowOffset: {
       width: 0,
@@ -546,8 +562,9 @@ const styles = StyleSheet.create({
   // ボタンエリア - 写真の下に配置
   buttonContainer: {
     alignItems: "center",
-    gap: 20, // ボタン間のスペースを広げる
+    gap: 15, // ボタン間のスペース
     paddingTop: 10, // 上部にパディング追加
+    width: '100%',
   },
   // 紫ネオン星のスタイル
   neonStar: {
@@ -589,6 +606,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: "center",
     justifyContent: "center",
+    minWidth: 120,
   },
   neonButtonText: {
     color: "#fff",
@@ -600,7 +618,37 @@ const styles = StyleSheet.create({
     textShadowRadius: 5,
   },
   shareButton: {
-    marginTop: 15,
+    marginTop: 0, // gap で統一されたスペーシングを使用
+  },
+  // 投稿ボタン用のスタイル
+  publishButton: {
+    marginTop: 5, // 少し追加の余白
+  },
+  publishButtonInnerDisabled: {
+    backgroundColor: "#333",
+  },
+  publishButtonText: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  publishButtonSubText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+    letterSpacing: 1,
+    textShadowColor: "#ff00ff",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 5,
+    marginTop: 2,
+  },
+  publishButtonTextDisabled: {
+    color: "#666",
+    textShadowColor: "#333",
+  },
+  publishButtonDisabled: {
+    borderColor: "#333",
+    shadowColor: "#333",
+    shadowOpacity: 0.3,
   },
   title: {
     fontSize: 24,
@@ -617,19 +665,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   selectButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  randomButton: {
-    backgroundColor: "#6c757d",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  randomButtonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "600",
@@ -663,14 +698,6 @@ const styles = StyleSheet.create({
   rainbowGradient: {
     flex: 1,
     borderRadius: 1000,
-  },
-  sparkle: {
-    position: "absolute",
-    fontSize: 20,
-    zIndex: 5,
-    textShadowColor: "#fff",
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
   },
 });
 
