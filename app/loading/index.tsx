@@ -2,9 +2,9 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Animated, Easing, StyleSheet, View, Dimensions } from "react-native";
+import { Animated, Dimensions, Easing, StyleSheet, View } from "react-native";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 export default function LoadingScreen() {
   const router = useRouter();
@@ -533,7 +533,9 @@ export default function LoadingScreen() {
         </View>
 
         {/* ローディングテキスト */}
-        <Animated.View style={[styles.textContainer, { transform: [{ scale: pulseAnim }] }]}>
+        <Animated.View
+          style={[styles.textContainer, { transform: [{ scale: pulseAnim }] }]}
+        >
           <Animated.Text
             style={[
               styles.loadingText,
