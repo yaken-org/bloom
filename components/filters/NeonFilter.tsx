@@ -14,30 +14,30 @@ const NeonFilter: React.FC<FilterComponentProps> = React.memo(
     const s = intensity; // 彩度スケーリング
 
     const neonMatrix = useMemo(() => {
-        const b = 0.7; // 基本光量  
-        const i = s;
-        return [
-            b + 1.3 * i,
-            0.2 * i,
-            0.6 * i,
-            0,
-            0, // ピンク系
-            0.2 * i,
-            b + 0.8 * i,
-            0.3 * i,
-            0,
-            0, // 緑少なめ
-            0.4 * i,
-            0.3 * i,
-            b + 1.5 * i,
-            0,
-            0, // 青・紫強調
-            0,
-            0,
-            0,
-            1,
-            0,
-        ];
+      const b = 0.7; // 基本光量
+      const i = s;
+      return [
+        b + 1.3 * i,
+        0.2 * i,
+        0.6 * i,
+        0,
+        0, // ピンク系
+        0.2 * i,
+        b + 0.8 * i,
+        0.3 * i,
+        0,
+        0, // 緑少なめ
+        0.4 * i,
+        0.3 * i,
+        b + 1.5 * i,
+        0,
+        0, // 青・紫強調
+        0,
+        0,
+        0,
+        1,
+        0,
+      ];
     }, [s]);
 
     return (

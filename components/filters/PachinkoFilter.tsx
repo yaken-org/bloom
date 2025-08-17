@@ -9,30 +9,30 @@ const PachinkoFilter: React.FC<FilterComponentProps> = React.memo(
     const s = intensity;
 
     const pachinkoMatrix = useMemo(() => {
-        const b = 0.7;
-        const i = s;
-        return [
-            b + 1.5 * i,
-            0.3 * i,
-            0.1 * i,
-            0,
-            0,
-            0.1 * i,
-            b + 1.2 * i,
-            0.05 * i,
-            0,
-            0,
-            0.05 * i,
-            0.1 * i,
-            b + 1.0 * i,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-        ];
+      const b = 0.7;
+      const i = s;
+      return [
+        b + 1.5 * i,
+        0.3 * i,
+        0.1 * i,
+        0,
+        0,
+        0.1 * i,
+        b + 1.2 * i,
+        0.05 * i,
+        0,
+        0,
+        0.05 * i,
+        0.1 * i,
+        b + 1.0 * i,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+      ];
     }, [s]);
 
     return (
